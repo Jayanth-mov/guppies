@@ -54,8 +54,7 @@ export default function Fish({ entry, highlighted, dimmed, onSelect }: FishProps
 
   // fixed regardless of species — a guppy's rider should be as legible as a
   // whale shark's, not scaled down to match its tiny body
-  const avatarSize = 32;
-  const headPct = (shape.head[0] / shape.w) * 100;
+  const avatarSize = 64;
 
   const style = {
     // clamp keeps the shallowest fish (and their avatars, riding above the
@@ -90,8 +89,11 @@ export default function Fish({ entry, highlighted, dimmed, onSelect }: FishProps
             type="button"
             className={styles.hit}
             onClick={() => onSelect(entry.handle)}
-            aria-label={`@${entry.handle} — ${entry.species.name}, ${formatCount(entry.followers)} followers. Open in leaderboard.`}
+            aria-label={`${entry.handle} — ${entry.species.name}, ${formatCount(entry.followers)} followers. Open in leaderboard.`}
           >
+            <span className={styles.countAbove} aria-hidden="true">
+              {formatCount(entry.followers)}
+            </span>
             <span className={styles.flip}>
               <svg
                 className={styles.sprite}
@@ -105,11 +107,9 @@ export default function Fish({ entry, highlighted, dimmed, onSelect }: FishProps
                 </g>
                 <g fill="currentColor">{shape.body}</g>
               </svg>
-              <span
-                className={styles.avatar}
-                style={{ left: `${headPct.toFixed(1)}%` }}
-                aria-hidden="true"
-              >
+            </span>
+            <span className={styles.label}>
+              <span className={styles.avatar} aria-hidden="true">
                 {initialsFor(entry.handle)}
                 {entry.avatarUrl && (
                   // initials stay underneath as the fallback if the CDN URL
@@ -127,13 +127,7 @@ export default function Fish({ entry, highlighted, dimmed, onSelect }: FishProps
                   />
                 )}
               </span>
-            </span>
-            <span className={styles.label}>
-              @{entry.handle}
-              <span className={styles.count}>
-                {" · "}
-                {formatCount(entry.followers)}
-              </span>
+              <span className={styles.labelName}>{entry.handle}</span>
             </span>
           </button>
         </div>

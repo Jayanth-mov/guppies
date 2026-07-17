@@ -19,6 +19,10 @@ export default function OceanPage() {
   const [roster, setRoster] = useState(() => getRoster());
   const [lastUpdated, setLastUpdated] = useState(() => getLastUpdated());
   const [open, setOpen] = useState(false);
+  // gates EvolutionToast until the roster has settled (live data applied, or
+  // confirmed unavailable) — otherwise it'd compare against localStorage
+  // twice in one visit (bundled, then live) and could double-fire a toast
+  const [rosterSettled, setRosterSettled] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +36,9 @@ export default function OceanPage() {
       })
       .catch(() => {
         // offline or no pipeline yet — bundled data stands
+      })
+      .finally(() => {
+        if (!cancelled) setRosterSettled(true);
       });
     return () => {
       cancelled = true;
@@ -160,7 +167,7 @@ export default function OceanPage() {
         onFocusRowHandled={() => setFocusRow(null)}
       />
 
-      <EvolutionToast roster={roster} />
+      {rosterSettled && <EvolutionToast roster={roster} />}
     </div>
   );
 }

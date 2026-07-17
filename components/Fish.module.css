@@ -26,11 +26,12 @@
 }
 
 /* generous invisible hit area so a drifting fish doesn't flicker out from
-   under the cursor; extra depth below covers the gap down to the label */
+   under the cursor; extra depth above/below covers the count readout and
+   the label gap */
 .hit::after {
   content: "";
   position: absolute;
-  inset: -18px -22px -32px;
+  inset: -34px -22px -40px;
 }
 
 .flip {
@@ -64,17 +65,85 @@
   transform-origin: right center;
 }
 
-.avatar {
+/* ---- follower count, revealed above the fish on hover ---- */
+
+.countAbove {
   position: absolute;
-  top: -16px;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  margin-bottom: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(4, 16, 31, 0.85);
+  border: 1px solid rgba(108, 245, 226, 0.45);
+  color: var(--accent);
+  font-family: var(--font-mono), monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.wrap[data-highlight] .countAbove,
+.wrap:hover .countAbove,
+.wrap:has(:focus-visible) .countAbove {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---- label: pfp + name, always visible below the fish ---- */
+
+.label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
   transform: translateX(-50%);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 2px 2px;
+  border-radius: 999px;
+  background: rgba(4, 16, 31, 0.5);
+  white-space: nowrap;
+  opacity: 0.92;
+  transition: opacity 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wrap[data-highlight] .label,
+.wrap:hover .label,
+.wrap:has(:focus-visible) .label {
+  opacity: 1;
+  background: rgba(4, 16, 31, 0.78);
+  box-shadow: 0 0 0 1px rgba(108, 245, 226, 0.4);
+}
+
+.wrap[data-highlight] .labelName,
+.wrap:hover .labelName,
+.wrap:has(:focus-visible) .labelName {
+  color: var(--accent);
+}
+
+.labelName {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink-pale);
+}
+
+.avatar {
+  flex: none;
   width: max(20px, calc(var(--av) * var(--fish-scale, 1)));
   height: max(20px, calc(var(--av) * var(--fish-scale, 1)));
   border-radius: 50%;
   background: var(--av-bg);
   color: #eafcff;
   border: 1.5px solid rgba(255, 255, 255, 0.55);
-  font-size: calc(var(--av) * var(--fish-scale, 1) * 0.42);
+  font-size: calc(var(--av) * var(--fish-scale, 1) * 0.38);
   font-weight: 600;
   letter-spacing: 0.02em;
   display: flex;
@@ -82,6 +151,7 @@
   justify-content: center;
   box-shadow: 0 1px 4px rgba(4, 16, 31, 0.35);
   overflow: hidden;
+  position: relative;
 }
 
 .avatarImg {
@@ -91,44 +161,6 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-}
-
-.label {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 3px;
-  font-family: var(--font-mono), monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  color: currentColor;
-  opacity: 0.85;
-  padding: 1px 5px;
-  border-radius: 999px;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
-}
-
-.wrap[data-highlight] .label,
-.wrap:hover .label,
-.wrap:has(:focus-visible) .label {
-  opacity: 1;
-  background: rgba(4, 16, 31, 0.72);
-  color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(108, 245, 226, 0.4);
-}
-
-/* follower count rides along, revealed on hover / highlight / focus */
-.count {
-  display: none;
-  font-variant-numeric: tabular-nums;
-}
-
-.wrap[data-highlight] .count,
-.wrap:hover .count,
-.wrap:has(:focus-visible) .count {
-  display: inline;
 }
 
 /* ---- motion ---- */
@@ -153,17 +185,6 @@
   50%,
   100% {
     transform: scaleX(-1);
-  }
-}
-
-@keyframes faceAnchored {
-  0%,
-  49.9% {
-    transform: translateX(-50%) scaleX(1);
-  }
-  50%,
-  100% {
-    transform: translateX(-50%) scaleX(-1);
   }
 }
 
@@ -196,15 +217,10 @@
     animation-delay: var(--bob-phase);
   }
 
-  /* the fish turns to face where it's going; the avatar runs the same
-     keyframes so its content mirrors back to readable at the same instant */
+  /* only the sprite flips to face its direction of travel now — the label
+     and count sit outside .flip, so they never mirror into backwards text */
   .flip {
     animation: face var(--drift-dur) linear infinite;
-    animation-delay: var(--phase);
-  }
-
-  .avatar {
-    animation: faceAnchored var(--drift-dur) linear infinite;
     animation-delay: var(--phase);
   }
 

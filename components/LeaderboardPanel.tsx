@@ -176,10 +176,7 @@ export default function LeaderboardPanel({
                 )}
               </span>
               <span className={styles.who}>
-                <span className={styles.name}>
-                  {e.handle}
-                  {e.isHost && <span className={styles.host}>host</span>}
-                </span>
+                <span className={styles.name}>{e.handle}</span>
                 <span className={styles.sub}>
                   <i
                     className={styles.dot}

@@ -168,16 +168,6 @@
   gap: 6px;
 }
 
-.host {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  padding: 1px 6px;
-  border-radius: 999px;
-  border: 1px solid rgba(108, 245, 226, 0.5);
-  color: var(--accent);
-}
-
 .sub {
   font-size: 12px;
   opacity: 0.72;

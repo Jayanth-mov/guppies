@@ -11,6 +11,19 @@
   pointer-events: none;
 }
 
+@media (max-width: 979px) {
+  .stack {
+    left: 12px;
+    right: 12px;
+    transform: none;
+    align-items: flex-start;
+  }
+
+  .toast {
+    max-width: 100%;
+  }
+}
+
 @keyframes sink {
   from {
     opacity: 0;
