@@ -80,10 +80,21 @@ for (const acct of raw.accounts) {
   }
 }
 
+const successes = raw.accounts.length - failures.length;
+if (successes === 0) {
+  console.error(
+    "\nEvery call failed — not touching accounts.json. If the error above says " +
+      "the token can't be parsed or is expired, generate a fresh one and retry.\n",
+  );
+  process.exit(1);
+}
+
 raw.lastUpdated = new Date().toISOString();
 await writeFile(ACCOUNTS_PATH, JSON.stringify(raw, null, 2) + "\n", "utf8");
 
-console.log(`\nWrote real counts + lastUpdated to data/accounts.json.`);
+console.log(
+  `\nWrote counts for ${successes}/${raw.accounts.length} accounts + lastUpdated to data/accounts.json.`,
+);
 if (failures.length) {
   console.log(
     `\n${failures.length} account(s) could not be read — almost always because ` +
