@@ -52,7 +52,7 @@ export default function Fish({ entry, highlighted, dimmed, onSelect }: FishProps
   const ink = pale ? "#c6e4f4" : "#123a5c";
   const detail = pale ? "rgba(6, 26, 46, 0.55)" : "rgba(255, 255, 255, 0.55)";
 
-  const avatarSize = Math.round(Math.min(28, Math.max(18, width * 0.45)));
+  const avatarSize = Math.round(Math.min(42, Math.max(24, width * 0.55)));
   const headPct = (shape.head[0] / shape.w) * 100;
 
   const style = {

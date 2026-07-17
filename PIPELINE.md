@@ -116,39 +116,47 @@ month and write the result back to KV.
 Note: the app can stay in **Development mode** — everything above works for
 the app's own admins, which is all this project needs. No App Review.
 
-## 4. The cron + storage (Vercel)
+## 4. The pipeline (BUILT — this section is now setup instructions)
 
-- **Never call Meta from the browser** — the token would be public.
-- `app/api/cron/route.ts`: loop `data/accounts.json` handles → one
-  `business_discovery` call each (host via its own-fields call) → write a
-  snapshot `{ handle, count, timestamp }[]` to Vercel KV / Upstash Redis,
-  keyed by hour. ~17 calls/hour against a ~200/hour limit — huge headroom.
-- `vercel.json`:
+The code is in place:
 
-  ```json
-  { "crons": [{ "path": "/api/cron", "schedule": "0 */4 * * *" }] }
-  ```
+- [lib/pipeline.ts](lib/pipeline.ts) — snapshot engine: fetches all handles
+  (host via its own-fields call), stores 4-hourly snapshots in Upstash Redis,
+  derives **delta** (vs previous snapshot) and **growthWeek** (vs the earliest
+  snapshot after Sunday 12:00am in `WEEK_START_TZ`), and **auto-refreshes the
+  60-day token** once it's 30 days old, writing the replacement back to Redis.
+- [app/api/cron/route.ts](app/api/cron/route.ts) — runs a snapshot; guarded
+  by `Authorization: Bearer $CRON_SECRET`.
+- [app/api/roster/route.ts](app/api/roster/route.ts) — serves the latest
+  snapshot; the page overlays it on the bundled `accounts.json` at load.
+- [.github/workflows/refresh.yml](.github/workflows/refresh.yml) — the
+  scheduler. **Vercel's free Hobby plan only allows daily crons**, so a
+  GitHub Action pings `/api/cron` every 4 hours instead (free, same repo).
 
-  Refreshes every 4 hours (the site's tooltip says so — keep them in sync).
-- Env/KV needed: `IG_USER_ID`, `IG_ACCESS_TOKEN` (seed value; refreshed into
-  KV), `CRON_SECRET` (check the `Authorization` header so randoms can't
-  trigger it).
-- Derive from snapshot history: **delta** = current − previous snapshot,
-  **growthWeek** = (current − count at week start) / count at week start × 100,
-  where the week starts **Sunday 12:00am** (use a `WEEK_START_TZ` env var,
-  e.g. `America/Chicago`, so "midnight Sunday" is unambiguous). Use the
-  earliest snapshot at/after that instant as the baseline. **lastUpdated** =
-  newest snapshot timestamp. This history is also what makes evolution toasts
-  fire for real.
+### One-time setup
 
-## 5. Wire it into the site
+1. **Vercel project** — import the GitHub repo (Add New → Project → Import).
+2. **Storage** — Vercel dashboard → Storage (or Marketplace) → **Upstash for
+   Redis** → create the free database and connect it to the project. This
+   injects `KV_REST_API_URL` / `KV_REST_API_TOKEN` automatically.
+3. **Environment variables** (Project → Settings → Environment Variables):
+   | Name | Value |
+   |---|---|
+   | `IG_USER_ID` | `17841476323533943` |
+   | `IG_ACCESS_TOKEN` | the freshly exchanged 60-day token (seed; later refreshes live in Redis) |
+   | `META_APP_ID` | `1590773419407341` |
+   | `META_APP_SECRET` | App settings → Basic → App Secret (enables auto-refresh) |
+   | `CRON_SECRET` | any long random string |
+   | `WEEK_START_TZ` | e.g. `America/Chicago` (defines Sunday 12:00am) |
+4. **Redeploy** so the env vars take effect.
+5. **GitHub repo secrets** (Settings → Secrets and variables → Actions):
+   `CRON_URL` = `https://<your-deployment>/api/cron`, `CRON_SECRET` = same
+   value as on Vercel. Then trigger the workflow once manually (Actions →
+   refresh follower counts → Run workflow) and confirm it goes green.
 
-1. Implement a live `RosterSource` in [lib/roster.ts](lib/roster.ts) that
-   reads the latest snapshot JSON (an `/api/roster` route or direct KV read
-   in a server component) — the interface already carries `hostHandle`,
-   `lastUpdated`, and per-account `{followers, delta, growthWeek}`.
-2. Delete every `mock*` field and `lastUpdated` from `accounts.json`; it
-   shrinks back to just the handle list.
-3. Remove the "dev data" disclaimers in the panel footer and sea-floor
-   footer, and swap the initials avatars for `profile_picture_url`.
-4. Adding a friend = appending their handle to `accounts.json`. No code.
+## 5. Roster upkeep
+
+Adding a friend = appending `{ "handle": "x" }` to `accounts.json` and
+pushing. The next cron run fetches them; no other code changes. The bundled
+`followers` values in the JSON are just the first-paint fallback — the live
+snapshot overlays them on load.

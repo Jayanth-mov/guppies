@@ -1,0 +1,23 @@
+# Pings the deployed /api/cron every 4 hours. This is the free-tier scheduler:
+# Vercel's Hobby plan only allows daily crons, GitHub Actions has no such limit.
+#
+# Repo secrets required (Settings → Secrets and variables → Actions):
+#   CRON_URL    e.g. https://guppies.jayanth.mov/api/cron (or the vercel.app URL)
+#   CRON_SECRET the same value as the Vercel env var of that name
+
+name: refresh follower counts
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"
+  workflow_dispatch: # manual "Run workflow" button for testing
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: hit the cron endpoint
+        run: |
+          curl -fsS --max-time 90 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.CRON_URL }}"

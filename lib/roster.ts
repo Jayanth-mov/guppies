@@ -90,3 +90,37 @@ export function getRoster(source: RosterSource = localSource): FishEntry[] {
 export function getLastUpdated(source: RosterSource = localSource): string {
   return source.lastUpdated;
 }
+
+// ---- live pipeline data ----
+// Shape served by /api/roster (written to Redis by the cron in lib/pipeline.ts).
+
+export interface LiveAccount {
+  handle: string;
+  name?: string;
+  followers: number;
+  avatarUrl: string | null;
+  delta: number | null;
+  growthWeek: number | null;
+}
+
+export interface LiveRoster {
+  lastUpdated: string;
+  hostAccount: string;
+  accounts: LiveAccount[];
+}
+
+export function sourceFromLive(live: LiveRoster): RosterSource {
+  return {
+    hostHandle: live.hostAccount,
+    lastUpdated: live.lastUpdated,
+    fetchRoster: () =>
+      live.accounts.map((a) => ({
+        handle: a.handle,
+        name: a.name ?? a.handle,
+        followers: a.followers,
+        avatarUrl: a.avatarUrl,
+        delta: a.delta,
+        growthWeek: a.growthWeek,
+      })),
+  };
+}

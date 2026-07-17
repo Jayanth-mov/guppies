@@ -66,10 +66,10 @@
 
 .avatar {
   position: absolute;
-  top: -14px;
+  top: -16px;
   transform: translateX(-50%);
-  width: calc(var(--av) * var(--fish-scale, 1));
-  height: calc(var(--av) * var(--fish-scale, 1));
+  width: max(20px, calc(var(--av) * var(--fish-scale, 1)));
+  height: max(20px, calc(var(--av) * var(--fish-scale, 1)));
   border-radius: 50%;
   background: var(--av-bg);
   color: #eafcff;

@@ -1,7 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
-import { getLastUpdated, getRoster } from "@/lib/roster";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  getLastUpdated,
+  getRoster,
+  sourceFromLive,
+  type LiveRoster,
+} from "@/lib/roster";
 import Ocean from "./Ocean";
 import DepthGauge from "./DepthGauge";
 import LeaderboardPanel, { type SortMode } from "./LeaderboardPanel";
@@ -9,8 +14,29 @@ import EvolutionToast from "./EvolutionToast";
 import styles from "./OceanPage.module.css";
 
 export default function OceanPage() {
-  const roster = useMemo(() => getRoster(), []);
+  // bundled accounts.json renders immediately; the live snapshot (if the
+  // pipeline has ever run) overlays it a moment later
+  const [roster, setRoster] = useState(() => getRoster());
+  const [lastUpdated, setLastUpdated] = useState(() => getLastUpdated());
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/roster")
+      .then((r) => (r.ok ? (r.json() as Promise<LiveRoster>) : null))
+      .then((live) => {
+        if (!cancelled && live) {
+          setRoster(getRoster(sourceFromLive(live)));
+          setLastUpdated(live.lastUpdated);
+        }
+      })
+      .catch(() => {
+        // offline or no pipeline yet — bundled data stands
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [sortMode, setSortMode] = useState<SortMode>("followers");
   const [hovered, setHovered] = useState<string | null>(null);
   const [focusRow, setFocusRow] = useState<string | null>(null);
@@ -123,7 +149,7 @@ export default function OceanPage() {
         open={open}
         onClose={() => setOpen(false)}
         roster={roster}
-        lastUpdated={getLastUpdated()}
+        lastUpdated={lastUpdated}
         sortMode={sortMode}
         onSortMode={setSortMode}
         hovered={hovered}
