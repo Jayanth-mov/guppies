@@ -1,0 +1,215 @@
+.wrap {
+  position: absolute;
+  transform: translateY(-50%);
+  transition: opacity 0.3s ease;
+}
+
+.wrap[data-dim] {
+  opacity: 0.22;
+}
+
+.wrap[data-highlight] {
+  z-index: 6;
+}
+
+.drifter,
+.bobber,
+.flip {
+  display: block;
+}
+
+.hit {
+  display: block;
+  position: relative;
+  width: calc(var(--fw) * var(--fish-scale, 1));
+  border-radius: 8px;
+}
+
+/* generous invisible hit area so a drifting fish doesn't flicker out from
+   under the cursor; extra depth below covers the gap down to the label */
+.hit::after {
+  content: "";
+  position: absolute;
+  inset: -18px -22px -32px;
+}
+
+.flip {
+  position: relative;
+}
+
+.sprite {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.wrap[data-abyssal] .sprite {
+  filter: drop-shadow(0 0 10px rgba(108, 245, 226, 0.18));
+}
+
+.wrap[data-highlight] .sprite,
+.wrap:hover .sprite,
+.wrap:has(:focus-visible) .sprite {
+  filter: drop-shadow(0 0 3px var(--accent)) drop-shadow(0 0 12px rgba(108, 245, 226, 0.55));
+}
+
+.wrap:hover,
+.wrap:has(:focus-visible) {
+  z-index: 6;
+}
+
+.tail {
+  transform-box: fill-box;
+  transform-origin: right center;
+}
+
+.avatar {
+  position: absolute;
+  top: -14px;
+  transform: translateX(-50%);
+  width: calc(var(--av) * var(--fish-scale, 1));
+  height: calc(var(--av) * var(--fish-scale, 1));
+  border-radius: 50%;
+  background: var(--av-bg);
+  color: #eafcff;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  font-size: calc(var(--av) * var(--fish-scale, 1) * 0.42);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(4, 16, 31, 0.35);
+  overflow: hidden;
+}
+
+.avatarImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 3px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: currentColor;
+  opacity: 0.85;
+  padding: 1px 5px;
+  border-radius: 999px;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.wrap[data-highlight] .label,
+.wrap:hover .label,
+.wrap:has(:focus-visible) .label {
+  opacity: 1;
+  background: rgba(4, 16, 31, 0.72);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(108, 245, 226, 0.4);
+}
+
+/* follower count rides along, revealed on hover / highlight / focus */
+.count {
+  display: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.wrap[data-highlight] .count,
+.wrap:hover .count,
+.wrap:has(:focus-visible) .count {
+  display: inline;
+}
+
+/* ---- motion ---- */
+
+@keyframes drift {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(calc(var(--traverse) * var(--traverse-scale, 1)));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes face {
+  0%,
+  49.9% {
+    transform: scaleX(1);
+  }
+  50%,
+  100% {
+    transform: scaleX(-1);
+  }
+}
+
+@keyframes faceAnchored {
+  0%,
+  49.9% {
+    transform: translateX(-50%) scaleX(1);
+  }
+  50%,
+  100% {
+    transform: translateX(-50%) scaleX(-1);
+  }
+}
+
+@keyframes bob {
+  from {
+    transform: translateY(-7px);
+  }
+  to {
+    transform: translateY(7px);
+  }
+}
+
+@keyframes wag {
+  from {
+    transform: rotate(-4.5deg);
+  }
+  to {
+    transform: rotate(4.5deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drifter {
+    animation: drift var(--drift-dur) ease-in-out infinite;
+    animation-delay: var(--phase);
+  }
+
+  .bobber {
+    animation: bob var(--bob-dur) ease-in-out infinite alternate;
+    animation-delay: var(--bob-phase);
+  }
+
+  /* the fish turns to face where it's going; the avatar runs the same
+     keyframes so its content mirrors back to readable at the same instant */
+  .flip {
+    animation: face var(--drift-dur) linear infinite;
+    animation-delay: var(--phase);
+  }
+
+  .avatar {
+    animation: faceAnchored var(--drift-dur) linear infinite;
+    animation-delay: var(--phase);
+  }
+
+  .tail {
+    animation: wag var(--wag-dur) ease-in-out infinite alternate;
+    animation-delay: var(--bob-phase);
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "_comment": "Roster for guppies.jayanth.mov. followers and profilePictureUrl are LIVE values written by scripts/fetch-followers.mjs (and later the deployed cron). To add someone: append { \"handle\": \"x\" } and re-run the script. lastUpdated is set by the fetcher.",
+  "hostAccount": "jayanth.mov",
+  "lastUpdated": "2026-07-17T00:54:39.392Z",
+  "accounts": [
+    {
+      "handle": "jayanth.mov",
+      "name": "Jayanth",
+      "followers": 2747,
+      "profilePictureUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t51.82787-15/611268576_17865755460544118_2547828357438394205_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7d201b&_nc_ohc=sl3wX0lQ7vAQ7kNvwHheQhn&_nc_oc=AdrgYKZjywtYrcFkwOZg9OD7HdNUHYn95rhVSEgzC3i4niKLPhq3Qu55Xtpg5ein8ts&_nc_zt=23&_nc_ht=scontent-dfw6-1.xx&edm=AL-3X8kEAAAA&_nc_gid=mrlTkBqZ6Z6OWxRmDlraew&oh=00_AQDW9QdswN9pxBnDEdUCVCA8teQlY-tK_ksMjd38KX94_g&oe=6A5F4218"
+    },
+    {
+      "handle": "mann.ascends",
+      "name": "Mann",
+      "followers": 10946,
+      "profilePictureUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t51.82787-15/607203631_18007884527830126_7152934946039159906_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=7d201b&_nc_ohc=-JUTwO-P8K0Q7kNvwEiLFCC&_nc_oc=AdpWRROZ2_QwR8n3cDMGWlhqoVl3Lpdurk0gU6ghy-4V9bdSBqZPDgYpWxiOo2b4Lms&_nc_zt=23&_nc_ht=scontent-dfw6-1.xx&edm=AL-3X8kEAAAA&_nc_gid=2WFhqU7VFhnYS8TYRPTwYw&oh=00_AQCO0_vyrUbIG6f60d1txTEbF3NmdGIduVtlAmBFj4l5uw&oe=6A5F44E9"
+    },
+    {
+      "handle": "akrit.agra",
+      "name": "Akrit",
+      "followers": 38,
+      "profilePictureUrl": "https://scontent-dfw6-2.xx.fbcdn.net/v/t51.82787-15/729466930_18044721485584032_911676041230494487_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=7d201b&_nc_ohc=vclk03DlkfsQ7kNvwErc0IL&_nc_oc=Adpwk5HPZWpWvFTRAEVGpBt7YvU2In6KlTCLjjjT47MhaYZECHZASeu7ZY3m2Fc5fdI&_nc_zt=23&_nc_ht=scontent-dfw6-2.xx&edm=AL-3X8kEAAAA&_nc_gid=9-YYsQXUE9nuDBf15Cjy-w&oh=00_AQAjqcZrPpBffQrdkb1hGcYs9jNKrSH7deQKIkQIG08gqw&oe=6A5F6976"
+    },
+    {
+      "handle": "made.bysid",
+      "name": "Sid",
+      "followers": 63,
+      "profilePictureUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t51.82787-15/609500147_17847774387655194_2120490906323210275_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=7d201b&_nc_ohc=GBsGl0_SDYAQ7kNvwH87fKf&_nc_oc=Ado4BagqlYTYI1H1YVBxiByfOVtLIEcEyCcDNexNr3MXLXS6-N_mV98o6yOsUI074jE&_nc_zt=23&_nc_ht=scontent-dfw6-1.xx&edm=AL-3X8kEAAAA&_nc_gid=71P1YJQojoNWLfawkfRndA&oh=00_AQA5OOhUwiYtqeGPl1tf5fNN8PWmgaM6FGyP8lum9e6A7w&oe=6A5F3C28"
+    },
+    {
+      "handle": "mahadev.mov",
+      "name": "Mahadev",
+      "followers": 20
+    },
+    {
+      "handle": "radwan.merhebi",
+      "name": "Radwan",
+      "followers": 1218,
+      "profilePictureUrl": "https://scontent-dfw5-1.xx.fbcdn.net/v/t51.82787-15/747055289_17963006652134719_8628385581614189006_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7d201b&_nc_ohc=L_KdN_mZ350Q7kNvwFjDO6_&_nc_oc=AdqFJ4070eDKkPG9v__2BZisGsJhki3NqAwPeUfsuga95QqSMSWQSdawbtwz5bp3tvs&_nc_zt=23&_nc_ht=scontent-dfw5-1.xx&edm=AL-3X8kEAAAA&_nc_gid=y--UAb4TMVgnKFZZWLCDtg&oh=00_AQBCmWqIMKXPWIK_DixtTXmt7_Zjf4SRD0iMj9XJugHKDA&oe=6A5F5025"
+    },
+    {
+      "handle": "haider_kay786",
+      "name": "Haider",
+      "followers": 2939,
+      "profilePictureUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t51.75761-15/496307301_18276665038251652_4499581566328486189_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=7d201b&_nc_ohc=FcAhqPB9p1oQ7kNvwHS8YKL&_nc_oc=AdrFd_DKDZJOZsuQO_wwh76RG44pHM21O0uTrSIf7rmNDxeGic9-D7FRia64QbsjXjo&_nc_zt=23&_nc_ht=scontent-dfw6-1.xx&edm=AL-3X8kEAAAA&_nc_gid=x89nNi6FpqVVOGFcnTIrPQ&oh=00_AQAi6eYaHUO5b4_LJWJTVtJQ5hO7H4KB7gmvJNOK419rIg&oe=6A5F3B6C"
+    },
+    {
+      "handle": "adanxai",
+      "name": "Adan",
+      "followers": 6796,
+      "profilePictureUrl": "https://scontent-dfw5-2.xx.fbcdn.net/v/t51.82787-15/694253581_18085487219206172_6047391601742950014_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=7d201b&_nc_ohc=gn2cWF6z5u8Q7kNvwGsQ-py&_nc_oc=AdrhRCxWO6E_syIrwsaqQWICAIFf5hoCGCuyvUOOiAllvUTWPEqjQ60lr84pGlj6t7s&_nc_zt=23&_nc_ht=scontent-dfw5-2.xx&edm=AL-3X8kEAAAA&_nc_gid=JPuTha8NjindR-rXMk9T2w&oh=00_AQCcfUtRwMyTwW39jAMcBYmfakm8cOu6n1MZBJNs0IOeEw&oe=6A5F4695"
+    },
+    {
+      "handle": "unofficial.steven",
+      "name": "Steven",
+      "followers": 3298,
+      "profilePictureUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t51.82787-15/688432719_18162998506446890_992560395537649688_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7d201b&_nc_ohc=n_HJUBeyGVkQ7kNvwECu2jJ&_nc_oc=Adr8YtIBXWfkew-AQB3HQnCDLrsahra6ZfP8rA_elqbYN2vNIxBxII42h_nTCIrtbug&_nc_zt=23&_nc_ht=scontent-dfw6-1.xx&edm=AL-3X8kEAAAA&_nc_gid=p_t6B5b7TtUDRSVmFm507w&oh=00_AQAQ0RXw19m_cEKVyXd1R4aDuw604odoVY9Qjsp_5L4zZw&oe=6A5F406D"
+    },
+    {
+      "handle": "brandonsbrainwave",
+      "name": "Brandon",
+      "followers": 71470,
+      "profilePictureUrl": "https://scontent-dfw6-2.xx.fbcdn.net/v/t51.82787-15/606325310_18300590881283199_7696566115488154962_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=7d201b&_nc_ohc=DLkRMgOJnvwQ7kNvwHFjhzH&_nc_oc=AdptEx_6JW_5werhZ6p7ahSXeHC92xxAjDs6QGt60YagiGQgOq4sVa563-RsR_rdaoI&_nc_zt=23&_nc_ht=scontent-dfw6-2.xx&edm=AL-3X8kEAAAA&_nc_gid=32mAdS2gigHlpGQL9tM_LA&oh=00_AQBu-MYZBd1N5kmnnA33xk4OtYxLLBFrmDt52mp0hjaTzw&oe=6A5F4DF2"
+    },
+    {
+      "handle": "aidendjohnston",
+      "name": "Aiden",
+      "followers": 2571,
+      "profilePictureUrl": "https://scontent-dfw6-2.xx.fbcdn.net/v/t51.2885-15/432244951_258968860617240_8822523263499922330_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=7d201b&_nc_ohc=y-ZWivSWqYEQ7kNvwGNeq1c&_nc_oc=Adqsdq0lYqxju1ZVyTsB0pKmFTrMAh9ch7FQbEFZZgijz1pO4cJfwt9SODhApR-7HMo&_nc_zt=23&_nc_ht=scontent-dfw6-2.xx&edm=AL-3X8kEAAAA&oh=00_AQAKjXdht-r9OoP3cO7RBY0dkrtWgGMJMViYjB8BYUT1pw&oe=6A5F3481"
+    },
+    {
+      "handle": "sahilagarwalx",
+      "name": "Sahil",
+      "followers": 3160,
+      "profilePictureUrl": "https://scontent-dfw5-2.xx.fbcdn.net/v/t51.82787-15/520178923_17880891300349010_8037087118763090577_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=7d201b&_nc_ohc=C4xUEDSLNgEQ7kNvwH0O4of&_nc_oc=AdqsFsWctSKbOuu6DgLzW5DuP0iDIlM7HIRX3q8iCbWsRmtR4M_fxVEw6jGmEAmnN58&_nc_zt=23&_nc_ht=scontent-dfw5-2.xx&edm=AL-3X8kEAAAA&_nc_gid=K6Fw2VYkWX7cDi9ra3eihg&oh=00_AQDy9kS-s7Z6AFB9-o75juimck7Mco3cpnMDFS9aDxshLg&oe=6A5F3C40"
+    },
+    {
+      "handle": "cyrilsudepally",
+      "name": "Cyril",
+      "followers": 1266,
+      "profilePictureUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t51.82787-15/705320204_18085513685615187_5444641451353255465_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7d201b&_nc_ohc=3jRHn8HXv8kQ7kNvwF6i_Y7&_nc_oc=AdqGTU1-PNxnCbp1DDlLEvfHc-cJVU02BXvmSRBytcOt1X6BMdhmiwueWxUXUXihse8&_nc_zt=23&_nc_ht=scontent-dfw6-1.xx&edm=AL-3X8kEAAAA&_nc_gid=URANF0u1zVif8h6gZhAX9A&oh=00_AQBGLk_R_u390x3dYU8FIAxYGzPwgKFsiH58XjVLHgCObw&oe=6A5F51D9"
+    },
+    {
+      "handle": "aryan.builds07",
+      "name": "Aryan",
+      "followers": 603,
+      "profilePictureUrl": "https://scontent-dfw5-1.xx.fbcdn.net/v/t51.82787-15/565000546_18031363904743947_8546808281111099062_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7d201b&_nc_ohc=a-khZAHGAUkQ7kNvwF_9ceY&_nc_oc=AdpytruiEXtriiF_ftDGhedNsqQVlez4sFeBmMBfW3BcqPNp6cL9I0Ljsdh-mLtCnw8&_nc_zt=23&_nc_ht=scontent-dfw5-1.xx&edm=AL-3X8kEAAAA&_nc_gid=MjrkPOXF9sZb96xM2Ei1Wg&oh=00_AQDhBMgffVGiE6VfW10dQAN1uoKY0X1NRlmTXnY6dBjaqw&oe=6A5F4D34"
+    },
+    {
+      "handle": "mahesh.biz",
+      "name": "Mahesh",
+      "followers": 11043,
+      "profilePictureUrl": "https://scontent-dfw5-2.xx.fbcdn.net/v/t51.82787-15/522683378_17937002958052786_7947102205108849578_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=7d201b&_nc_ohc=H7UO-Xa67OEQ7kNvwEhHcKi&_nc_oc=Adonp4Y_ctefaJfbXgejjok06IHEV23MN7N-LRVvX9GKdKNapxw8zylmt7q6waaBHCA&_nc_zt=23&_nc_ht=scontent-dfw5-2.xx&edm=AL-3X8kEAAAA&_nc_gid=4b8CzeHRwX8fV2MiAVn8Ug&oh=00_AQAA_JvXErKJOt0_mQojPNspuujIgSNhAzZWnZRDZXaQpg&oe=6A5F4701"
+    },
+    {
+      "handle": "nigel.tatem",
+      "followers": 77218,
+      "profilePictureUrl": "https://scontent-dfw5-2.xx.fbcdn.net/v/t51.82787-15/685610167_17891026395470470_5079575124528414153_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=7d201b&_nc_ohc=A914ovUHJjAQ7kNvwHj2PUd&_nc_oc=AdoCPDnz_EpH0FI7CO_gwHjAj6df8mL5qjdQ7JrgdbT8Kjbv8QQMkK27dp0TR5U6Yw4&_nc_zt=23&_nc_ht=scontent-dfw5-2.xx&edm=AL-3X8kEAAAA&_nc_gid=9fj2EToSZxuCvPcwQ6xJgQ&oh=00_AQDPGAma-Iss7jLpS6cZtzA909dtU8ZnkBq1_c9GMbc0BQ&oe=6A5F5B3E"
+    },
+    {
+      "handle": "bigvig_",
+      "followers": 589,
+      "profilePictureUrl": "https://scontent-dfw5-1.xx.fbcdn.net/v/t51.82787-15/555600083_17846235657576909_1157679449995663020_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=7d201b&_nc_ohc=mdMdA9mi1A8Q7kNvwHlt4m-&_nc_oc=Adp64UjzeLHBVzPi_H4s7mc3xC7ltEDqo7LKXwTYp-YNkdRcM2r_tpPuT4pKdhiJ-RM&_nc_zt=23&_nc_ht=scontent-dfw5-1.xx&edm=AL-3X8kEAAAA&_nc_gid=2SKaASa-XGJpBYUBAbqTaw&oh=00_AQB9gJtJBFGRsGHB7zS-KujiOOJVipMs5byafFENrGbh_Q&oe=6A5F5368"
+    },
+    {
+      "handle": "jeffguo.md",
+      "followers": 12424,
+      "profilePictureUrl": "https://scontent-dfw5-2.xx.fbcdn.net/v/t51.82787-15/564326194_17848919919575180_4054739663584742802_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=7d201b&_nc_ohc=a26p-O1I8BMQ7kNvwFcm16F&_nc_oc=AdpKUY8kPSlbY686c9zKYmy9plTUZ2YDWeOvyF6D1d5jwtTiYiv69hv8sgd2NQL3zFA&_nc_zt=23&_nc_ht=scontent-dfw5-2.xx&edm=AL-3X8kEAAAA&_nc_gid=5WpT0_dK8bCm06CXM_t0lA&oh=00_AQCo9AwJrucKNXZQhXC9IgxQiKgUGLaQBbKidA0OAzu2rQ&oe=6A5F4B9C"
+    },
+    {
+      "handle": "raamics",
+      "followers": 3206,
+      "profilePictureUrl": "https://scontent-dfw5-1.xx.fbcdn.net/v/t51.82787-15/637812173_17866439457575872_7469123408462997216_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=7d201b&_nc_ohc=squJcKLpn1cQ7kNvwEJcMkE&_nc_oc=AdovcR7RhwqXTrwxy-X-X_B0j4DDhH7OFSrt1epuU3tAc9W461teCWR1082RITpRNpg&_nc_zt=23&_nc_ht=scontent-dfw5-1.xx&edm=AL-3X8kEAAAA&_nc_gid=_YcXWHn0OeVblrpfXjtvOw&oh=00_AQC-5XVk2sFzNMhtkiyWNVrPsKLnS_eR8Y6gKOcjfhjpoQ&oe=6A5F349C"
+    },
+    {
+      "handle": "ali.mkay",
+      "followers": 6260,
+      "profilePictureUrl": "https://scontent-dfw5-1.xx.fbcdn.net/v/t51.75761-15/503031815_18087774028712215_2493282783932622998_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7d201b&_nc_ohc=Jl32uEvxqbcQ7kNvwEPpa2V&_nc_oc=AdoRs90rjMmInnWsBFA6xYij659L1FPXqm5svrMhDwvDdIFywfLI-S6rS_EpUGDwcyU&_nc_zt=23&_nc_ht=scontent-dfw5-1.xx&edm=AL-3X8kEAAAA&_nc_gid=wIL3AVXNst-8uR4cPXYPEA&oh=00_AQDKeD8rsLGPEglZU62VGJ6fLLhQz9BSrgRz8VHeyv8J0g&oe=6A5F4B3A"
+    },
+    {
+      "handle": "vardy.mov",
+      "followers": 65266,
+      "profilePictureUrl": "https://scontent-dfw5-1.xx.fbcdn.net/v/t51.82787-15/535224521_17858003331478390_2276378235895124975_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7d201b&_nc_ohc=ok7RHdaokuEQ7kNvwGJVOen&_nc_oc=AdpMONu9GSuHz-A-ssdR7ttgBVXAEbFZ54nbapnAGFRap5KqJWpHz4YADTrUr2_BlB8&_nc_zt=23&_nc_ht=scontent-dfw5-1.xx&edm=AL-3X8kEAAAA&_nc_gid=ZgqTWRY8HoR6MG_kMrn1kw&oh=00_AQBR5ILK3JnW3VgjN9oYsFTVs7jOnHmYxcCFTyaM54Q2ZA&oe=6A5F45FA"
+    },
+    {
+      "handle": "ak_pilled"
+    },
+    {
+      "handle": "evannrama"
+    },
+    {
+      "handle": "acegotchuu"
+    },
+    {
+      "handle": "nathaneo_j"
+    }
+  ]
+}

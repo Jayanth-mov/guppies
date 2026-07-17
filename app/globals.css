@@ -1,0 +1,74 @@
+:root {
+  /* 12-band depth ramp, shallows → abyss */
+  --band-1: #bfe6f5;
+  --band-2: #a5daf0;
+  --band-3: #8acdea;
+  --band-4: #6fbee3;
+  --band-5: #56aeda;
+  --band-6: #3f9bce;
+  --band-7: #2e86be;
+  --band-8: #2270a8;
+  --band-9: #1a5b8e;
+  --band-10: #144773;
+  --band-11: #0e3358;
+  --band-12: #08203c;
+
+  --sky: #e9f7ff;
+  --abyss-floor: #04101f;
+
+  --ink-dark: #0a2c47; /* text on light bands (1–6) */
+  --ink-pale: #cfeaf7; /* text on dark bands (7–12) */
+
+  --accent: #6cf5e2; /* bioluminescent cyan: highlights, focus */
+  --rise: #3adea6; /* delta up */
+  --fall: #ff8a7a; /* delta down */
+
+  --panel-bg: #071a2e;
+  --panel-line: rgba(108, 200, 235, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--abyss-floor);
+  color: var(--ink-pale);
+  font-family: var(--font-cond), "Arial Narrow", sans-serif;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: rgba(108, 245, 226, 0.35);
+}

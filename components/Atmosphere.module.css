@@ -1,0 +1,163 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ray {
+  position: absolute;
+  top: 0;
+  transform: skewX(-13deg);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.34),
+    rgba(255, 255, 255, 0) 88%
+  );
+  opacity: 0.6;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.kelpLeft,
+.kelpRight {
+  position: absolute;
+  transform-origin: bottom center;
+}
+
+.kelpLeft {
+  left: -8px;
+  top: 46%;
+}
+
+.kelpRight {
+  right: -8px;
+  top: 33.5%;
+  scale: -1 1;
+}
+
+.mote {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(235, 248, 255, 0.4);
+}
+
+.snow {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(214, 236, 250, 0.42);
+}
+
+.speck {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 7px var(--accent);
+  opacity: 0.35;
+}
+
+@keyframes shimmer {
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 0.85;
+  }
+}
+
+@keyframes rise {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.75;
+  }
+  85% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-360px);
+    opacity: 0;
+  }
+}
+
+@keyframes floaty {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(14px, 20px);
+  }
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.5;
+  }
+  85% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(150px);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.06;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+
+@keyframes sway {
+  from {
+    transform: rotate(-2.2deg);
+  }
+  to {
+    transform: rotate(2.2deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ray {
+    animation: shimmer 10s ease-in-out infinite alternate;
+  }
+
+  .bubble {
+    animation: rise 12s linear infinite;
+  }
+
+  .mote {
+    animation: floaty 24s ease-in-out infinite alternate;
+  }
+
+  .snow {
+    animation: fall 22s linear infinite;
+  }
+
+  .speck {
+    animation: pulse 5s ease-in-out infinite alternate;
+  }
+
+  .kelpLeft,
+  .kelpRight {
+    animation: sway 13s ease-in-out infinite alternate;
+  }
+
+  .kelpRight {
+    animation-delay: -6s;
+  }
+}
