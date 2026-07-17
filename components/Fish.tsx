@@ -52,9 +52,9 @@ export default function Fish({ entry, highlighted, dimmed, onSelect }: FishProps
   const ink = pale ? "#c6e4f4" : "#123a5c";
   const detail = pale ? "rgba(6, 26, 46, 0.55)" : "rgba(255, 255, 255, 0.55)";
 
-  // fixed regardless of species — a guppy's rider should be as legible as a
-  // whale shark's, not scaled down to match its tiny body
-  const avatarSize = 64;
+  // fixed regardless of species, sized to sit naturally next to the 11px
+  // label text rather than to the fish's own body
+  const avatarSize = 22;
 
   const style = {
     // clamp keeps the shallowest fish (and their avatars, riding above the
