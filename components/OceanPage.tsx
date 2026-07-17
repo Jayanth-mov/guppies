@@ -69,9 +69,11 @@ export default function OceanPage() {
         hoverTimer.current = null;
       }
       if (handle && window.matchMedia("(min-width: 980px)").matches) {
+        // deliberate hold, not a flinch — sweeping the cursor down the list
+        // shouldn't drag the ocean along with it
         hoverTimer.current = window.setTimeout(
           () => scrollToFish(handle),
-          180,
+          750,
         );
       }
     },
@@ -88,18 +90,28 @@ export default function OceanPage() {
       <button
         type="button"
         className={styles.fab}
+        data-open={open || undefined}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls="leaderboard"
+        aria-label={open ? "Close leaderboard" : "Open leaderboard"}
       >
-        <svg viewBox="0 0 24 14" width="22" height="13" aria-hidden="true">
-          <path
-            d="M2 7c3.6-4.4 9-6 13-4 1.8.9 3.1 2.2 4 4-.9 1.8-2.2 3.1-4 4-4 2-9.4.4-13-4z"
-            fill="currentColor"
-          />
-          <path d="M17 7l6-4-1.8 4L23 11z" fill="currentColor" />
-        </svg>
-        Leaderboard
+        {open ? (
+          <span className={styles.fabClose} aria-hidden="true">
+            ×
+          </span>
+        ) : (
+          <>
+            <svg viewBox="0 0 24 14" width="22" height="13" aria-hidden="true">
+              <path
+                d="M2 7c3.6-4.4 9-6 13-4 1.8.9 3.1 2.2 4 4-.9 1.8-2.2 3.1-4 4-4 2-9.4.4-13-4z"
+                fill="currentColor"
+              />
+              <path d="M17 7l6-4-1.8 4L23 11z" fill="currentColor" />
+            </svg>
+            Leaderboard
+          </>
+        )}
       </button>
 
       <header className={styles.hero}>
@@ -127,17 +139,7 @@ export default function OceanPage() {
 
       <footer className={styles.floor}>
         <h2 className={styles.floorTitle}>The sea floor</h2>
-        <p className={styles.floorLine}>
-          {roster.length} swimmers and counting. Built by{" "}
-          <a
-            href="https://instagram.com/jayanth.mov"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            @jayanth.mov
-          </a>
-          .
-        </p>
+        <p className={styles.floorLine}>{roster.length} swimmers and counting.</p>
         <p className={styles.floorNote}>
           Live Instagram follower counts, refreshed periodically.
         </p>

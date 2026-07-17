@@ -24,67 +24,31 @@
     transform: translateX(0);
     visibility: visible;
   }
-
-  .grip {
-    display: none;
-  }
 }
 
-/* mobile: bottom sheet snapping to half / full */
+/* mobile: full-screen panel, no half-height snapping */
 @media (max-width: 979px) {
   .panel {
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 92svh;
-    border-radius: 18px 18px 0 0;
-    border: 1px solid var(--panel-line);
-    border-bottom: none;
-    transform: translateY(102%);
+    inset: 0;
+    height: 100svh;
+    transform: translateY(100%);
     transition: transform 0.34s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.34s;
-    box-shadow: 0 -12px 40px rgba(2, 10, 20, 0.5);
   }
 
   .panel[data-open] {
+    transform: translateY(0);
     visibility: visible;
   }
-
-  .panel[data-open][data-pos="half"] {
-    transform: translateY(48%);
-  }
-
-  .panel[data-open][data-pos="full"] {
-    transform: translateY(0);
-  }
-}
-
-.grip {
-  display: flex;
-  justify-content: center;
-  padding: 10px 0 4px;
-  touch-action: none;
-  cursor: grab;
-}
-
-.gripBar {
-  width: 44px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(207, 234, 247, 0.35);
 }
 
 .head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px 6px;
+  padding: 18px 16px 6px;
 }
 
-.headText {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  min-width: 0;
+@media (min-width: 980px) {
+  .head {
+    padding: 14px 16px 6px;
+  }
 }
 
 .title {
@@ -92,70 +56,6 @@
   font-size: 19px;
   font-weight: 600;
   letter-spacing: 0.08em;
-}
-
-.updated {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-mono), monospace;
-  font-size: 10.5px;
-  opacity: 0.65;
-  white-space: nowrap;
-  cursor: help;
-}
-
-.info {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid rgba(207, 234, 247, 0.5);
-  font-size: 9px;
-  font-style: italic;
-  font-family: var(--font-cond), sans-serif;
-}
-
-.updated::after {
-  content: attr(data-tip);
-  position: absolute;
-  top: calc(100% + 7px);
-  right: 0;
-  padding: 5px 9px;
-  border-radius: 7px;
-  background: rgba(2, 10, 20, 0.95);
-  border: 1px solid var(--panel-line);
-  color: var(--ink-pale);
-  font-size: 11.5px;
-  font-family: var(--font-cond), sans-serif;
-  font-style: normal;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  z-index: 5;
-}
-
-.updated:hover::after,
-.updated:focus-visible::after {
-  opacity: 1;
-}
-
-.close {
-  font-size: 24px;
-  line-height: 1;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  opacity: 0.7;
-}
-
-.close:hover {
-  opacity: 1;
-  background: rgba(108, 200, 235, 0.12);
 }
 
 .toggle {
@@ -328,11 +228,59 @@
   color: var(--fall);
 }
 
-.note {
-  margin: 0;
-  padding: 9px 16px;
+/* ---- last-updated, bottom of panel ---- */
+
+.updated {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 16px 16px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  background: rgba(2, 10, 20, 0.55);
+  border: 1px solid var(--panel-line);
+  cursor: help;
+  flex: none;
+}
+
+.updatedLabel {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+
+.updatedTime {
+  font-family: var(--font-mono), monospace;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.updated::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: rgba(2, 10, 20, 0.95);
+  border: 1px solid var(--panel-line);
+  color: var(--ink-pale);
   font-size: 11.5px;
-  opacity: 0.5;
-  font-style: italic;
-  border-top: 1px solid var(--panel-line);
+  font-family: var(--font-cond), sans-serif;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 5;
+}
+
+.updated:hover::after,
+.updated:focus-visible::after,
+.updated[data-show]::after {
+  opacity: 1;
 }

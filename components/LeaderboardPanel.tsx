@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FishEntry } from "@/lib/roster";
 import { BAND_COLORS, formatCount } from "@/lib/species";
 import { avatarHue, initialsFor } from "./Fish";
@@ -28,7 +21,16 @@ interface PanelProps {
   onFocusRowHandled: () => void;
 }
 
-type SheetPos = "half" | "full";
+function formatAgo(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  if (s < 60) return `${s}sec ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}hr${h === 1 ? "" : "s"} ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
 
 export default function LeaderboardPanel({
   open,
@@ -42,31 +44,17 @@ export default function LeaderboardPanel({
   focusRow,
   onFocusRowHandled,
 }: PanelProps) {
-  const sheetRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
-  const [pos, setPos] = useState<SheetPos>("half");
-  const [dragY, setDragY] = useState<number | null>(null);
-  const dragStart = useRef<{ y: number; base: number } | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [updatedAgo, setUpdatedAgo] = useState<string | null>(null);
+  const [tipOpen, setTipOpen] = useState(false);
 
-  // relative time is computed client-side only, so SSR markup stays stable
+  // ticks every second so "35sec ago" stays honest, not just on the minute
   useEffect(() => {
-    const compute = () => {
-      const h = Math.max(
-        0,
-        Math.round((Date.now() - new Date(lastUpdated).getTime()) / 3.6e6),
-      );
-      setUpdatedAgo(
-        h < 1
-          ? "just now"
-          : h < 48
-            ? `${h} hour${h === 1 ? "" : "s"} ago`
-            : `${Math.round(h / 24)} days ago`,
-      );
-    };
+    const compute = () =>
+      setUpdatedAgo(formatAgo(Date.now() - new Date(lastUpdated).getTime()));
     compute();
-    const t = window.setInterval(compute, 60_000);
+    const t = window.setInterval(compute, 1000);
     return () => window.clearInterval(t);
   }, [lastUpdated]);
 
@@ -78,11 +66,6 @@ export default function LeaderboardPanel({
       );
     return arr; // roster arrives sorted by followers
   }, [roster, sortMode]);
-
-  // opening always starts the mobile sheet at half
-  useEffect(() => {
-    if (open) setPos("half");
-  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -108,42 +91,6 @@ export default function LeaderboardPanel({
     return () => window.clearTimeout(t);
   }, [open, focusRow, onFocusRowHandled]);
 
-  const isMobile = () =>
-    typeof window !== "undefined" &&
-    window.matchMedia("(max-width: 979px)").matches;
-
-  const baseOffset = useCallback((p: SheetPos) => {
-    const h = sheetRef.current?.clientHeight ?? 0;
-    return p === "full" ? 0 : h * 0.48;
-  }, []);
-
-  const onDragStart = (e: ReactPointerEvent) => {
-    if (!isMobile()) return;
-    dragStart.current = { y: e.clientY, base: baseOffset(pos) };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const onDragMove = (e: ReactPointerEvent) => {
-    if (!dragStart.current) return;
-    const h = sheetRef.current?.clientHeight ?? 1;
-    const off = Math.min(
-      Math.max(dragStart.current.base + e.clientY - dragStart.current.y, 0),
-      h,
-    );
-    setDragY(off);
-  };
-
-  const onDragEnd = () => {
-    if (!dragStart.current) return;
-    const h = sheetRef.current?.clientHeight ?? 1;
-    const off = dragY ?? dragStart.current.base;
-    dragStart.current = null;
-    setDragY(null);
-    if (off > h * 0.72) onClose();
-    else if (off > h * 0.24) setPos("half");
-    else setPos("full");
-  };
-
   const deltaChip = (d: number | null) =>
     d === null ? "—" : d >= 0 ? `+${formatCount(d)} ▲` : `${formatCount(d)} ▼`;
   const growthChip = (g: number | null) =>
@@ -153,54 +100,14 @@ export default function LeaderboardPanel({
 
   return (
     <section
-      ref={sheetRef}
       id="leaderboard"
       className={styles.panel}
       data-open={open || undefined}
-      data-pos={pos}
-      style={
-        dragY !== null
-          ? { transform: `translateY(${dragY}px)`, transition: "none" }
-          : undefined
-      }
       aria-label="Leaderboard"
       inert={!open}
     >
-      <div
-        className={styles.grip}
-        onPointerDown={onDragStart}
-        onPointerMove={onDragMove}
-        onPointerUp={onDragEnd}
-        onPointerCancel={onDragEnd}
-      >
-        <span className={styles.gripBar} aria-hidden="true" />
-      </div>
-
       <header className={styles.head}>
-        <div className={styles.headText}>
-          <h2 className={styles.title}>Leaderboard</h2>
-          {updatedAgo && (
-            <span
-              className={styles.updated}
-              tabIndex={0}
-              aria-label="Updates every 4 hours"
-              data-tip="Updates every 4 hours"
-            >
-              last updated {updatedAgo}
-              <span className={styles.info} aria-hidden="true">
-                i
-              </span>
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          className={styles.close}
-          onClick={onClose}
-          aria-label="Close leaderboard"
-        >
-          ×
-        </button>
+        <h2 className={styles.title}>Leaderboard</h2>
       </header>
 
       <div
@@ -306,10 +213,18 @@ export default function LeaderboardPanel({
         ))}
       </ol>
 
-      <p className={styles.note}>
-        Live follower counts. Deltas and weekly growth begin once scheduled
-        tracking is running.
-      </p>
+      <button
+        type="button"
+        className={styles.updated}
+        data-show={tipOpen || undefined}
+        aria-label={`Last updated ${updatedAgo ?? "unknown"}. Updates every 4 hours.`}
+        data-tip="Updates every 4 hours"
+        onClick={() => setTipOpen((v) => !v)}
+        onBlur={() => setTipOpen(false)}
+      >
+        <span className={styles.updatedLabel}>last updated</span>
+        <span className={styles.updatedTime}>{updatedAgo ?? "—"}</span>
+      </button>
     </section>
   );
 }

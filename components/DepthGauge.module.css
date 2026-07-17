@@ -73,7 +73,7 @@
 }
 
 .seg[data-active] {
-  box-shadow: inset 0 0 0 1.5px var(--accent);
+  box-shadow: inset 0 0 0 1.5px #ffffff;
 }
 
 .marker {
@@ -81,7 +81,7 @@
   left: -3px;
   right: -3px;
   height: 2px;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
   pointer-events: none;
 }

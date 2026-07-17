@@ -52,11 +52,15 @@ export default function Fish({ entry, highlighted, dimmed, onSelect }: FishProps
   const ink = pale ? "#c6e4f4" : "#123a5c";
   const detail = pale ? "rgba(6, 26, 46, 0.55)" : "rgba(255, 255, 255, 0.55)";
 
-  const avatarSize = Math.round(Math.min(42, Math.max(24, width * 0.55)));
+  // fixed regardless of species — a guppy's rider should be as legible as a
+  // whale shark's, not scaled down to match its tiny body
+  const avatarSize = 32;
   const headPct = (shape.head[0] / shape.w) * 100;
 
   const style = {
-    top: `${(entry.depth * 100).toFixed(3)}%`,
+    // clamp keeps the shallowest fish (and their avatars, riding above the
+    // sprite) from rendering above the water's top edge
+    top: `clamp(60px, ${(entry.depth * 100).toFixed(3)}%, calc(100% - 60px))`,
     left: `${lane.toFixed(2)}%`,
     color: ink,
     "--detail": detail,

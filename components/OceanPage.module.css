@@ -41,6 +41,18 @@
   color: var(--accent);
 }
 
+.fab[data-open] {
+  padding: 9px 13px;
+  border-color: rgba(108, 245, 226, 0.5);
+}
+
+.fabClose {
+  display: block;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--accent);
+}
+
 @media (min-width: 980px) {
   .squeezed .fab {
     right: 356px;
