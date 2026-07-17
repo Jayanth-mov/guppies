@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { runSnapshot } from "@/lib/pipeline";
 
-// Triggered every 4 hours by the GitHub Actions workflow (see
+// Triggered every 15 minutes by the GitHub Actions workflow (see
 // .github/workflows/refresh.yml). Requires the CRON_SECRET bearer token so
 // strangers can't burn the rate limit.
 
