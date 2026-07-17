@@ -12,6 +12,7 @@ interface FishProps {
   highlighted: boolean;
   dimmed: boolean;
   onSelect: (handle: string) => void;
+  swimSeed: string;
 }
 
 export function fishDomId(handle: string): string {
@@ -32,9 +33,17 @@ export function avatarHue(handle: string): number {
   return Math.round(pick(rng(`hue:${handle}`), 165, 225));
 }
 
-export default function Fish({ entry, highlighted, dimmed, onSelect }: FishProps) {
+export default function Fish({
+  entry,
+  highlighted,
+  dimmed,
+  onSelect,
+  swimSeed,
+}: FishProps) {
   const shape = FISH_SHAPES[entry.species.symbolId];
-  const r = rng(entry.handle);
+  // depth stays data-driven (it encodes rank); only lane + animation timing
+  // reshuffle with the per-visit seed
+  const r = rng(entry.handle + swimSeed);
 
   const width = entry.size;
   // keep big fish from drifting off the right edge

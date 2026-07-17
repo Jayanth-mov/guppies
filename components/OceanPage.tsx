@@ -23,6 +23,13 @@ export default function OceanPage() {
   // confirmed unavailable) — otherwise it'd compare against localStorage
   // twice in one visit (bundled, then live) and could double-fire a toast
   const [rosterSettled, setRosterSettled] = useState(false);
+  // reshuffles each visit so fish don't drift in identical lanes/phases every
+  // reload. Starts empty so SSR and first hydration match, then randomizes.
+  const [swimSeed, setSwimSeed] = useState("");
+
+  useEffect(() => {
+    setSwimSeed(`:${Math.floor(Math.random() * 1e9)}`);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,6 +148,7 @@ export default function OceanPage() {
           roster={roster}
           hovered={hovered}
           onSelectFish={handleSelectFish}
+          swimSeed={swimSeed}
         />
       </main>
 

@@ -1,10 +1,24 @@
 // Server-side pipeline: called by /api/cron every 4 hours (GitHub Actions
-// scheduler), stores snapshots in Upstash Redis, and derives the numbers the
-// site shows — delta since last snapshot and growth since the week started
-// (Sunday 12:00am in WEEK_START_TZ). Never import this from client code.
+// scheduler), stores snapshots in Upstash Redis, and derives the change/percent
+// the site shows over each comparison window (latest / day / week / month).
+// Never import this from client code.
 
 import raw from "@/data/accounts.json";
-import type { LiveAccount, LiveRoster } from "./roster";
+import {
+  RANGE_KEYS,
+  emptyStats,
+  type LiveAccount,
+  type LiveRoster,
+  type RangeKey,
+  type Stats,
+} from "./roster";
+
+// window length for each range; "latest" is special-cased to the prior snapshot
+const RANGE_MS: Record<Exclude<RangeKey, "latest">, number> = {
+  day: 24 * 3_600_000,
+  week: 7 * 24 * 3_600_000,
+  month: 30 * 24 * 3_600_000,
+};
 
 const GRAPH = "https://graph.facebook.com/v21.0";
 
@@ -230,11 +244,32 @@ export async function runSnapshot(): Promise<RunSummary> {
   const prevLatest = await redisGetJSON<LiveRoster>(KEY_LATEST);
   const history = (await redisGetJSON<Snapshot[]>(KEY_HISTORY)) ?? [];
   const prev = history[history.length - 1] ?? null;
-  const weekStart = weekStartISO(
-    new Date(),
-    process.env.WEEK_START_TZ ?? "America/Chicago",
-  );
-  const baseline = history.find((s) => s.t >= weekStart) ?? null;
+
+  const nowMs = Date.now();
+  // baseline follower count for a handle at the start of a window: the newest
+  // snapshot at or before the cutoff (or the previous snapshot for "latest").
+  // undefined when history doesn't reach back that far — no fabricated trend.
+  const baselineCount = (handle: string, key: RangeKey): number | undefined => {
+    if (key === "latest") return prev?.counts[handle];
+    const cutoff = nowMs - RANGE_MS[key];
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (new Date(history[i].t).getTime() <= cutoff) {
+        return history[i].counts[handle];
+      }
+    }
+    return undefined;
+  };
+
+  const statsFor = (handle: string, current: number): Stats => {
+    const s = emptyStats();
+    for (const key of RANGE_KEYS) {
+      const base = baselineCount(handle, key);
+      if (base !== undefined && base > 0) {
+        s[key] = { change: current - base, pct: ((current - base) / base) * 100 };
+      }
+    }
+    return s;
+  };
 
   const now = new Date().toISOString();
   const counts: Record<string, number> = {};
@@ -245,20 +280,12 @@ export async function runSnapshot(): Promise<RunSummary> {
     try {
       const got = await fetchAccount(igUserId, token, handle, handle === host);
       counts[handle] = got.followers;
-      const base = baseline?.counts[handle];
       accounts.push({
         handle,
         name,
         followers: got.followers,
         avatarUrl: got.avatarUrl,
-        delta:
-          prev && prev.counts[handle] !== undefined
-            ? got.followers - prev.counts[handle]
-            : null,
-        growthWeek:
-          base !== undefined && base > 0
-            ? ((got.followers - base) / base) * 100
-            : null,
+        stats: statsFor(handle, got.followers),
       });
     } catch (err) {
       failed.push({ handle, reason: (err as Error).message });
@@ -266,7 +293,7 @@ export async function runSnapshot(): Promise<RunSummary> {
       const carried = prevLatest?.accounts.find((a) => a.handle === handle);
       if (carried) {
         counts[handle] = carried.followers;
-        accounts.push({ ...carried, delta: null });
+        accounts.push({ ...carried, stats: emptyStats() });
       }
     }
   }

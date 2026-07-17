@@ -7,13 +7,28 @@ import {
   widthFor,
 } from "./species";
 
+// Comparison windows offered by the leaderboard's range selector.
+export type RangeKey = "latest" | "day" | "week" | "month";
+export const RANGE_KEYS: RangeKey[] = ["latest", "day", "week", "month"];
+
+// Follower change + percent over a window; null until history reaches back far
+// enough for an honest baseline.
+export interface RangeStat {
+  change: number;
+  pct: number;
+}
+export type Stats = Record<RangeKey, RangeStat | null>;
+
+export function emptyStats(): Stats {
+  return { latest: null, day: null, week: null, month: null };
+}
+
 export interface FishEntry {
   handle: string;
   name: string;
   followers: number;
   avatarUrl: string | null; // live profile picture; refreshed on every fetch
-  delta: number | null; // change since last snapshot; null until history exists
-  growthWeek: number | null; // growth % since Sunday 12:00am; null until history exists
+  stats: Stats; // change/pct per window; null entries until history exists
   species: Species;
   speciesIndex: number;
   depth: number; // 0 = surface, 1 = seabed
@@ -27,8 +42,7 @@ interface RawAccount {
   name: string;
   followers: number;
   avatarUrl: string | null;
-  delta: number | null;
-  growthWeek: number | null;
+  stats: Stats;
 }
 
 // Seam for the live pipeline. The future source reads cached business_discovery
@@ -64,10 +78,9 @@ const localSource: RosterSource = {
       name: a.name ?? a.handle,
       followers: a.followers ?? 0,
       avatarUrl: a.profilePictureUrl ?? null,
-      // No snapshot history yet, so no honest delta/growth — the cron fills
-      // these once it has prior snapshots to diff against.
-      delta: null,
-      growthWeek: null,
+      // No snapshot history in the bundled file — the cron fills these once it
+      // has prior snapshots to diff against.
+      stats: emptyStats(),
     })),
 };
 
@@ -99,8 +112,7 @@ export interface LiveAccount {
   name?: string;
   followers: number;
   avatarUrl: string | null;
-  delta: number | null;
-  growthWeek: number | null;
+  stats: Stats;
 }
 
 export interface LiveRoster {
@@ -119,8 +131,7 @@ export function sourceFromLive(live: LiveRoster): RosterSource {
         name: a.name ?? a.handle,
         followers: a.followers,
         avatarUrl: a.avatarUrl,
-        delta: a.delta,
-        growthWeek: a.growthWeek,
+        stats: a.stats ?? emptyStats(),
       })),
   };
 }

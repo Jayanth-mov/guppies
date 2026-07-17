@@ -13,10 +13,11 @@ interface OceanProps {
   roster: FishEntry[];
   hovered: string | null;
   onSelectFish: (handle: string) => void;
+  swimSeed: string;
 }
 
 const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
-  { roster, hovered, onSelectFish },
+  { roster, hovered, onSelectFish, swimSeed },
   ref,
 ) {
   const bands = useMemo(() => bandSpans(), []);
@@ -70,6 +71,7 @@ const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
           highlighted={hovered === e.handle}
           dimmed={hovered !== null && hovered !== e.handle}
           onSelect={onSelectFish}
+          swimSeed={swimSeed}
         />
       ))}
     </div>
