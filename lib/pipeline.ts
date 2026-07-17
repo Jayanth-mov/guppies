@@ -46,6 +46,9 @@ export interface RunSummary {
   fetched: number;
   failed: { handle: string; reason: string }[];
   lastUpdated: string;
+  snapshots: number; // history length after this run
+  historyReadIn: number; // history length read at the start (persistence check)
+  readBack: number; // history length re-read right after writing
 }
 
 // ---- Redis (Upstash REST protocol; works with the Vercel marketplace vars) ----
@@ -250,7 +253,9 @@ export async function runSnapshot(): Promise<RunSummary> {
   const nowMs = Date.now();
   // baseline follower count for a handle at the start of a window: the newest
   // snapshot at or before the cutoff (or the previous snapshot for "latest").
-  // undefined when history doesn't reach back that far — no fabricated trend.
+  // "Show so far": when history doesn't yet reach a full window back, fall back
+  // to the earliest snapshot we have, so the change accumulates from day one
+  // instead of showing a dash.
   const baselineCount = (handle: string, key: RangeKey): number | undefined => {
     if (key === "latest") return prev?.counts[handle];
     const cutoff = nowMs - RANGE_MS[key];
@@ -259,7 +264,7 @@ export async function runSnapshot(): Promise<RunSummary> {
         return history[i].counts[handle];
       }
     }
-    return undefined;
+    return history[0]?.counts[handle];
   };
 
   const statsFor = (handle: string, current: number): Stats => {
@@ -306,16 +311,40 @@ export async function runSnapshot(): Promise<RunSummary> {
     );
   }
 
+  // how much history we READ this run — if this stays ~1 across runs, snapshots
+  // aren't persisting in Redis (which starves every window's baseline)
+  const historyReadIn = history.length;
+
   history.push({ t: now, counts });
   if (history.length > MAX_SNAPSHOTS) {
     history.splice(0, history.length - MAX_SNAPSHOTS);
   }
 
-  const latest: LiveRoster = { lastUpdated: now, hostAccount: host, accounts };
+  const latest: LiveRoster = {
+    lastUpdated: now,
+    hostAccount: host,
+    accounts,
+    snapshots: history.length,
+  };
   await redisSetJSON(KEY_HISTORY, history);
   await redisSetJSON(KEY_LATEST, latest);
 
-  return { ok: true, fetched: accounts.length - failed.length, failed, lastUpdated: now };
+  // read the history straight back so a persistence failure is visible in logs
+  const verify = (await redisGetJSON<Snapshot[]>(KEY_HISTORY))?.length ?? 0;
+  console.log(
+    `[cron] historyReadIn=${historyReadIn} wrote=${history.length} readBack=${verify} ` +
+      `fetched=${accounts.length - failed.length} failed=${failed.length}`,
+  );
+
+  return {
+    ok: true,
+    fetched: accounts.length - failed.length,
+    failed,
+    lastUpdated: now,
+    snapshots: history.length,
+    historyReadIn,
+    readBack: verify,
+  };
 }
 
 export async function readLatest(): Promise<LiveRoster | null> {

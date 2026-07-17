@@ -119,6 +119,7 @@ export interface LiveRoster {
   lastUpdated: string;
   hostAccount: string;
   accounts: LiveAccount[];
+  snapshots?: number; // count of stored snapshots (persistence diagnostic)
 }
 
 export function sourceFromLive(live: LiveRoster): RosterSource {
