@@ -325,6 +325,7 @@ export async function runSnapshot(): Promise<RunSummary> {
     hostAccount: host,
     accounts,
     snapshots: history.length,
+    failed,
   };
   await redisSetJSON(KEY_HISTORY, history);
   await redisSetJSON(KEY_LATEST, latest);

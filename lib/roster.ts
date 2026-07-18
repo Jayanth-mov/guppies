@@ -120,6 +120,7 @@ export interface LiveRoster {
   hostAccount: string;
   accounts: LiveAccount[];
   snapshots?: number; // count of stored snapshots (persistence diagnostic)
+  failed?: { handle: string; reason: string }[]; // handles business_discovery skipped this run
 }
 
 export function sourceFromLive(live: LiveRoster): RosterSource {
