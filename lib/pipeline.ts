@@ -146,10 +146,19 @@ async function graph(
     { cache: "no-store" },
   );
   const json = (await res.json()) as {
-    error?: { message: string };
+    error?: {
+      message: string;
+      code?: number;
+      error_subcode?: number;
+      type?: string;
+    };
     [k: string]: unknown;
   };
-  if (json.error) throw new Error(json.error.message);
+  if (json.error) {
+    const e = json.error;
+    const tag = [e.code, e.error_subcode].filter((x) => x != null).join("/");
+    throw new Error(`${e.message}${tag ? ` [${e.type ?? ""} ${tag}]` : ""}`);
+  }
   return json;
 }
 
