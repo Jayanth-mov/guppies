@@ -10,10 +10,8 @@
       "profilePictureUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t51.82787-15/611268576_17865755460544118_2547828357438394205_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=7d201b&_nc_ohc=sl3wX0lQ7vAQ7kNvwHheQhn&_nc_oc=AdrgYKZjywtYrcFkwOZg9OD7HdNUHYn95rhVSEgzC3i4niKLPhq3Qu55Xtpg5ein8ts&_nc_zt=23&_nc_ht=scontent-dfw6-1.xx&edm=AL-3X8kEAAAA&_nc_gid=mrlTkBqZ6Z6OWxRmDlraew&oh=00_AQDW9QdswN9pxBnDEdUCVCA8teQlY-tK_ksMjd38KX94_g&oe=6A5F4218"
     },
     {
-      "handle": "mann.ascends",
-      "name": "Mann",
-      "followers": 10946,
-      "profilePictureUrl": "https://scontent-dfw6-1.xx.fbcdn.net/v/t51.82787-15/607203631_18007884527830126_7152934946039159906_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=7d201b&_nc_ohc=-JUTwO-P8K0Q7kNvwEiLFCC&_nc_oc=AdpWRROZ2_QwR8n3cDMGWlhqoVl3Lpdurk0gU6ghy-4V9bdSBqZPDgYpWxiOo2b4Lms&_nc_zt=23&_nc_ht=scontent-dfw6-1.xx&edm=AL-3X8kEAAAA&_nc_gid=2WFhqU7VFhnYS8TYRPTwYw&oh=00_AQCO0_vyrUbIG6f60d1txTEbF3NmdGIduVtlAmBFj4l5uw&oe=6A5F44E9"
+      "handle": "mannascends",
+      "name": "Mann"
     },
     {
       "handle": "akrit.agra",
@@ -133,6 +131,12 @@
     },
     {
       "handle": "nathaneo_j"
+    },
+    {
+      "handle": "zachyadegari"
+    },
+    {
+      "handle": "evan_yadegari"
     }
   ]
 }
