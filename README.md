@@ -52,7 +52,7 @@ Motion honors `prefers-reduced-motion`: every animation lives inside
 
 ## The pipeline (not built yet — the boring part)
 
-Instagram Graph API `business_discovery`, queried from a 15-minute cron, never
+Instagram Graph API `business_discovery`, queried from an hourly cron, never
 from the browser. Snapshots land in KV; the page reads cached JSON. Deltas,
 growth %, and evolutions all come from snapshot history.
 

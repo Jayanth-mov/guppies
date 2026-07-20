@@ -121,7 +121,7 @@ the app's own admins, which is all this project needs. No App Review.
 The code is in place:
 
 - [lib/pipeline.ts](lib/pipeline.ts) — snapshot engine: fetches all handles
-  (host via its own-fields call), stores 15-minute snapshots in Upstash Redis,
+  (host via its own-fields call), stores hourly snapshots in Upstash Redis,
   derives **delta** (vs previous snapshot) and **growthWeek** (vs the earliest
   snapshot after Sunday 12:00am in `WEEK_START_TZ`), and **auto-refreshes the
   60-day token** once it's 30 days old, writing the replacement back to Redis.
@@ -131,7 +131,7 @@ The code is in place:
   snapshot; the page overlays it on the bundled `accounts.json` at load.
 - [.github/workflows/refresh.yml](.github/workflows/refresh.yml) — the
   scheduler. **Vercel's free Hobby plan only allows daily crons**, so a
-  GitHub Action pings `/api/cron` every 15 minutes instead (free, same repo).
+  GitHub Action pings `/api/cron` hourly instead (free, same repo).
 
 ### One-time setup
 

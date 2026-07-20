@@ -280,7 +280,7 @@ export default function LeaderboardPanel({
               <span className={styles.menuUpdated}>
                 last updated {updatedAgo ?? "—"}
               </span>
-              <span className={styles.menuHint}>updates every 15 minutes</span>
+              <span className={styles.menuHint}>updates hourly</span>
             </div>
             {RANGE_KEYS.map((k) => (
               <button

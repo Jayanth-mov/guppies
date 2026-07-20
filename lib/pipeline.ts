@@ -1,4 +1,4 @@
-// Server-side pipeline: called by /api/cron every 15 minutes (GitHub Actions
+// Server-side pipeline: called by /api/cron hourly (GitHub Actions
 // scheduler), stores snapshots in Upstash Redis, and derives the change/percent
 // the site shows over each comparison window (latest / day / week / month).
 // Never import this from client code.
@@ -26,10 +26,10 @@ const KEY_HISTORY = "guppies:history";
 const KEY_LATEST = "guppies:latest";
 const KEY_TOKEN = "guppies:token";
 
-// ~31 days of 15-minute snapshots — enough to back the "past month" window.
-// (31d * 24h * 4/h = 2976.) Each snapshot is small (~25 handle:count pairs),
-// so the whole history blob stays on the order of a couple MB.
-const MAX_SNAPSHOTS = 3000;
+// Cap on stored snapshots. At hourly cadence 800 covers ~33 days — enough to
+// back the "past month" window. Each snapshot is small (~27 handle:count
+// pairs), so the whole history blob stays well under a megabyte.
+const MAX_SNAPSHOTS = 800;
 
 interface Snapshot {
   t: string; // ISO timestamp
