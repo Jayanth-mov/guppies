@@ -39,6 +39,7 @@ interface Snapshot {
 interface StoredToken {
   token: string;
   exchangedAt: string;
+  seededFrom?: string; // the IG_ACCESS_TOKEN env value this was seeded from
 }
 
 export interface RunSummary {
@@ -98,16 +99,25 @@ async function redisSetJSON(key: string, value: unknown): Promise<void> {
 
 async function getWorkingToken(): Promise<string> {
   let stored = await redisGetJSON<StoredToken>(KEY_TOKEN);
+  const seed = process.env.IG_ACCESS_TOKEN;
+
+  // Adopt the env token whenever it changes — this is how an operator swaps in
+  // a fresh token (e.g. after the old one is revoked). A 30-day auto-refresh
+  // leaves seededFrom untouched, so it never triggers this path; only a genuine
+  // env change (seededFrom !== current seed) re-seeds.
+  if (seed && (!stored || stored.seededFrom !== seed)) {
+    stored = {
+      token: seed,
+      exchangedAt: new Date().toISOString(),
+      seededFrom: seed,
+    };
+    await redisSetJSON(KEY_TOKEN, stored);
+  }
 
   if (!stored) {
-    const seed = process.env.IG_ACCESS_TOKEN;
-    if (!seed) {
-      throw new Error(
-        "No token in Redis and no IG_ACCESS_TOKEN env var to seed it with.",
-      );
-    }
-    stored = { token: seed, exchangedAt: new Date().toISOString() };
-    await redisSetJSON(KEY_TOKEN, stored);
+    throw new Error(
+      "No token in Redis and no IG_ACCESS_TOKEN env var to seed it with.",
+    );
   }
 
   const ageDays =
@@ -125,6 +135,7 @@ async function getWorkingToken(): Promise<string> {
       stored = {
         token: json.access_token,
         exchangedAt: new Date().toISOString(),
+        seededFrom: stored.seededFrom, // keep the seed marker across refreshes
       };
       await redisSetJSON(KEY_TOKEN, stored);
     }
