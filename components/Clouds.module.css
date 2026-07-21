@@ -1,17 +1,40 @@
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
 .clouds {
   position: absolute;
   inset: 0;
-  z-index: 2;
   overflow: hidden;
   pointer-events: none;
   opacity: 0;
   animation: cloudsIn 1.6s ease forwards;
 }
 
-.defs {
+/* back clouds sit behind the hero text (text is z-index 2); front over it */
+.clouds[data-depth="back"] {
+  z-index: 1;
+}
+.clouds[data-depth="front"] {
+  z-index: 3;
+  /* front clouds are semi-transparent so obscured text stays ~25% visible */
+  --peak: 0.72;
+}
+
+.parallax {
   position: absolute;
-  width: 0;
-  height: 0;
+  inset: 0;
+  will-change: transform;
+}
+
+/* differential scroll motion → the layers separate in depth as you scroll */
+.parallax[data-depth="back"] {
+  transform: translateY(calc(var(--cloud-sy, 0px) * 0.16));
+}
+.parallax[data-depth="front"] {
+  transform: translateY(calc(var(--cloud-sy, 0px) * -0.12));
 }
 
 @keyframes cloudsIn {
@@ -58,10 +81,10 @@
     opacity: 0;
   }
   10% {
-    opacity: 1;
+    opacity: var(--peak, 1);
   }
   90% {
-    opacity: 1;
+    opacity: var(--peak, 1);
   }
   100% {
     transform: translateX(150vw) scale(var(--scale, 1));
@@ -76,14 +99,17 @@
   }
 }
 
-/* reduced motion: rest the clouds in view, no drift */
+/* reduced motion: rest the clouds in view, no drift or parallax */
 @media (prefers-reduced-motion: reduce) {
   .clouds {
     animation: none;
     opacity: 1;
   }
+  .parallax {
+    transform: none;
+  }
   .cloud {
     transform: translateX(38vw) scale(var(--scale, 1));
-    opacity: 1;
+    opacity: var(--peak, 1);
   }
 }

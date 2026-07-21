@@ -89,7 +89,7 @@
    hashing (the clouds live in their own module). */
 .hero > *:not([data-layer]) {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* ---- decorative sky (behind the text) ---- */
