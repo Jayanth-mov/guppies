@@ -106,19 +106,26 @@
 
 .copied {
   position: absolute;
-  top: calc(100% + 4px);
+  bottom: calc(100% + 7px);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(4px);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(4, 22, 38, 0.95);
+  border: 1px solid rgba(108, 245, 226, 0.45);
+  color: #eafcff;
   font-size: 10px;
-  letter-spacing: 0.1em;
-  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.15s ease;
   pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease;
 }
 
 .copied[data-show] {
   opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .title {

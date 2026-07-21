@@ -5,16 +5,36 @@
   pointer-events: none;
 }
 
-.ray {
+/* ---- caustics: rippling light web over the shallows ---- */
+
+.caustics {
   position: absolute;
   top: 0;
-  transform: skewX(-13deg);
+  left: -12%;
+  width: 124%;
+  height: 20%;
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent);
+  will-change: transform;
+}
+
+/* ---- godrays: wide, soft, sunlit shafts fading into midwater ---- */
+
+.ray {
+  position: absolute;
+  top: -40px;
+  transform: skewX(-14deg);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.34),
-    rgba(255, 255, 255, 0) 88%
+    rgba(255, 255, 255, 0.26),
+    rgba(255, 255, 255, 0) 82%
   );
-  opacity: 0.6;
+  filter: blur(14px);
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
 }
 
 .bubble {
@@ -22,18 +42,20 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.12);
+  opacity: 0;
 }
 
 .mote {
   position: absolute;
   border-radius: 50%;
-  background: rgba(235, 248, 255, 0.4);
+  background: rgba(235, 248, 255, 0.5);
 }
 
 .snow {
   position: absolute;
   border-radius: 50%;
-  background: rgba(214, 236, 250, 0.42);
+  background: rgba(214, 236, 250, 0.5);
+  opacity: 0;
 }
 
 .speck {
@@ -44,12 +66,44 @@
   opacity: 0.35;
 }
 
-@keyframes shimmer {
-  from {
-    opacity: 0.3;
+/* ---- depth vignette: darkens the edges, weighted toward the deep ---- */
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      130% 90% at 50% 22%,
+      transparent 52%,
+      rgba(2, 12, 28, 0.5) 100%
+    ),
+    linear-gradient(180deg, transparent 60%, rgba(2, 10, 24, 0.35));
+}
+
+@keyframes raysway {
+  0% {
+    transform: skewX(-14deg) translateX(0);
+    opacity: 0.28;
   }
-  to {
-    opacity: 0.85;
+  50% {
+    transform: skewX(-14deg) translateX(var(--drift, 40px));
+    opacity: 0.62;
+  }
+  100% {
+    transform: skewX(-14deg) translateX(0);
+    opacity: 0.28;
+  }
+}
+
+@keyframes causticsdrift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-3%, 1.5%, 0) scale(1.07);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
@@ -58,11 +112,11 @@
     transform: translateY(0);
     opacity: 0;
   }
-  12% {
-    opacity: 0.75;
+  14% {
+    opacity: var(--maxop, 0.6);
   }
   85% {
-    opacity: 0.5;
+    opacity: calc(var(--maxop, 0.6) * 0.65);
   }
   100% {
     transform: translateY(-360px);
@@ -85,10 +139,10 @@
     opacity: 0;
   }
   15% {
-    opacity: 0.5;
+    opacity: var(--maxop, 0.4);
   }
   85% {
-    opacity: 0.4;
+    opacity: calc(var(--maxop, 0.4) * 0.8);
   }
   100% {
     transform: translateY(150px);
@@ -106,8 +160,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .caustics {
+    animation: causticsdrift 20s ease-in-out infinite;
+  }
+
   .ray {
-    animation: shimmer 10s ease-in-out infinite alternate;
+    animation: raysway 16s ease-in-out infinite;
   }
 
   .bubble {
@@ -124,5 +182,16 @@
 
   .speck {
     animation: pulse 5s ease-in-out infinite alternate;
+  }
+}
+
+/* static fallback: particles that animate opacity would be invisible frozen */
+@media (prefers-reduced-motion: reduce) {
+  .bubble {
+    opacity: var(--maxop, 0.5);
+  }
+
+  .snow {
+    opacity: var(--maxop, 0.4);
   }
 }

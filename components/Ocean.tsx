@@ -26,12 +26,16 @@ const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
   const bands = useMemo(() => bandSpans(), []);
 
   const gradient = useMemo(() => {
-    const stops = bands
-      .map(
-        (b) =>
-          `${b.color} ${(b.top * 100 + 0.25).toFixed(2)}%, ${b.color} ${(b.bottom * 100 - 0.25).toFixed(2)}%`,
-      )
-      .join(", ");
+    // one stop at each band's center so CSS blends smoothly between tiers —
+    // a continuous descent rather than 12 hard stripes (the dashed labels
+    // still mark the zone boundaries)
+    const stops = [
+      `${bands[0].color} 0%`,
+      ...bands.map(
+        (b) => `${b.color} ${(((b.top + b.bottom) / 2) * 100).toFixed(2)}%`,
+      ),
+      `${bands[bands.length - 1].color} 100%`,
+    ].join(", ");
     return `linear-gradient(180deg, ${stops})`;
   }, [bands]);
 
