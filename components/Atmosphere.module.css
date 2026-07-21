@@ -5,36 +5,69 @@
   pointer-events: none;
 }
 
-/* ---- caustics: rippling light web over the shallows ---- */
+/* ---- dappled surface light: soft shifting bright patches in the shallows ---- */
 
-.caustics {
+.dapple {
   position: absolute;
   top: 0;
   left: -12%;
   width: 124%;
-  height: 20%;
-  opacity: 0.4;
+  height: 26%;
   mix-blend-mode: screen;
+  opacity: 0.6;
+  background:
+    radial-gradient(28% 55% at 18% 22%, rgba(255, 255, 255, 0.28), transparent 62%),
+    radial-gradient(24% 48% at 46% 14%, rgba(198, 240, 255, 0.24), transparent 60%),
+    radial-gradient(30% 52% at 72% 26%, rgba(255, 255, 255, 0.22), transparent 62%),
+    radial-gradient(22% 44% at 90% 16%, rgba(210, 245, 255, 0.2), transparent 60%);
   -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent);
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent);
   will-change: transform;
 }
 
-/* ---- godrays: wide, soft, sunlit shafts fading into midwater ---- */
+.dapple[data-alt] {
+  opacity: 0.4;
+  background:
+    radial-gradient(26% 50% at 34% 18%, rgba(255, 255, 255, 0.2), transparent 62%),
+    radial-gradient(30% 54% at 60% 24%, rgba(190, 235, 255, 0.22), transparent 60%),
+    radial-gradient(24% 46% at 84% 12%, rgba(255, 255, 255, 0.18), transparent 60%);
+}
+
+/* ---- godrays: bright, wide, sunlit shafts fading into the midwater ---- */
 
 .ray {
   position: absolute;
-  top: -40px;
+  top: -60px;
   transform: skewX(-14deg);
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.26),
-    rgba(255, 255, 255, 0) 82%
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0) 80%
   );
-  filter: blur(14px);
-  opacity: 0.4;
+  filter: blur(12px);
+  opacity: 0.7;
   mix-blend-mode: screen;
   will-change: transform, opacity;
+}
+
+/* ---- parallax layers: each scrolls at a different rate ---- */
+
+.plx {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.plx[data-tier="0"] {
+  transform: translate3d(0, calc(var(--sy, 0px) * 0.04), 0);
+}
+
+.plx[data-tier="1"] {
+  transform: translate3d(0, calc(var(--sy, 0px) * -0.05), 0);
+}
+
+.plx[data-tier="2"] {
+  transform: translate3d(0, calc(var(--sy, 0px) * -0.14), 0);
 }
 
 .bubble {
@@ -48,13 +81,13 @@
 .mote {
   position: absolute;
   border-radius: 50%;
-  background: rgba(235, 248, 255, 0.5);
+  background: rgba(235, 248, 255, 0.55);
 }
 
 .snow {
   position: absolute;
   border-radius: 50%;
-  background: rgba(214, 236, 250, 0.5);
+  background: rgba(214, 236, 250, 0.55);
   opacity: 0;
 }
 
@@ -73,37 +106,45 @@
   inset: 0;
   background:
     radial-gradient(
-      130% 90% at 50% 22%,
-      transparent 52%,
+      130% 90% at 50% 24%,
+      transparent 54%,
       rgba(2, 12, 28, 0.5) 100%
     ),
-    linear-gradient(180deg, transparent 60%, rgba(2, 10, 24, 0.35));
+    linear-gradient(180deg, transparent 62%, rgba(2, 10, 24, 0.35));
+}
+
+@keyframes dappledrift {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+  }
+  50% {
+    transform: translateX(4%) scale(1.06);
+  }
+}
+
+@keyframes dappledriftAlt {
+  0%,
+  100% {
+    transform: translateX(0) scale(1.04);
+  }
+  50% {
+    transform: translateX(-5%) scale(1);
+  }
 }
 
 @keyframes raysway {
   0% {
     transform: skewX(-14deg) translateX(0);
-    opacity: 0.28;
+    opacity: 0.5;
   }
   50% {
-    transform: skewX(-14deg) translateX(var(--drift, 40px));
-    opacity: 0.62;
+    transform: skewX(-14deg) translateX(var(--drift, 50px));
+    opacity: 0.9;
   }
   100% {
     transform: skewX(-14deg) translateX(0);
-    opacity: 0.28;
-  }
-}
-
-@keyframes causticsdrift {
-  0% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(-3%, 1.5%, 0) scale(1.07);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.5;
   }
 }
 
@@ -119,7 +160,7 @@
     opacity: calc(var(--maxop, 0.6) * 0.65);
   }
   100% {
-    transform: translateY(-360px);
+    transform: translateY(-380px);
     opacity: 0;
   }
 }
@@ -129,13 +170,13 @@
     transform: translate(0, 0);
   }
   to {
-    transform: translate(14px, 20px);
+    transform: translate(16px, 22px);
   }
 }
 
 @keyframes fall {
   0% {
-    transform: translateY(-30px);
+    transform: translateY(-40px);
     opacity: 0;
   }
   15% {
@@ -145,7 +186,7 @@
     opacity: calc(var(--maxop, 0.4) * 0.8);
   }
   100% {
-    transform: translateY(150px);
+    transform: translateY(180px);
     opacity: 0;
   }
 }
@@ -160,8 +201,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .caustics {
-    animation: causticsdrift 20s ease-in-out infinite;
+  .dapple {
+    animation: dappledrift 17s ease-in-out infinite;
+  }
+
+  .dapple[data-alt] {
+    animation: dappledriftAlt 21s ease-in-out infinite;
   }
 
   .ray {

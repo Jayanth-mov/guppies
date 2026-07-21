@@ -176,7 +176,9 @@
   padding: 110px 24px 130px;
   text-align: center;
   color: var(--ink-pale);
-  background: linear-gradient(180deg, var(--band-12), var(--abyss-floor) 55%);
+  /* starts at the ocean's vignetted bottom tone (band-12 darkened) so the
+     seam between the ocean and the sea floor is seamless */
+  background: linear-gradient(180deg, #05172e 0%, var(--abyss-floor) 60%);
 }
 
 .floorTitle {
