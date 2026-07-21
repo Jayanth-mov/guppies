@@ -99,17 +99,22 @@ const SPECKS = gen("speck", 22, "speck", (r) => {
 const ALL = [...BUBBLES, ...MOTES, ...SNOW, ...SPECKS];
 const TIERS = [0, 1, 2].map((t) => ALL.filter((p) => p.tier === t));
 
-const RAYS = Array.from({ length: 7 }, (_, i) => {
+// the sun sits around here (matches the hero's sun x); rays fan out from it
+const SUN_X = 80;
+const RAYS = Array.from({ length: 9 }, (_, i) => {
   const r = rng(`ray${i}`);
+  const left = pick(r, 22, 108);
   return {
     key: i,
     style: {
-      left: `${(1 + i * 14 + pick(r, 0, 8)).toFixed(1)}%`,
-      width: `${pick(r, 160, 320).toFixed(0)}px`,
-      height: `${pick(r, 1000, 1700).toFixed(0)}px`,
+      left: `${left.toFixed(1)}%`,
+      width: `${pick(r, 150, 300).toFixed(0)}px`,
+      height: `${pick(r, 1100, 1800).toFixed(0)}px`,
       animationDuration: `${pick(r, 12, 22).toFixed(1)}s`,
       animationDelay: `${-pick(r, 0, 16).toFixed(1)}s`,
-      "--drift": `${pick(r, 30, 80).toFixed(0)}px`,
+      "--drift": `${pick(r, 24, 64).toFixed(0)}px`,
+      // fan angle: rays lean away from the sun the further they are from it
+      "--skew": `${((left - SUN_X) * 0.42).toFixed(1)}deg`,
     } as CSSProperties,
   };
 });
@@ -142,6 +147,8 @@ export default function Atmosphere() {
 
   return (
     <div className={styles.layer} ref={rootRef} aria-hidden="true">
+      {/* sunlight pouring in through the surface under the sun */}
+      <div className={styles.sunbeam} />
       <div className={styles.dapple} />
       <div className={styles.dapple} data-alt />
 

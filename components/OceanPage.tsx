@@ -9,6 +9,7 @@ import {
 } from "@/lib/roster";
 import Ocean from "./Ocean";
 import { fishDomId } from "./Fish";
+import Clouds from "./Clouds";
 import DepthGauge from "./DepthGauge";
 import LeaderboardPanel, { type SortMode } from "./LeaderboardPanel";
 import EvolutionToast from "./EvolutionToast";
@@ -184,7 +185,7 @@ export default function OceanPage() {
       </button>
 
       <header className={styles.hero}>
-        <div className={styles.sky} aria-hidden="true">
+        <div className={styles.sky} data-layer="sky" aria-hidden="true">
           <span className={styles.sun} />
           <span className={styles.sunStreak} />
           <span className={styles.flareGhost} data-g="1" />
@@ -239,12 +240,7 @@ export default function OceanPage() {
           </span>
         </p>
 
-        <div className={styles.clouds} aria-hidden="true">
-          <span className={styles.cloud} data-c="1" />
-          <span className={styles.cloud} data-c="2" />
-          <span className={styles.cloud} data-c="3" />
-          <span className={styles.cloud} data-c="4" />
-        </div>
+        <Clouds />
       </header>
 
       <main>

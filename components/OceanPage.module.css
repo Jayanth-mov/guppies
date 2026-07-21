@@ -76,15 +76,18 @@
   color: var(--ink-dark);
   background: linear-gradient(
     180deg,
-    #eaf7ff 0%,
-    #d9f0fd 42%,
-    #c9e9f7 74%,
+    #5fb0e2 0%,
+    #86c8ec 38%,
+    #aaddf3 68%,
+    #c9ecf8 88%,
     var(--band-1) 100%
   );
 }
 
-/* keep the hero text above the sky, but below the drifting clouds */
-.hero > *:not(.sky):not(.clouds) {
+/* keep the hero text above the sky, but below the drifting clouds. The
+   decorative layers are marked data-layer so this survives CSS-module class
+   hashing (the clouds live in their own module). */
+.hero > *:not([data-layer]) {
   position: relative;
   z-index: 1;
 }
@@ -225,67 +228,6 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 70%);
 }
 
-/* ---- clouds (in front of the text, so they drift over the title) ---- */
-
-.clouds {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-/* puffy cloud built from stacked soft blobs on a flat base */
-.cloud {
-  position: absolute;
-  width: 220px;
-  height: 78px;
-  filter: blur(4px);
-  opacity: 0.92;
-  background:
-    radial-gradient(60% 90% at 50% 100%, #ffffff 42%, transparent 74%),
-    radial-gradient(circle at 26% 62%, #ffffff 30%, transparent 60%),
-    radial-gradient(circle at 46% 44%, #ffffff 36%, transparent 64%),
-    radial-gradient(circle at 64% 54%, #ffffff 32%, transparent 62%),
-    radial-gradient(circle at 80% 66%, #ffffff 26%, transparent 58%);
-}
-
-.cloud[data-c="1"] {
-  top: 34%;
-  width: 260px;
-  height: 92px;
-}
-
-.cloud[data-c="2"] {
-  top: 48%;
-  width: 200px;
-  height: 70px;
-  opacity: 0.8;
-}
-
-.cloud[data-c="3"] {
-  top: 40%;
-  width: 300px;
-  height: 104px;
-  opacity: 0.72;
-}
-
-.cloud[data-c="4"] {
-  top: 55%;
-  width: 170px;
-  height: 60px;
-  opacity: 0.85;
-}
-
-@keyframes cloudDrift {
-  from {
-    transform: translateX(-40vw);
-  }
-  to {
-    transform: translateX(130vw);
-  }
-}
-
 @keyframes sunPulse {
   from {
     box-shadow:
@@ -304,42 +246,6 @@
 @media (prefers-reduced-motion: no-preference) {
   .sun {
     animation: sunPulse 7s ease-in-out infinite alternate;
-  }
-
-  .cloud[data-c="1"] {
-    animation: cloudDrift 68s linear infinite;
-    animation-delay: -10s;
-  }
-
-  .cloud[data-c="2"] {
-    animation: cloudDrift 90s linear infinite;
-    animation-delay: -46s;
-  }
-
-  .cloud[data-c="3"] {
-    animation: cloudDrift 118s linear infinite;
-    animation-delay: -74s;
-  }
-
-  .cloud[data-c="4"] {
-    animation: cloudDrift 80s linear infinite;
-    animation-delay: -30s;
-  }
-}
-
-/* static fallback: place clouds across the sky */
-@media (prefers-reduced-motion: reduce) {
-  .cloud[data-c="1"] {
-    left: 4%;
-  }
-  .cloud[data-c="2"] {
-    left: 58%;
-  }
-  .cloud[data-c="3"] {
-    left: 26%;
-  }
-  .cloud[data-c="4"] {
-    left: 76%;
   }
 }
 

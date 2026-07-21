@@ -33,16 +33,34 @@
     radial-gradient(24% 46% at 84% 12%, rgba(255, 255, 255, 0.18), transparent 60%);
 }
 
-/* ---- godrays: bright, wide, sunlit shafts fading into the midwater ---- */
+/* ---- sunbeam: bright pool where the sun enters the water surface ---- */
+
+.sunbeam {
+  position: absolute;
+  top: 0;
+  left: 32%;
+  right: -10%;
+  height: 48%;
+  background: radial-gradient(
+    56% 92% at 74% 0%,
+    rgba(255, 250, 224, 0.6),
+    rgba(255, 248, 216, 0) 70%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* ---- godrays: bright shafts fanning down from the sun through the surface ---- */
 
 .ray {
   position: absolute;
-  top: 16px;
-  transform: skewX(-14deg);
+  top: 0;
+  transform-origin: top center;
+  transform: skewX(var(--skew, -8deg));
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.5),
-    rgba(255, 255, 255, 0) 80%
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0) 78%
   );
   filter: blur(12px);
   opacity: 0.7;
@@ -135,15 +153,15 @@
 
 @keyframes raysway {
   0% {
-    transform: skewX(-14deg) translateX(0);
+    transform: skewX(var(--skew, -8deg)) translateX(0);
     opacity: 0.5;
   }
   50% {
-    transform: skewX(-14deg) translateX(var(--drift, 50px));
+    transform: skewX(var(--skew, -8deg)) translateX(var(--drift, 50px));
     opacity: 0.9;
   }
   100% {
-    transform: skewX(-14deg) translateX(0);
+    transform: skewX(var(--skew, -8deg)) translateX(0);
     opacity: 0.5;
   }
 }
