@@ -82,41 +82,6 @@ const SPECKS = makeParticles("specks", 14, (r) => {
   };
 });
 
-function Kelp({ className }: { className: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 90 620"
-      width="90"
-      height="620"
-      aria-hidden="true"
-    >
-      <g
-        fill="none"
-        stroke="rgba(7, 34, 54, 0.3)"
-        strokeLinecap="round"
-      >
-        <path
-          strokeWidth="7"
-          d="M18 620 C10 540 26 500 16 430 C8 370 24 330 14 260 C8 210 18 170 12 120"
-        />
-        <path
-          strokeWidth="6"
-          d="M38 620 C32 560 46 520 38 450 C30 390 44 350 36 280 C30 230 40 180 34 130 C30 100 36 70 32 40"
-        />
-        <path
-          strokeWidth="8"
-          d="M60 620 C54 550 70 510 60 440 C52 380 66 340 58 270 C52 220 62 170 56 120 C52 90 58 60 54 30"
-        />
-        <path
-          strokeWidth="5"
-          d="M80 620 C76 570 86 530 80 470 C74 420 84 380 78 320 C74 280 80 240 76 200"
-        />
-      </g>
-    </svg>
-  );
-}
-
 export default function Atmosphere() {
   return (
     <div className={styles.layer} aria-hidden="true">
@@ -126,8 +91,6 @@ export default function Atmosphere() {
       {BUBBLES.map((p) => (
         <span key={`b${p.key}`} className={styles.bubble} style={p.style} />
       ))}
-      <Kelp className={styles.kelpLeft} />
-      <Kelp className={styles.kelpRight} />
       {MOTES.map((p) => (
         <span key={`m${p.key}`} className={styles.mote} style={p.style} />
       ))}

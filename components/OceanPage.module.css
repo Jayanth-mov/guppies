@@ -81,11 +81,44 @@
 }
 
 .kicker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
+  padding: 4px 6px;
   font-family: var(--font-mono), monospace;
   font-size: 12px;
   letter-spacing: 0.28em;
-  opacity: 0.55;
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.kicker:hover {
+  opacity: 0.95;
+}
+
+.linkIcon {
+  opacity: 0.85;
+  transform: translateY(0.5px);
+}
+
+.copied {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.copied[data-show] {
+  opacity: 1;
 }
 
 .title {

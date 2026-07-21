@@ -56,8 +56,36 @@ export default function OceanPage() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [focusRow, setFocusRow] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const oceanRef = useRef<HTMLDivElement | null>(null);
   const hoverTimer = useRef<number | null>(null);
+
+  const handleCopyLink = useCallback(async () => {
+    const url = window.location.href;
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(url);
+      ok = true;
+    } catch {
+      // fallback for older browsers / non-secure contexts
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+      } catch {
+        ok = false;
+      }
+    }
+    if (ok) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    }
+  }, []);
 
   // scroll so the fish sits centered on screen. Reads the fish's live DOM
   // position, so it stays accurate even after the drift animation or a data
@@ -156,10 +184,37 @@ export default function OceanPage() {
       </button>
 
       <header className={styles.hero}>
-        <p className={styles.kicker}>guppies.jayanth.mov</p>
+        <button
+          type="button"
+          className={styles.kicker}
+          onClick={handleCopyLink}
+          aria-label="Copy link to this page"
+        >
+          guppies.jayanth.mov
+          <svg
+            className={styles.linkIcon}
+            viewBox="0 0 24 24"
+            width="13"
+            height="13"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M9 15l6-6" />
+            <path d="M11 6.5l1-1a4 4 0 015.5 5.5l-1 1" />
+            <path d="M13 17.5l-1 1a4 4 0 01-5.5-5.5l1-1" />
+          </svg>
+          <span className={styles.copied} data-show={copied || undefined}>
+            copied!
+          </span>
+        </button>
         <h1 className={styles.title}>guppies</h1>
         <p className={styles.tagline}>
-          A follower ocean. Bigger fish live deeper.
+          A fish-themed leaderboard for lighthearted, friendly competition
+          within the circle.
         </p>
         <p className={styles.hint}>
           scroll to dive{" "}

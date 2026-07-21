@@ -7,12 +7,13 @@ import {
   type RangeKey,
   type RangeStat,
 } from "@/lib/roster";
-import { BAND_COLORS, formatCount } from "@/lib/species";
+import { formatCount } from "@/lib/species";
 import { avatarHue, initialsFor } from "./Fish";
 import { FISH_SHAPES } from "./FishShapes";
 import styles from "./LeaderboardPanel.module.css";
 
 export type SortMode = "followers" | "growth";
+type GrowthSort = "pct" | "count";
 
 interface PanelProps {
   open: boolean;
@@ -54,8 +55,8 @@ const changeNum = (c: number | null | undefined) =>
 const pctChip = (p: number | null | undefined) =>
   p == null ? "—" : `${p >= 0 ? "+" : ""}${p.toFixed(1)}%`;
 
-// tiny species silhouette, colored by its depth band
-function MiniFish({ speciesIndex, symbolId }: { speciesIndex: number; symbolId: string }) {
+// tiny species silhouette in white, for legibility against the dark panel
+function MiniFish({ symbolId }: { symbolId: string }) {
   const shape = FISH_SHAPES[symbolId];
   return (
     <span className={styles.miniFishSlot} aria-hidden="true">
@@ -64,8 +65,8 @@ function MiniFish({ speciesIndex, symbolId }: { speciesIndex: number; symbolId: 
         viewBox={shape.viewBox}
         style={{
           aspectRatio: `${shape.w} / ${shape.h}`,
-          color: BAND_COLORS[speciesIndex],
-          ["--detail" as string]: "rgba(233, 247, 255, 0.5)",
+          color: "#eaf6ff",
+          ["--detail" as string]: "rgba(4, 16, 31, 0.5)",
         }}
       >
         <g fill="currentColor">{shape.tail}</g>
@@ -92,6 +93,7 @@ export default function LeaderboardPanel({
   const [flash, setFlash] = useState<string | null>(null);
   const [updatedAgo, setUpdatedAgo] = useState<string | null>(null);
   const [range, setRange] = useState<RangeKey>("day");
+  const [growthSort, setGrowthSort] = useState<GrowthSort>("pct");
   const [menuOpen, setMenuOpen] = useState(false);
 
   // each tab has its own default window; switching tabs resets to it
@@ -112,13 +114,15 @@ export default function LeaderboardPanel({
   const sorted = useMemo(() => {
     const arr = roster.slice();
     if (sortMode === "growth") {
+      const key = growthSort === "pct" ? "pct" : "change";
       arr.sort(
         (a, b) =>
-          (b.stats[range]?.pct ?? -Infinity) - (a.stats[range]?.pct ?? -Infinity),
+          (b.stats[range]?.[key] ?? -Infinity) -
+          (a.stats[range]?.[key] ?? -Infinity),
       );
     }
     return arr; // roster arrives sorted by followers
-  }, [roster, sortMode, range]);
+  }, [roster, sortMode, range, growthSort]);
 
   useEffect(() => {
     if (!open) return;
@@ -215,6 +219,31 @@ export default function LeaderboardPanel({
         </button>
       </div>
 
+      {sortMode === "growth" && (
+        <div
+          className={styles.subToggle}
+          role="group"
+          aria-label="Sort growth by"
+        >
+          <button
+            type="button"
+            data-on={growthSort === "pct" || undefined}
+            aria-pressed={growthSort === "pct"}
+            onClick={() => setGrowthSort("pct")}
+          >
+            % growth
+          </button>
+          <button
+            type="button"
+            data-on={growthSort === "count" || undefined}
+            aria-pressed={growthSort === "count"}
+            onClick={() => setGrowthSort("count")}
+          >
+            Followers gained
+          </button>
+        </div>
+      )}
+
       <ol className={styles.list}>
         {sorted.map((e, i) => (
           <li key={e.handle}>
@@ -260,10 +289,7 @@ export default function LeaderboardPanel({
               <span className={styles.who}>
                 <span className={styles.name}>{e.handle}</span>
                 <span className={styles.sub}>
-                  <MiniFish
-                    speciesIndex={e.speciesIndex}
-                    symbolId={e.species.symbolId}
-                  />
+                  <MiniFish symbolId={e.species.symbolId} />
                   {e.species.name}
                 </span>
               </span>

@@ -24,23 +24,6 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
-.kelpLeft,
-.kelpRight {
-  position: absolute;
-  transform-origin: bottom center;
-}
-
-.kelpLeft {
-  left: -8px;
-  top: 46%;
-}
-
-.kelpRight {
-  right: -8px;
-  top: 33.5%;
-  scale: -1 1;
-}
-
 .mote {
   position: absolute;
   border-radius: 50%;
@@ -122,15 +105,6 @@
   }
 }
 
-@keyframes sway {
-  from {
-    transform: rotate(-2.2deg);
-  }
-  to {
-    transform: rotate(2.2deg);
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .ray {
     animation: shimmer 10s ease-in-out infinite alternate;
@@ -150,14 +124,5 @@
 
   .speck {
     animation: pulse 5s ease-in-out infinite alternate;
-  }
-
-  .kelpLeft,
-  .kelpRight {
-    animation: sway 13s ease-in-out infinite alternate;
-  }
-
-  .kelpRight {
-    animation-delay: -6s;
   }
 }

@@ -83,6 +83,29 @@
   opacity: 1;
 }
 
+.subToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: -4px 16px 10px;
+}
+
+.subToggle button {
+  padding: 5px 4px;
+  border-radius: 6px;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  opacity: 0.6;
+  border: 1px solid var(--panel-line);
+  background: rgba(2, 10, 20, 0.4);
+}
+
+.subToggle button[data-on] {
+  border-color: rgba(108, 200, 235, 0.4);
+  color: var(--accent);
+  opacity: 1;
+}
+
 .list {
   list-style: none;
   margin: 0;
