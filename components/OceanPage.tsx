@@ -184,6 +184,14 @@ export default function OceanPage() {
       </button>
 
       <header className={styles.hero}>
+        <div className={styles.sky} aria-hidden="true">
+          <span className={styles.sun} />
+          <span className={styles.cloud} data-c="1" />
+          <span className={styles.cloud} data-c="2" />
+          <span className={styles.cloud} data-c="3" />
+          <span className={styles.cloud} data-c="4" />
+          <span className={styles.waterline} />
+        </div>
         <button
           type="button"
           className={styles.kicker}
