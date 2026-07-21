@@ -37,7 +37,7 @@
 
 .ray {
   position: absolute;
-  top: -60px;
+  top: 16px;
   transform: skewX(-14deg);
   background: linear-gradient(
     180deg,

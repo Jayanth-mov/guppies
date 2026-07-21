@@ -186,10 +186,11 @@ export default function OceanPage() {
       <header className={styles.hero}>
         <div className={styles.sky} aria-hidden="true">
           <span className={styles.sun} />
-          <span className={styles.cloud} data-c="1" />
-          <span className={styles.cloud} data-c="2" />
-          <span className={styles.cloud} data-c="3" />
-          <span className={styles.cloud} data-c="4" />
+          <span className={styles.sunStreak} />
+          <span className={styles.flareGhost} data-g="1" />
+          <span className={styles.flareGhost} data-g="2" />
+          <span className={styles.flareGhost} data-g="3" />
+          <span className={styles.flareGhost} data-g="4" />
           <span className={styles.waterline} />
         </div>
         <button
@@ -224,12 +225,26 @@ export default function OceanPage() {
           A fish-themed leaderboard for lighthearted, friendly competition
           within the circle.
         </p>
+        <button
+          type="button"
+          className={styles.heroCta}
+          onClick={() => setOpen(true)}
+        >
+          View the leaderboard
+        </button>
         <p className={styles.hint}>
           scroll to dive{" "}
           <span className={styles.arrow} aria-hidden="true">
             ↓
           </span>
         </p>
+
+        <div className={styles.clouds} aria-hidden="true">
+          <span className={styles.cloud} data-c="1" />
+          <span className={styles.cloud} data-c="2" />
+          <span className={styles.cloud} data-c="3" />
+          <span className={styles.cloud} data-c="4" />
+        </div>
       </header>
 
       <main>
