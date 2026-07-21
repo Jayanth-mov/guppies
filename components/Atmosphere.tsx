@@ -109,7 +109,7 @@ const RAYS = Array.from({ length: 9 }, (_, i) => {
     style: {
       left: `${left.toFixed(1)}%`,
       width: `${pick(r, 150, 300).toFixed(0)}px`,
-      height: `${pick(r, 1100, 1800).toFixed(0)}px`,
+      height: `${pick(r, 2000, 3400).toFixed(0)}px`,
       animationDuration: `${pick(r, 12, 22).toFixed(1)}s`,
       animationDelay: `${-pick(r, 0, 16).toFixed(1)}s`,
       "--drift": `${pick(r, 24, 64).toFixed(0)}px`,

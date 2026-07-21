@@ -186,12 +186,9 @@ export default function OceanPage() {
 
       <header className={styles.hero}>
         <div className={styles.sky} data-layer="sky" aria-hidden="true">
-          <span className={styles.sun} />
-          <span className={styles.sunStreak} />
-          <span className={styles.flareGhost} data-g="1" />
-          <span className={styles.flareGhost} data-g="2" />
-          <span className={styles.flareGhost} data-g="3" />
-          <span className={styles.flareGhost} data-g="4" />
+          <span className={styles.sun}>
+            <span className={styles.sunGlint} />
+          </span>
           <span className={styles.waterline} />
         </div>
         <button

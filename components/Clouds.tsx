@@ -3,49 +3,32 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import styles from "./Clouds.module.css";
 
-// Organic drifting clouds. Positions/shapes are randomized on mount (fresh each
-// reload) — generated client-side so SSR and hydration match (empty first).
+// Cloud technique adapted from a CodePen by najarro93 (pen NWvmyGQ): three
+// layered box-shadow blobs (white body, grey mid, dark underside) distorted by
+// an feTurbulence displacement filter for an organic, wispy silhouette.
+// Positions/sizes are randomized on mount so they differ every reload.
 
-interface Puff {
-  cx: number;
-  cy: number;
-  r: number;
-}
 interface CloudCfg {
   id: number;
-  top: number;
+  w: number;
+  h: number;
+  top: number; // % down the sky
   scale: number;
-  op: number;
-  dur: number;
-  delay: number;
-  x: number; // reduced-motion resting position, in vw
-  puffs: Puff[];
+  dur: number; // seconds to cross
+  delay: number; // negative, to pre-spread the clouds
 }
 
 function makeClouds(): CloudCfg[] {
-  const n = 6 + Math.floor(Math.random() * 4); // 6–9
-  const clouds: CloudCfg[] = [];
-  for (let i = 0; i < n; i++) {
-    const puffN = 4 + Math.floor(Math.random() * 3); // 4–6 lumps
-    const puffs: Puff[] = [];
-    for (let j = 0; j < puffN; j++) {
-      const cx = 34 + (j / (puffN - 1)) * 132 + (Math.random() * 22 - 11);
-      const r = 20 + Math.random() * 22;
-      const cy = 58 - Math.random() * 16;
-      puffs.push({ cx, cy, r });
-    }
-    clouds.push({
-      id: i,
-      top: 20 + Math.random() * 42, // spread through the sky, over the title
-      scale: 0.65 + Math.random() * 1.0,
-      op: 0.68 + Math.random() * 0.3,
-      dur: 70 + Math.random() * 75,
-      delay: -(Math.random() * 145),
-      x: 6 + Math.random() * 78,
-      puffs,
-    });
-  }
-  return clouds;
+  const n = 5 + Math.floor(Math.random() * 2); // 5–6 (each is 3 filtered layers)
+  return Array.from({ length: n }, (_, i) => ({
+    id: i,
+    w: 200 + Math.random() * 320,
+    h: 100 + Math.random() * 140,
+    top: -22 + Math.random() * 62, // box-shadow offsets the blob ~300px down
+    scale: 0.5 + Math.random() * 0.8,
+    dur: 95 + Math.random() * 115,
+    delay: -(Math.random() * 200),
+  }));
 }
 
 export default function Clouds() {
@@ -57,30 +40,65 @@ export default function Clouds() {
 
   return (
     <div className={styles.clouds} data-layer="clouds" aria-hidden="true">
+      <svg className={styles.defs} width="0" height="0" aria-hidden="true">
+        <filter id="gc-back">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.012"
+            numOctaves={3}
+            seed={2}
+          />
+          <feDisplacementMap in="SourceGraphic" scale={170} />
+        </filter>
+        <filter id="gc-mid">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.012"
+            numOctaves={2}
+            seed={2}
+          />
+          <feDisplacementMap in="SourceGraphic" scale={150} />
+        </filter>
+        <filter id="gc-front">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.012"
+            numOctaves={2}
+            seed={2}
+          />
+          <feDisplacementMap in="SourceGraphic" scale={50} />
+        </filter>
+      </svg>
+
       {clouds.map((c) => (
-        <span
+        <div
           key={c.id}
           className={styles.cloud}
           style={
             {
               top: `${c.top}%`,
-              "--op": c.op,
               "--dur": `${c.dur}s`,
               "--delay": `${c.delay}s`,
               "--scale": c.scale,
-              "--x": c.x,
             } as CSSProperties
           }
         >
-          <svg viewBox="0 0 200 96" className={styles.cloudSvg}>
-            <g fill="#ffffff">
-              <ellipse cx="100" cy="74" rx="86" ry="17" />
-              {c.puffs.map((p, idx) => (
-                <circle key={idx} cx={p.cx} cy={p.cy} r={p.r} />
-              ))}
-            </g>
-          </svg>
-        </span>
+          <div
+            className={styles.part}
+            data-l="back"
+            style={{ width: c.w, height: c.h }}
+          />
+          <div
+            className={styles.part}
+            data-l="mid"
+            style={{ width: c.w, height: c.h }}
+          />
+          <div
+            className={styles.part}
+            data-l="front"
+            style={{ width: c.w, height: c.h }}
+          />
+        </div>
       ))}
     </div>
   );
