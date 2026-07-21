@@ -8,6 +8,7 @@ import {
   type LiveRoster,
 } from "@/lib/roster";
 import Ocean from "./Ocean";
+import { fishDomId } from "./Fish";
 import DepthGauge from "./DepthGauge";
 import LeaderboardPanel, { type SortMode } from "./LeaderboardPanel";
 import EvolutionToast from "./EvolutionToast";
@@ -53,25 +54,40 @@ export default function OceanPage() {
   }, []);
   const [sortMode, setSortMode] = useState<SortMode>("followers");
   const [hovered, setHovered] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [focusRow, setFocusRow] = useState<string | null>(null);
   const oceanRef = useRef<HTMLDivElement | null>(null);
   const hoverTimer = useRef<number | null>(null);
 
-  const scrollToFish = useCallback(
-    (handle: string) => {
-      const el = oceanRef.current;
-      const entry = roster.find((e) => e.handle === handle);
-      if (!el || !entry) return;
-      const rect = el.getBoundingClientRect();
-      const y =
-        rect.top + window.scrollY + entry.depth * rect.height - window.innerHeight / 2;
-      const reduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-      window.scrollTo({ top: Math.max(0, y), behavior: reduced ? "auto" : "smooth" });
-    },
-    [roster],
-  );
+  // scroll so the fish sits centered on screen. Reads the fish's live DOM
+  // position, so it stays accurate even after the drift animation or a data
+  // refresh moves it.
+  const scrollToFish = useCallback((handle: string) => {
+    const el = document.getElementById(fishDomId(handle));
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const y = rect.top + window.scrollY + rect.height / 2 - window.innerHeight / 2;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: Math.max(0, y), behavior: reduced ? "auto" : "smooth" });
+  }, []);
+
+  // open a shared link (#handle): start at the hero, then glide down to the
+  // selected fish so the recipient sees the descent
+  useEffect(() => {
+    const raw = window.location.hash.slice(1);
+    if (!raw) return;
+    const handle = decodeURIComponent(raw);
+    if (!roster.some((e) => e.handle === handle)) return;
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+    setSelected(handle);
+    const t = window.setTimeout(() => scrollToFish(handle), 900);
+    return () => window.clearTimeout(t);
+    // once, on mount — `roster` here is the bundled data and has every handle
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // hovering a row lights up its fish and glides the ocean to it (debounced
   // so sweeping the cursor down the list doesn't thrash the scroll)
@@ -94,10 +110,21 @@ export default function OceanPage() {
     [scrollToFish],
   );
 
-  const handleSelectFish = useCallback((handle: string) => {
-    setOpen(true);
-    setFocusRow(handle);
-  }, []);
+  const handleSelectFish = useCallback(
+    (handle: string) => {
+      setSelected(handle);
+      setFocusRow(handle);
+      scrollToFish(handle);
+      // shareable deep link; replaceState so rapid clicks don't stack history
+      window.history.replaceState(null, "", `#${handle}`);
+      // desktop drawer squeezes the ocean; on mobile it'd cover the fish we
+      // just centered, so only auto-open the leaderboard on wide screens
+      if (window.matchMedia("(min-width: 980px)").matches) {
+        setOpen(true);
+      }
+    },
+    [scrollToFish],
+  );
 
   return (
     <div className={`${styles.world} ${open ? styles.squeezed : ""}`}>
@@ -147,6 +174,7 @@ export default function OceanPage() {
           ref={oceanRef}
           roster={roster}
           hovered={hovered}
+          selected={selected}
           onSelectFish={handleSelectFish}
           swimSeed={swimSeed}
         />

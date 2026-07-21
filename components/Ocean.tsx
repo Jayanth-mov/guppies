@@ -12,14 +12,17 @@ export const OCEAN_HEIGHT = 7200;
 interface OceanProps {
   roster: FishEntry[];
   hovered: string | null;
+  selected: string | null;
   onSelectFish: (handle: string) => void;
   swimSeed: string;
 }
 
 const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
-  { roster, hovered, onSelectFish, swimSeed },
+  { roster, hovered, selected, onSelectFish, swimSeed },
   ref,
 ) {
+  // hover wins while active; otherwise the clicked/linked fish stays lit
+  const active = hovered ?? selected;
   const bands = useMemo(() => bandSpans(), []);
 
   const gradient = useMemo(() => {
@@ -68,7 +71,7 @@ const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
         <Fish
           key={e.handle}
           entry={e}
-          highlighted={hovered === e.handle}
+          highlighted={active === e.handle}
           dimmed={hovered !== null && hovered !== e.handle}
           onSelect={onSelectFish}
           swimSeed={swimSeed}
