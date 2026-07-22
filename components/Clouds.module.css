@@ -1,7 +1,15 @@
+/* keep the filter defs painted and in the viewport — some mobile browsers
+   drop a filter: url() reference once its <svg> scrolls off-screen, which
+   made the clouds vanish on scroll */
 .defs {
-  position: absolute;
-  width: 0;
-  height: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .clouds {
@@ -49,6 +57,10 @@
   top: -300px;
   left: -300px;
   border-radius: 50%;
+  /* promote to a stable compositing layer so the SVG filter survives scroll */
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .part[data-l="back"] {

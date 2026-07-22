@@ -189,7 +189,12 @@ export default function OceanPage() {
           <span className={styles.sun}>
             <span className={styles.sunGlint} />
           </span>
-          <span className={styles.waterline} />
+          <div className={styles.surface}>
+            <span className={styles.wave} data-w="back" />
+            <span className={styles.wave} data-w="mid" />
+            <span className={styles.wave} data-w="front" />
+            <span className={styles.surfaceGlint} />
+          </div>
         </div>
         <button
           type="button"
