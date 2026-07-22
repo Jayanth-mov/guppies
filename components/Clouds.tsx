@@ -23,14 +23,15 @@ interface CloudCfg {
 }
 
 function makeClouds(): CloudCfg[] {
-  const n = 6 + Math.floor(Math.random() * 3); // 6–8 (~25% more than before)
+  const n = 5 + Math.floor(Math.random() * 2); // 5–6
   return Array.from({ length: n }, (_, i) => ({
     id: i,
     // alternate so it's reliably ~half in front of the text, half behind
     depth: i % 2 === 0 ? "back" : "front",
     w: 200 + Math.random() * 320,
     h: 100 + Math.random() * 140,
-    top: 2 + Math.random() * 74,
+    // keep the floor up in the sky so clouds never dip below the waterline
+    top: -8 + Math.random() * 54,
     scale: 0.5 + Math.random() * 0.8,
     dur: 95 + Math.random() * 115,
     delay: -(Math.random() * 200),
@@ -62,25 +63,6 @@ export default function Clouds() {
 
   useEffect(() => {
     setClouds(makeClouds());
-  }, []);
-
-  // scroll-parallax: publish scroll offset to a root var the layers read
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      document.documentElement.style.setProperty("--cloud-sy", `${window.scrollY}px`);
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
   }, []);
 
   const back = clouds.filter((c) => c.depth === "back");

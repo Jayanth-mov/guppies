@@ -26,15 +26,6 @@
 .parallax {
   position: absolute;
   inset: 0;
-  will-change: transform;
-}
-
-/* differential scroll motion → the layers separate in depth as you scroll */
-.parallax[data-depth="back"] {
-  transform: translateY(calc(var(--cloud-sy, 0px) * 0.16));
-}
-.parallax[data-depth="front"] {
-  transform: translateY(calc(var(--cloud-sy, 0px) * -0.12));
 }
 
 @keyframes cloudsIn {
