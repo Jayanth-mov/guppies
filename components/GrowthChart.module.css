@@ -1,0 +1,233 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-bg);
+  color: var(--ink-pale);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.28s ease, visibility 0.28s;
+}
+
+.modal[data-open] {
+  visibility: visible;
+  opacity: 1;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 9px;
+  background: rgba(2, 10, 20, 0.55);
+  border: 1px solid var(--panel-line);
+}
+
+.seg button {
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+
+.seg button[data-on] {
+  background: rgba(108, 200, 235, 0.16);
+  color: var(--accent);
+  opacity: 1;
+}
+
+.close {
+  font-size: 26px;
+  line-height: 1;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+.close:hover {
+  opacity: 1;
+  background: rgba(108, 200, 235, 0.12);
+}
+
+.plotWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px 18px 18px;
+  gap: 10px;
+}
+
+.plot {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.svg {
+  display: block;
+}
+
+.note {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.grid {
+  stroke: var(--panel-line);
+  stroke-width: 1;
+}
+
+.axis {
+  fill: var(--ink-pale);
+  opacity: 0.55;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+}
+
+.line {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transition: opacity 0.15s ease, stroke-width 0.15s ease;
+}
+
+.line[data-dim] {
+  opacity: 0.18;
+}
+
+.line[data-hot] {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+
+.crosshair {
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+.tooltip {
+  position: absolute;
+  min-width: 150px;
+  max-width: 170px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: rgba(2, 12, 22, 0.96);
+  border: 1px solid var(--panel-line);
+  box-shadow: 0 8px 26px rgba(2, 10, 20, 0.5);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.tipTime {
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  opacity: 0.6;
+  margin-bottom: 5px;
+}
+
+.tipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.tipRow i {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.tipHandle {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.tipVal {
+  font-family: var(--font-mono), monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 92px;
+  overflow-y: auto;
+  padding-top: 2px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-line);
+  background: rgba(2, 10, 20, 0.4);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.chip i {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.chip:hover {
+  border-color: rgba(108, 200, 235, 0.5);
+}
+
+.chip[data-off] {
+  opacity: 0.4;
+}
+
+.chip[data-off] i {
+  opacity: 0.3;
+}
