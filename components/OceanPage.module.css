@@ -199,39 +199,6 @@
   filter: blur(0.5px);
 }
 
-/* a little paper boat floating on the surface */
-.boat {
-  position: absolute;
-  left: 50%;
-  bottom: 30px;
-  margin-left: -26px;
-  z-index: 1;
-  filter: drop-shadow(0 3px 3px rgba(40, 80, 110, 0.28));
-  transform-origin: 50% 90%;
-}
-
-.boat svg {
-  display: block;
-}
-
-@keyframes boatBob {
-  0% {
-    transform: translateY(0) rotate(-3.5deg);
-  }
-  50% {
-    transform: translateY(-3px) rotate(3.5deg);
-  }
-  100% {
-    transform: translateY(0) rotate(-3.5deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .boat {
-    animation: boatBob 4.5s ease-in-out infinite;
-  }
-}
-
 @keyframes waveBack {
   to {
     background-position-x: 320px;
@@ -281,15 +248,8 @@
   }
 }
 
-.heroCtas {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 16px 0 0;
-}
-
 .heroCta {
+  margin: 16px 0 0;
   padding: 10px 22px;
   border-radius: 999px;
   background: rgba(4, 22, 38, 0.72);
@@ -299,10 +259,6 @@
   letter-spacing: 0.06em;
   backdrop-filter: blur(6px);
   transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.heroCta[data-variant="chart"] {
-  background: rgba(4, 22, 38, 0.5);
 }
 
 .heroCta:hover {

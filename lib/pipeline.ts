@@ -371,14 +371,3 @@ export async function runSnapshot(): Promise<RunSummary> {
 export async function readLatest(): Promise<LiveRoster | null> {
   return redisGetJSON<LiveRoster>(KEY_LATEST);
 }
-
-export async function readHistory(): Promise<Snapshot[]> {
-  return (await redisGetJSON<Snapshot[]>(KEY_HISTORY)) ?? [];
-}
-
-export function redisConfigured(): boolean {
-  return Boolean(
-    (process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL) &&
-      (process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN),
-  );
-}

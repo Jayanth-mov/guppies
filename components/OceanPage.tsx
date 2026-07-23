@@ -10,7 +10,6 @@ import {
 import Ocean from "./Ocean";
 import { fishDomId } from "./Fish";
 import Clouds from "./Clouds";
-import GrowthChart from "./GrowthChart";
 import DepthGauge from "./DepthGauge";
 import LeaderboardPanel, { type SortMode } from "./LeaderboardPanel";
 import EvolutionToast from "./EvolutionToast";
@@ -59,7 +58,6 @@ export default function OceanPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [focusRow, setFocusRow] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [chartOpen, setChartOpen] = useState(false);
   const oceanRef = useRef<HTMLDivElement | null>(null);
   const hoverTimer = useRef<number | null>(null);
 
@@ -194,17 +192,6 @@ export default function OceanPage() {
           <div className={styles.surface}>
             <span className={styles.wave} data-w="back" />
             <span className={styles.wave} data-w="mid" />
-            <span className={styles.boat}>
-              <svg viewBox="0 0 100 64" width="52" height="33">
-                <g>
-                  <path d="M8 40 L92 40 L75 59 Q72 61 68 61 L32 61 Q28 61 25 59 Z" fill="#ffffff" />
-                  <path d="M50 40 L26 40 L50 11 Z" fill="#e6eff6" />
-                  <path d="M50 40 L74 40 L50 11 Z" fill="#ffffff" />
-                  <path d="M11 40 L89 40" stroke="#c7d9e8" strokeWidth="1.4" />
-                  <path d="M50 11 L50 40" stroke="#d6e4ef" strokeWidth="1.2" />
-                </g>
-              </svg>
-            </span>
             <span className={styles.wave} data-w="front" />
             <span className={styles.surfaceGlint} />
           </div>
@@ -241,23 +228,13 @@ export default function OceanPage() {
           A fish-themed leaderboard for lighthearted, friendly competition
           within the circle.
         </p>
-        <div className={styles.heroCtas}>
-          <button
-            type="button"
-            className={styles.heroCta}
-            onClick={() => setOpen(true)}
-          >
-            View the leaderboard
-          </button>
-          <button
-            type="button"
-            className={styles.heroCta}
-            data-variant="chart"
-            onClick={() => setChartOpen(true)}
-          >
-            Growth chart
-          </button>
-        </div>
+        <button
+          type="button"
+          className={styles.heroCta}
+          onClick={() => setOpen(true)}
+        >
+          View the leaderboard
+        </button>
         <p className={styles.hint}>
           scroll to dive{" "}
           <span className={styles.arrow} aria-hidden="true">
@@ -301,8 +278,6 @@ export default function OceanPage() {
         focusRow={focusRow}
         onFocusRowHandled={() => setFocusRow(null)}
       />
-
-      <GrowthChart open={chartOpen} onClose={() => setChartOpen(false)} />
 
       {rosterSettled && <EvolutionToast roster={roster} />}
     </div>
