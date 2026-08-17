@@ -129,6 +129,10 @@ The code is in place:
   by `Authorization: Bearer $CRON_SECRET`.
 - [app/api/roster/route.ts](app/api/roster/route.ts) — serves the latest
   snapshot; the page overlays it on the bundled `accounts.json` at load.
+- [app/api/history/weekly/route.ts](app/api/history/weekly/route.ts) — serves
+  the permanent Sunday archive. The first post-deploy cron backfills July 19,
+  2026 onward from `guppies:history`, then preserves the first successful
+  snapshot in every Sunday week indefinitely in `guppies:weekly`.
 - [.github/workflows/refresh.yml](.github/workflows/refresh.yml) — the
   scheduler. **Vercel's free Hobby plan only allows daily crons**, so a
   GitHub Action pings `/api/cron` every four hours instead (free, same repo).

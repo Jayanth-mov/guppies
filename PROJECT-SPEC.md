@@ -60,6 +60,7 @@ app/
   art/page.tsx          dev artboard: all 12 fish silhouettes side by side
   api/cron/route.ts     runs a snapshot (CRON_SECRET bearer-guarded)
   api/roster/route.ts   serves the latest snapshot from Redis
+  api/history/weekly/route.ts  serves permanent Sunday snapshots
 components/
   OceanPage.tsx/.css    top-level client component: all page state, hero (sky,
                         sun, water surface, copy-link kicker, CTA), fish
@@ -81,6 +82,8 @@ components/
   LeaderboardPanel.tsx/.css  right drawer (desktop, squeezes ocean) /
                         full-screen sheet (mobile); Followers & Growth tabs,
                         growth sub-sort, range dropup, white mini-fish icons
+  WeeklySnapshotPanel.tsx/.css  full-screen Sunday time-travel archive:
+                        historical ranks/counts/deltas/species
   EvolutionToast.tsx/.css  localStorage species memory → tier-crossing toasts
 lib/
   species.ts            SINGLE SOURCE OF TRUTH: 12 tiers, band colors, depth &
@@ -88,10 +91,12 @@ lib/
   roster.ts             data seam: bundled fallback + live overlay types
   pipeline.ts           server-only: Graph API calls, Redis snapshots, stats,
                         self-refreshing token
+  weekly.ts             Sunday boundary math + immutable archive backfill
   rand.ts               seeded deterministic RNG (no Math.random in render —
                         SSR/hydration safety)
   species.test.ts       11 vitest cases: tier boundaries, depth monotonicity,
                         size invariants
+  weekly.test.ts        Sunday/DST, July 19 start, immutable backfill tests
 data/accounts.json      the roster (28 handles) + bundled fallback counts
 scripts/
   fetch-followers.mjs   manual local fetch → writes real counts into
@@ -230,12 +235,20 @@ special-cases this.
 5. Append to history (cap `MAX_SNAPSHOTS = 800` ≈ 133 days at four-hour cadence), write
    latest, log `[cron] historyReadIn/wrote/readBack` for persistence
    diagnostics.
+6. Backfill and append the immutable Sunday archive. It begins July 19, 2026,
+   stores the first successful snapshot in each Sunday week, and is never
+   trimmed. Existing archived weeks always win and cannot be rewritten.
+
+The 800-entry detailed cap bounds the size of the single JSON blob read and
+rewritten on every refresh. It was originally about 33 days at hourly cadence
+and is about 133 days at four-hour cadence. `guppies:weekly` grows only about
+52 small entries per year, so it is intentionally uncapped.
 
 **Redis keys** (Upstash REST protocol; env accepts both `KV_REST_API_*` and
 `UPSTASH_REDIS_REST_*` names): `guppies:history` (Snapshot[]),
 `guppies:latest` (LiveRoster incl. `snapshots` count and `failed[]` with
 Meta error+code per skipped handle — the main remote diagnostic),
-`guppies:token` (StoredToken).
+`guppies:token` (StoredToken), `guppies:weekly` (WeeklySnapshot[], permanent).
 
 **Token lifecycle** (the part everyone gets wrong):
 - Long-lived user tokens last **60 days max** (there is no 6-month token).
@@ -251,6 +264,9 @@ Meta error+code per skipped handle — the main remote diagnostic),
 **Frontend data**: the page renders bundled `accounts.json` instantly, then
 overlays `GET /api/roster` (latest snapshot) once fetched. `RosterSource` in
 `lib/roster.ts` is the seam; `sourceFromLive` adapts the live shape.
+The hero's **Weekly snapshots** action opens the archive served by
+`GET /api/history/weekly`; ranks and species are reconstructed from the saved
+counts, while profile pictures deliberately use their current versions.
 
 **Profile pictures**: Meta returns short-lived signed CDN URLs. The browser uses
 stable `/api/avatar/[handle]` URLs instead; the deployment CDN caches each image
@@ -283,8 +299,8 @@ professional / username changed too recently for Meta's index.
 **Vercel env vars**: `IG_USER_ID`, `IG_ACCESS_TOKEN` (60-day token seed),
 `META_APP_ID`, `META_APP_SECRET` (enables auto-refresh), `CRON_SECRET`
 (long random string), plus the Upstash-injected Redis pair. `WEEK_START_TZ`
-may still exist — it is **dead** (growth windows are rolling now) and safe to
-delete.
+(normally `America/Chicago`) defines the permanent archive's Sunday midnight
+boundary and must remain configured.
 
 **GitHub Actions secrets**: `CRON_URL` =
 `https://guppies-three.vercel.app/api/cron`, `CRON_SECRET` = same as Vercel.

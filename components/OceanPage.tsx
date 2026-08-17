@@ -13,6 +13,7 @@ import Clouds from "./Clouds";
 import DepthGauge from "./DepthGauge";
 import LeaderboardPanel, { type SortMode } from "./LeaderboardPanel";
 import EvolutionToast from "./EvolutionToast";
+import WeeklySnapshotPanel from "./WeeklySnapshotPanel";
 import styles from "./OceanPage.module.css";
 
 export default function OceanPage() {
@@ -21,6 +22,7 @@ export default function OceanPage() {
   const [roster, setRoster] = useState(() => getRoster());
   const [lastUpdated, setLastUpdated] = useState(() => getLastUpdated());
   const [open, setOpen] = useState(false);
+  const [snapshotsOpen, setSnapshotsOpen] = useState(false);
   // gates EvolutionToast until the roster has settled (live data applied, or
   // confirmed unavailable) — otherwise it'd compare against localStorage
   // twice in one visit (bundled, then live) and could double-fire a toast
@@ -228,13 +230,23 @@ export default function OceanPage() {
           A fish-themed leaderboard for lighthearted, friendly competition
           within the circle.
         </p>
-        <button
-          type="button"
-          className={styles.heroCta}
-          onClick={() => setOpen(true)}
-        >
-          View the leaderboard
-        </button>
+        <div className={styles.heroActions}>
+          <button
+            type="button"
+            className={styles.heroCta}
+            onClick={() => setOpen(true)}
+          >
+            View the leaderboard
+          </button>
+          <button
+            type="button"
+            className={styles.heroCta}
+            data-secondary
+            onClick={() => setSnapshotsOpen(true)}
+          >
+            Weekly snapshots
+          </button>
+        </div>
         <p className={styles.hint}>
           scroll to dive{" "}
           <span className={styles.arrow} aria-hidden="true">
@@ -277,6 +289,12 @@ export default function OceanPage() {
         onHoverRow={handleHoverRow}
         focusRow={focusRow}
         onFocusRowHandled={() => setFocusRow(null)}
+      />
+
+      <WeeklySnapshotPanel
+        open={snapshotsOpen}
+        onClose={() => setSnapshotsOpen(false)}
+        roster={roster}
       />
 
       {rosterSettled && <EvolutionToast roster={roster} />}
