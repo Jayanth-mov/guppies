@@ -1,4 +1,4 @@
-// Server-side pipeline: called by /api/cron hourly (GitHub Actions
+// Server-side pipeline: called by /api/cron every four hours (GitHub Actions
 // scheduler), stores snapshots in Upstash Redis, and derives the change/percent
 // the site shows over each comparison window (latest / day / week / month).
 // Never import this from client code.
@@ -26,9 +26,10 @@ const KEY_HISTORY = "guppies:history";
 const KEY_LATEST = "guppies:latest";
 const KEY_TOKEN = "guppies:token";
 
-// Cap on stored snapshots. At hourly cadence 800 covers ~33 days — enough to
+// Cap on stored snapshots. At four-hour cadence 800 covers ~133 days — enough to
 // back the "past month" window. Each snapshot is small (~27 handle:count
-// pairs), so the whole history blob stays well under a megabyte.
+// pairs at the current roster size), so the whole history blob stays well
+// under a megabyte.
 const MAX_SNAPSHOTS = 800;
 
 interface Snapshot {
@@ -264,9 +265,13 @@ export async function runSnapshot(): Promise<RunSummary> {
   const handles = raw.accounts.map((a) => ({
     handle: a.handle,
     name: (a as { name?: string }).name,
+    bundledAvatarUrl: (a as { profilePictureUrl?: string }).profilePictureUrl,
   }));
 
   const prevLatest = await redisGetJSON<LiveRoster>(KEY_LATEST);
+  const previousByHandle = new Map(
+    prevLatest?.accounts.map((account) => [account.handle, account]) ?? [],
+  );
   const history = (await redisGetJSON<Snapshot[]>(KEY_HISTORY)) ?? [];
   const prev = history[history.length - 1] ?? null;
 
@@ -303,21 +308,25 @@ export async function runSnapshot(): Promise<RunSummary> {
   const accounts: LiveAccount[] = [];
   const failed: { handle: string; reason: string }[] = [];
 
-  for (const { handle, name } of handles) {
+  for (const { handle, name, bundledAvatarUrl } of handles) {
     try {
       const got = await fetchAccount(igUserId, token, handle, handle === host);
+      const previous = previousByHandle.get(handle);
       counts[handle] = got.followers;
       accounts.push({
         handle,
         name,
         followers: got.followers,
-        avatarUrl: got.avatarUrl,
+        // Meta occasionally omits profile_picture_url even when the rest of
+        // business_discovery succeeds. Never erase a picture we already had.
+        avatarUrl:
+          got.avatarUrl ?? previous?.avatarUrl ?? bundledAvatarUrl ?? null,
         stats: statsFor(handle, got.followers),
       });
     } catch (err) {
       failed.push({ handle, reason: (err as Error).message });
       // carry the last-known entry forward so the fish doesn't vanish
-      const carried = prevLatest?.accounts.find((a) => a.handle === handle);
+      const carried = previousByHandle.get(handle);
       if (carried) {
         counts[handle] = carried.followers;
         accounts.push({ ...carried, stats: emptyStats() });

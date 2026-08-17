@@ -32,9 +32,9 @@ Deltas/growth show `—` until genuine history exists to compute them from.
 | Repo | `github.com/Jayanth-mov/guppies` (branch `main`) |
 | Deploy | Vercel, `https://guppies-three.vercel.app` (auto-deploys on push to main) |
 | Intended domain | `guppies.jayanth.mov` (not yet connected; the vercel.app URL works permanently regardless) |
-| Scheduler | GitHub Actions (`.github/workflows/refresh.yml`), hourly `0 * * * *` |
+| Scheduler | GitHub Actions (`.github/workflows/refresh.yml`), every four hours `0 */4 * * *` |
 | Storage | Upstash Redis via the Vercel marketplace integration |
-| Status | Fully live: real counts flowing hourly, deltas/growth accumulating |
+| Status | Fully live: real counts flowing every four hours, deltas/growth accumulating |
 
 **Git author identity matters:** commits must be authored
 `Jayanth <66447798+Jayanth-mov@users.noreply.github.com>` (set in local git
@@ -92,12 +92,12 @@ lib/
                         SSR/hydration safety)
   species.test.ts       11 vitest cases: tier boundaries, depth monotonicity,
                         size invariants
-data/accounts.json      the roster (27 handles) + bundled fallback counts
+data/accounts.json      the roster (28 handles) + bundled fallback counts
 scripts/
   fetch-followers.mjs   manual local fetch → writes real counts into
                         accounts.json (token via env, never committed)
   diagnose.mjs          runs the exact Graph calls with full Meta error output
-.github/workflows/refresh.yml  hourly curl of /api/cron with the secret
+.github/workflows/refresh.yml  four-hour curl of /api/cron with the secret
 README.md, PIPELINE.md, CHART-PLAN.md   deeper docs (pipeline setup, chart plan)
 ```
 
@@ -183,7 +183,7 @@ mini fish silhouette + species name; click opens their Instagram; hover
 lights the fish in the ocean, dims others, and after a deliberate 750ms hold
 glides the ocean to it. Bottom: a range **dropup** (Latest / Past day / Past
 week / Past month — all rolling windows) with "last updated Xm ago" ticking
-per-second and an "updates hourly" hint in its header. Followers tab defaults
+per-second and an "updates every 4 hours" hint in its header. Followers tab defaults
 to Past day, Growth tab to Past week.
 
 **Evolution toasts**: localStorage (`guppies.species.v1`) remembers each
@@ -217,17 +217,17 @@ special-cases this.
 | Facebook Page (routing only) | StuFlo, id `1137245512813845` |
 | `IG_USER_ID` (host) | `17841476323533943` |
 
-**Flow**: GitHub Actions (hourly) → `GET /api/cron` with
+**Flow**: GitHub Actions (every four hours) → `GET /api/cron` with
 `Authorization: Bearer $CRON_SECRET` → `runSnapshot()`:
 1. `getWorkingToken()` — token lifecycle below.
-2. Loop all 27 handles; per-account failures don't abort the run.
+2. Loop all 28 handles; per-account failures don't abort the run.
 3. Failed accounts **carry forward** their last-known entry (with stats
    nulled) so fish don't vanish; a *new* handle that fails simply doesn't
    appear until it first succeeds.
 4. Compute per-window stats (`latest` = vs previous snapshot, `day`/`week`/
    `month` = vs newest snapshot at/before the cutoff, **falling back to the
    oldest snapshot** when history is shorter than the window — "show so far").
-5. Append to history (cap `MAX_SNAPSHOTS = 800` ≈ 33 days hourly), write
+5. Append to history (cap `MAX_SNAPSHOTS = 800` ≈ 133 days at four-hour cadence), write
    latest, log `[cron] historyReadIn/wrote/readBack` for persistence
    diagnostics.
 
@@ -252,11 +252,19 @@ Meta error+code per skipped handle — the main remote diagnostic),
 overlays `GET /api/roster` (latest snapshot) once fetched. `RosterSource` in
 `lib/roster.ts` is the seam; `sourceFromLive` adapts the live shape.
 
+**Profile pictures**: Meta returns short-lived signed CDN URLs. The browser uses
+stable `/api/avatar/[handle]` URLs instead; the deployment CDN caches each image
+for 30 days and serves stale for up to another week while revalidating. A
+successful follower fetch that temporarily omits `profile_picture_url` keeps
+the account's last-known URL instead of erasing it. Initials remain the fallback
+when Meta has never returned a picture for an account.
+
 **Rate/abuse limits (learned the hard way)**: ~200 calls/hour nominal, but
 burst behavior matters more — a 15-minute cadence plus repeated manual
 workflow runs got the host account **suspended for suspicious activity**
 (every call returned "API access blocked"; the token revived on
-reinstatement). Hourly cadence is the safe setting. Never spam manual runs;
+reinstatement). Even hourly cadence was safe; the current four-hour cadence is
+more conservative. Never spam manual runs;
 one `workflow_dispatch` for testing is fine. At ~50+ roster accounts, revisit
 the math before shortening the cadence.
 
@@ -296,7 +304,7 @@ the rest). Full walkthrough in PIPELINE.md.
 ## 8. Operational runbook
 
 - **Add a member**: append `{ "handle": "x" }` to `data/accounts.json`, push.
-  Next hourly run fetches them. Requirement: account must be public +
+  Next scheduled run fetches them. Requirement: account must be public +
   Professional (Creator/Business) — a public *personal* account opens fine in
   a browser but is invisible to the API. No other code changes, ever.
 - **Remove/rename**: edit the JSON. A renamed handle is a "new" account to
@@ -305,7 +313,7 @@ the rest). Full walkthrough in PIPELINE.md.
 - **Why is X missing / stale?**: check `failed[]` in
   `https://guppies-three.vercel.app/api/roster` — every skipped handle with
   Meta's exact error and code. `snapshots` on the same payload should
-  increment hourly; if it sticks, history isn't persisting.
+  increment every four hours; if it sticks, history isn't persisting.
 - **Deep local diagnosis**: `$env:IG_ACCESS_TOKEN = Read-Host "token";
   node scripts/diagnose.mjs` — runs /me, /me/permissions, host count, and two
   business_discovery calls with full error JSON.
@@ -366,7 +374,7 @@ Mock-data ocean built first; live pipeline swapped in via Graph API Explorer
 setup (app "guppies", Page StuFlo). TypeScript 7 broke the build once →
 pinned 5.x. A short-lived token seeded early stale data → seededFrom
 reconcile added. 15-minute cadence + manual run spam → account suspension →
-hourly cadence + the "don't hammer" rule. Sunday-anchored weekly growth
+four-hour cadence + the "don't hammer" rule. Sunday-anchored weekly growth
 replaced by rolling windows (day/week/month) with the "show so far" fallback.
 Clouds went CSS-pills → hand-drawn SVG (tagged) → turbulence-displacement
 (current, credited); parallax on clouds was added and removed (dragged them

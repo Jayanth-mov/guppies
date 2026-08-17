@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import type { FishEntry } from "@/lib/roster";
+import { avatarProxyUrl, type FishEntry } from "@/lib/roster";
 import { formatCount } from "@/lib/species";
 import { pick, rng } from "@/lib/rand";
 import { FISH_SHAPES } from "./FishShapes";
@@ -120,21 +120,20 @@ export default function Fish({
             <span className={styles.label}>
               <span className={styles.avatar} aria-hidden="true">
                 {initialsFor(entry.handle)}
-                {entry.avatarUrl && (
-                  // initials stay underneath as the fallback if the CDN URL
-                  // has expired between fetches
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    className={styles.avatarImg}
-                    src={entry.avatarUrl}
-                    alt=""
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                )}
+                {/* Initials stay underneath if Meta has never supplied a
+                    picture. The stable proxy serves the last cached image
+                    even when a snapshot temporarily omits its CDN URL. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={entry.avatarUrl ?? "missing"}
+                  className={styles.avatarImg}
+                  src={avatarProxyUrl(entry.handle)}
+                  alt=""
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
               </span>
               <span className={styles.labelName}>{entry.handle}</span>
             </span>

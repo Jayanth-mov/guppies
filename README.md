@@ -52,9 +52,11 @@ Motion honors `prefers-reduced-motion`: every animation lives inside
 
 ## The pipeline (not built yet — the boring part)
 
-Instagram Graph API `business_discovery`, queried from an hourly cron, never
+Instagram Graph API `business_discovery`, queried every four hours by cron, never
 from the browser. Snapshots land in KV; the page reads cached JSON. Deltas,
-growth %, and evolutions all come from snapshot history.
+growth %, and evolutions all come from snapshot history. Profile pictures use a
+same-origin proxy because Meta's signed CDN URLs expire; the proxy caches the
+image bytes for a month and then revalidates against the latest snapshot.
 
 **Full step-by-step setup lives in [PIPELINE.md](PIPELINE.md)** — Meta app
 creation, tokens, the 60-day refresh trap, Vercel Cron, and the swap-in.

@@ -6,8 +6,8 @@ new API route + an SVG chart component.
 
 ## Data (already collected)
 
-The cron writes `guppies:history` to Redis: an array of hourly snapshots
-`{ t: ISO, counts: { handle: number } }`, capped at ~800 entries (~33 days).
+The cron writes `guppies:history` to Redis: an array of four-hour snapshots
+`{ t: ISO, counts: { handle: number } }`, capped at ~800 entries (~133 days).
 That IS the time series — nothing new to collect. The chart's time span is
 "however long the pipeline has been running," which grows over time.
 
@@ -84,7 +84,7 @@ colors.
 
 - History only reaches back as far as the cron has run; ranges longer than that
   just show all available data.
-- ~800 snapshots × ~27 handles ≈ 20k points — fine to fetch and draw; downsample
+- ~800 snapshots × ~28 handles ≈ 22k points — fine to fetch and draw; downsample
   only the "all" range.
 - Keep motion/hover honoring `prefers-reduced-motion` and visible focus, same
   quality floor as the rest of the site.

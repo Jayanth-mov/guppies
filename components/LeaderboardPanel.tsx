@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  avatarProxyUrl,
   RANGE_KEYS,
   type FishEntry,
   type RangeKey,
@@ -272,19 +273,17 @@ export default function LeaderboardPanel({
                 aria-hidden="true"
               >
                 {initialsFor(e.handle)}
-                {e.avatarUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    className={styles.avatarImg}
-                    src={e.avatarUrl}
-                    alt=""
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    onError={(ev) => {
-                      ev.currentTarget.style.display = "none";
-                    }}
-                  />
-                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  key={e.avatarUrl ?? "missing"}
+                  className={styles.avatarImg}
+                  src={avatarProxyUrl(e.handle)}
+                  alt=""
+                  loading="lazy"
+                  onError={(ev) => {
+                    ev.currentTarget.style.display = "none";
+                  }}
+                />
               </span>
               <span className={styles.who}>
                 <span className={styles.name}>{e.handle}</span>
@@ -306,7 +305,7 @@ export default function LeaderboardPanel({
               <span className={styles.menuUpdated}>
                 last updated {updatedAgo ?? "—"}
               </span>
-              <span className={styles.menuHint}>updates hourly</span>
+              <span className={styles.menuHint}>updates every 4 hours</span>
             </div>
             {RANGE_KEYS.map((k) => (
               <button

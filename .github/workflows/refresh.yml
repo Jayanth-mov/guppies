@@ -1,8 +1,9 @@
-# Pings the deployed /api/cron hourly. This is the free-tier scheduler:
+# Pings the deployed /api/cron every four hours. This is the free-tier scheduler:
 # Vercel's Hobby plan only allows daily crons, GitHub Actions has no such
 # limit (though scheduled runs are best-effort and can be delayed under GitHub
-# load — treat the hour mark as a target, not a guarantee). business_discovery
-# returns Meta's cached count anyway, so hourly is as fresh as it gets.
+# load — treat the scheduled time as a target, not a guarantee).
+# business_discovery returns Meta's cached count anyway, so polling more often
+# may not produce fresher values.
 #
 # Repo secrets required (Settings → Secrets and variables → Actions):
 #   CRON_URL    e.g. https://guppies.jayanth.mov/api/cron (or the vercel.app URL)
@@ -12,7 +13,7 @@ name: refresh follower counts
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 */4 * * *"
   workflow_dispatch: # manual "Run workflow" button for testing
 
 jobs:

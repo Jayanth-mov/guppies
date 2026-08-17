@@ -23,6 +23,13 @@ export function emptyStats(): Stats {
   return { latest: null, day: null, week: null, month: null };
 }
 
+// Never expose Meta's short-lived signed CDN URL as an image src. The stable
+// same-origin endpoint caches the image bytes for a month and refreshes them
+// from the latest snapshot when that cache expires.
+export function avatarProxyUrl(handle: string): string {
+  return `/api/avatar/${encodeURIComponent(handle)}`;
+}
+
 export interface FishEntry {
   handle: string;
   name: string;
