@@ -19,6 +19,9 @@ describe("weekly archive", () => {
     expect(weekStartISO(new Date("2026-11-08T18:00:00Z"), TZ)).toBe(
       "2026-11-08T06:00:00.000Z",
     );
+    expect(weekStartISO(new Date("2026-08-17T21:03:42.963Z"), TZ)).toBe(
+      "2026-08-16T05:00:00.000Z",
+    );
   });
 
   it("starts on July 19 and selects the first snapshot in each week", () => {

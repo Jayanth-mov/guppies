@@ -44,7 +44,12 @@ function tzOffsetMs(tz: string, at: Date): number {
     +p.minute,
     +p.second,
   );
-  return asUTC - at.getTime();
+  // Intl exposes whole seconds, so remove the input's millisecond remainder
+  // before calculating the offset. Otherwise every source snapshot's random
+  // milliseconds leak into its computed Sunday boundary and create duplicate
+  // week keys.
+  const atWholeSecond = Math.floor(at.getTime() / 1000) * 1000;
+  return asUTC - atWholeSecond;
 }
 
 /** Sunday 12:00am in `tz`, returned as the corresponding ISO instant. */
