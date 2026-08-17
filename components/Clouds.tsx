@@ -22,8 +22,8 @@ interface CloudCfg {
   delay: number; // negative, to pre-spread the clouds
 }
 
-function makeClouds(): CloudCfg[] {
-  const n = 5 + Math.floor(Math.random() * 2); // 5–6
+function makeClouds(count?: number): CloudCfg[] {
+  const n = count ?? 5 + Math.floor(Math.random() * 2); // desktop: 5–6
   return Array.from({ length: n }, (_, i) => ({
     id: i,
     // alternate so it's reliably ~half in front of the text, half behind
@@ -62,7 +62,17 @@ export default function Clouds() {
   const [clouds, setClouds] = useState<CloudCfg[]>([]);
 
   useEffect(() => {
-    setClouds(makeClouds());
+    const mobile = window.matchMedia(
+      "(max-width: 760px), (hover: none) and (pointer: coarse)",
+    );
+    const populate = () => {
+      // Keep the full moving/filter effect on phones, but halve the number of
+      // expensive filtered clouds (3 instead of the desktop's 5–6).
+      setClouds(makeClouds(mobile.matches ? 3 : undefined));
+    };
+    populate();
+    mobile.addEventListener("change", populate);
+    return () => mobile.removeEventListener("change", populate);
   }, []);
 
   const back = clouds.filter((c) => c.depth === "back");
