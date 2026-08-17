@@ -65,6 +65,7 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  contain: paint;
   min-height: 88svh;
   display: flex;
   flex-direction: column;
@@ -142,6 +143,7 @@
   bottom: 0;
   height: 110px;
   overflow: hidden;
+  contain: paint;
 }
 
 /* a soft haze of light lifting off the water into the sky */
@@ -155,11 +157,15 @@
 /* three tiling wave bands scrolling at different speeds for a rippling top */
 .wave {
   position: absolute;
-  left: -10%;
-  right: -10%;
+  /* Extra width lets an entire repeating tile slide without exposing an
+     edge. Animating transform stays on the compositor; background-position
+     forced the browser to repaint all three wave strips every frame. */
+  left: -320px;
+  right: -320px;
   bottom: 0;
   background-repeat: repeat-x;
   background-position: 0 bottom;
+  will-change: transform;
 }
 
 .wave[data-w="back"] {
@@ -201,17 +207,17 @@
 
 @keyframes waveBack {
   to {
-    background-position-x: 320px;
+    transform: translate3d(320px, 0, 0);
   }
 }
 @keyframes waveMid {
   to {
-    background-position-x: -260px;
+    transform: translate3d(-260px, 0, 0);
   }
 }
 @keyframes waveFront {
   to {
-    background-position-x: 200px;
+    transform: translate3d(200px, 0, 0);
   }
 }
 
@@ -264,6 +270,39 @@
 .heroCta:hover {
   border-color: var(--accent);
   transform: translateY(-1px);
+}
+
+/* Phones have a much smaller paint/compositing budget. Keep one gently moving
+   wave so the surface still feels alive, but freeze the two rear layers and
+   the paint-heavy animated sun glow. */
+@media (max-width: 760px), (hover: none) and (pointer: coarse) {
+  .wave {
+    will-change: auto;
+  }
+
+  .wave[data-w="back"],
+  .wave[data-w="mid"] {
+    animation: none;
+    transform: none;
+  }
+
+  .wave[data-w="front"] {
+    animation-duration: 12s;
+    will-change: transform;
+  }
+
+  .sun {
+    animation: none;
+  }
+
+  .surfaceGlint {
+    filter: none;
+  }
+
+  .heroCta {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 .kicker {
