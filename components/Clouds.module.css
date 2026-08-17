@@ -116,3 +116,47 @@
     opacity: var(--peak, 1);
   }
 }
+
+/* Mobile keeps the drifting cloud motion, but swaps the expensive SVG
+   turbulence/displacement filters for lightweight multi-lobed CSS shapes.
+   Clouds.tsx also limits this mobile version to three clouds. */
+@media (max-width: 760px), (hover: none) and (pointer: coarse) {
+  .defs {
+    display: none;
+  }
+
+  .part {
+    top: 0;
+    left: 0;
+    border-radius: 0;
+    box-shadow: none;
+    filter: none;
+    transform: none;
+    -webkit-backface-visibility: visible;
+    backface-visibility: visible;
+  }
+
+  .part[data-l="back"] {
+    background:
+      radial-gradient(ellipse 29% 42% at 22% 67%, #fff 0 96%, transparent 100%),
+      radial-gradient(ellipse 34% 57% at 43% 51%, #fff 0 96%, transparent 100%),
+      radial-gradient(ellipse 30% 48% at 66% 59%, #fff 0 96%, transparent 100%),
+      radial-gradient(ellipse 25% 36% at 83% 69%, #fff 0 96%, transparent 100%),
+      radial-gradient(ellipse 47% 30% at 50% 76%, #fff 0 96%, transparent 100%);
+  }
+
+  .part[data-l="mid"] {
+    background:
+      radial-gradient(ellipse 46% 24% at 49% 79%, rgba(158, 168, 179, 0.3) 0 94%, transparent 100%),
+      radial-gradient(ellipse 24% 22% at 23% 76%, rgba(158, 168, 179, 0.22) 0 94%, transparent 100%),
+      radial-gradient(ellipse 25% 22% at 77% 76%, rgba(158, 168, 179, 0.22) 0 94%, transparent 100%);
+  }
+
+  .part[data-l="front"] {
+    background: radial-gradient(
+      ellipse 43% 17% at 50% 85%,
+      rgba(58, 76, 94, 0.18) 0 92%,
+      transparent 100%
+    );
+  }
+}
