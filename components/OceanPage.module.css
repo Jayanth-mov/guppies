@@ -378,7 +378,10 @@
   padding: 154px 24px 110px;
   text-align: center;
   color: var(--ink-pale);
-  background: #051426;
+  /* Match the abyss after Atmosphere's depth vignette is composited. Using
+     the raw final band color here creates a visibly lighter rectangular strip
+     between the ocean and the first seabed ridge. */
+  background: #020f1f;
 }
 
 .seabedArt {

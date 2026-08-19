@@ -193,15 +193,15 @@
   0% {
     transform: scaleX(0.12) scaleY(1.04);
   }
-  1.5%,
-  48.5% {
+  0.25%,
+  49.75% {
     transform: scaleX(1);
   }
   50% {
     transform: scaleX(0.12) scaleY(1.04);
   }
-  51.5%,
-  98.5% {
+  50.25%,
+  99.75% {
     transform: scaleX(-1);
   }
   100% {
