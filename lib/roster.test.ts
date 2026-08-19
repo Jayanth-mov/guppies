@@ -35,6 +35,9 @@ function liveRoster() {
 const history: WeeklyHistoryPayload = {
   timezone: "America/Chicago",
   startsOn: "2026-07-19",
+  origins: {
+    "mann.ascends": { t: "2026-07-17T04:26:20Z", count: 120 },
+  },
   weeks: [
     {
       weekStart: "2026-07-19T05:00:00.000Z",

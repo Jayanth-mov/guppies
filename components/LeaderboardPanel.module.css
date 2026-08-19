@@ -199,7 +199,11 @@
 @media (prefers-reduced-motion: no-preference) {
   .valueSwap,
   .rank {
-    animation: valueSwap 0.65s cubic-bezier(0.22, 0.78, 0.24, 1);
+    animation: valueSwap 0.9s cubic-bezier(0.22, 0.78, 0.24, 1);
+  }
+
+  .miniFish {
+    animation: valueSwap 0.9s cubic-bezier(0.22, 0.78, 0.24, 1);
   }
 }
 

@@ -192,6 +192,20 @@ function continuousHistoricalValue(
     if (previous) return previous;
   }
 
+  const origin = handles
+    .map((handle) => history.origins?.[handle])
+    .filter((record) => record !== undefined)
+    .sort((a, b) => a.t.localeCompare(b.t))[0];
+  if (origin) {
+    return {
+      followers: origin.count,
+      stats: {
+        ...emptyStats(),
+        all: origin.count > 0 ? { change: 0, pct: 0 } : null,
+      },
+    };
+  }
+
   // Mann's only gap predates his first archived canonical-handle snapshot.
   // Recover the immutable origin from that later row's all-time delta rather
   // than pretending his much-larger later count existed in the first week.

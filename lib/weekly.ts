@@ -28,6 +28,8 @@ export interface WeeklyHistoryPayload {
   timezone: string;
   startsOn: string;
   weeks: WeeklySnapshot[];
+  /** First count ever retained for each handle, independent of rolling detail. */
+  origins?: OriginRecords;
 }
 
 const RANGE_MS = {

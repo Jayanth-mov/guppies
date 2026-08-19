@@ -44,7 +44,8 @@ npm run build   # production build
   snapshot selector time-travels the entire page: counts, ranks, fish species,
   size, depth, and leaderboard growth all use the selected Sunday endpoint.
   Comparison windows include latest, day, week, month, and all time. Rows glide
-  into their historical order while fish visibly swim to their new depth.
+  into their historical order while fish visibly swim to their new depth. If
+  a fish is selected, the viewport follows it throughout the snapshot route.
 - [components/EvolutionToast.tsx](components/EvolutionToast.tsx) — remembers
   each swimmer's species in localStorage and announces tier crossings on the
   next load. Dormant until counts actually move.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { avatarProxyUrl, type FishEntry } from "@/lib/roster";
 import { formatCount } from "@/lib/species";
 import { pick, rng } from "@/lib/rand";
@@ -18,6 +18,8 @@ interface FishProps {
 export function fishDomId(handle: string): string {
   return `fish-${handle.replace(/[^a-z0-9_-]/gi, "-")}`;
 }
+
+export const SNAPSHOT_SWIM_MS = 2200;
 
 export function initialsFor(name: string): string {
   return name
@@ -40,25 +42,64 @@ export default function Fish({
   onSelect,
   swimSeed,
 }: FishProps) {
-  const previousDepth = useRef(entry.depth);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const migrationRef = useRef<HTMLDivElement | null>(null);
+  const previousPosition = useRef<{ top: number; left: number } | null>(null);
+  const migrationAnimation = useRef<Animation | null>(null);
   const migrationCycle = useRef(0);
   const [migrating, setMigrating] = useState<{
     direction: "up" | "down";
     cycle: number;
   } | null>(null);
 
-  useEffect(() => {
-    const before = previousDepth.current;
-    previousDepth.current = entry.depth;
-    if (Math.abs(entry.depth - before) < 0.0001) return;
+  useLayoutEffect(() => {
+    const wrap = wrapRef.current;
+    const mover = migrationRef.current;
+    if (!wrap || !mover) return;
+    migrationAnimation.current?.cancel();
+
+    const next = wrap.getBoundingClientRect();
+    const before = previousPosition.current;
+    previousPosition.current = { top: next.top, left: next.left };
+    if (!before) return;
+    const deltaX = before.left - next.left;
+    const deltaY = before.top - next.top;
+    if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) return;
+
     migrationCycle.current += 1;
+    const cycle = migrationCycle.current;
     setMigrating({
-      direction: entry.depth > before ? "down" : "up",
-      cycle: migrationCycle.current,
+      direction: deltaY < 0 ? "down" : "up",
+      cycle,
     });
-    const timer = window.setTimeout(() => setMigrating(null), 2400);
-    return () => window.clearTimeout(timer);
-  }, [entry.depth]);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setMigrating(null);
+      return;
+    }
+
+    // FLIP the full fish from its previous screen coordinate to the new one.
+    // This avoids Safari treating clamp()-based top changes as discrete jumps.
+    const animation = mover.animate(
+      [
+        { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
+        { transform: "translate3d(0, 0, 0)" },
+      ],
+      {
+        duration: SNAPSHOT_SWIM_MS,
+        easing: "cubic-bezier(0.22, 0.78, 0.24, 1)",
+      },
+    );
+    migrationAnimation.current = animation;
+    void animation.finished
+      .then(() => {
+        if (migrationCycle.current === cycle) setMigrating(null);
+      })
+      .catch(() => {
+        // A rapid second snapshot intentionally cancels this route.
+      });
+    return () => animation.cancel();
+  }, [entry.depth, entry.size]);
 
   const shape = FISH_SHAPES[entry.species.symbolId];
   // depth stays data-driven (it encodes rank); only lane + animation timing
@@ -105,7 +146,7 @@ export default function Fish({
 
   return (
     <div
-      id={fishDomId(entry.handle)}
+      ref={wrapRef}
       className={styles.wrap}
       data-highlight={highlighted || undefined}
       data-dim={dimmed || undefined}
@@ -113,53 +154,59 @@ export default function Fish({
       data-migrating={migrating?.direction}
       style={style}
     >
-      <div className={styles.drifter}>
-        <div className={styles.bobber}>
-          <button
-            type="button"
-            className={styles.hit}
-            onClick={() => onSelect(entry.handle)}
-            aria-label={`${entry.handle} — ${entry.species.name}, ${formatCount(entry.followers)} followers. Open in leaderboard.`}
-          >
-            <span className={styles.countAbove} aria-hidden="true">
-              {formatCount(entry.followers)}
-            </span>
-            <span className={styles.flip}>
-              <svg
-                key={`${entry.species.symbolId}:${migrating?.cycle ?? "idle"}`}
-                className={styles.sprite}
-                viewBox={shape.viewBox}
-                style={{ aspectRatio: `${shape.w} / ${shape.h}` }}
-                aria-hidden="true"
-                focusable="false"
-              >
-                <g className={styles.tail} fill="currentColor">
-                  {shape.tail}
-                </g>
-                <g fill="currentColor">{shape.body}</g>
-              </svg>
-            </span>
-            <span className={styles.label}>
-              <span className={styles.avatar} aria-hidden="true">
-                {initialsFor(entry.handle)}
-                {/* Initials stay underneath if Meta has never supplied a
-                    picture. The stable proxy serves the last cached image
-                    even when a snapshot temporarily omits its CDN URL. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  key={entry.avatarUrl ?? "missing"}
-                  className={styles.avatarImg}
-                  src={avatarProxyUrl(entry.handle)}
-                  alt=""
-                  loading="lazy"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
+      <div
+        id={fishDomId(entry.handle)}
+        ref={migrationRef}
+        className={styles.migration}
+      >
+        <div className={styles.drifter}>
+          <div className={styles.bobber}>
+            <button
+              type="button"
+              className={styles.hit}
+              onClick={() => onSelect(entry.handle)}
+              aria-label={`${entry.handle} — ${entry.species.name}, ${formatCount(entry.followers)} followers. Open in leaderboard.`}
+            >
+              <span className={styles.countAbove} aria-hidden="true">
+                {formatCount(entry.followers)}
               </span>
-              <span className={styles.labelName}>{entry.handle}</span>
-            </span>
-          </button>
+              <span className={styles.flip}>
+                <svg
+                  key={`${entry.species.symbolId}:${migrating?.cycle ?? "idle"}`}
+                  className={styles.sprite}
+                  viewBox={shape.viewBox}
+                  style={{ aspectRatio: `${shape.w} / ${shape.h}` }}
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <g className={styles.tail} fill="currentColor">
+                    {shape.tail}
+                  </g>
+                  <g fill="currentColor">{shape.body}</g>
+                </svg>
+              </span>
+              <span className={styles.label}>
+                <span className={styles.avatar} aria-hidden="true">
+                  {initialsFor(entry.handle)}
+                  {/* Initials stay underneath if Meta has never supplied a
+                      picture. The stable proxy serves the last cached image
+                      even when a snapshot temporarily omits its CDN URL. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    key={entry.avatarUrl ?? "missing"}
+                    className={styles.avatarImg}
+                    src={avatarProxyUrl(entry.handle)}
+                    alt=""
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </span>
+                <span className={styles.labelName}>{entry.handle}</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

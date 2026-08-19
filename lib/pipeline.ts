@@ -375,6 +375,7 @@ export async function readWeeklyHistory(): Promise<WeeklyHistoryPayload> {
   return {
     timezone,
     startsOn: WEEKLY_ARCHIVE_START_DATE,
+    origins,
     // Derive as a read fallback before the first post-deploy cron has written
     // the permanent key. The cron is the only writer.
     weeks:

@@ -91,7 +91,8 @@ lib/
   roster.ts             data seam: bundled fallback + live overlay types
   pipeline.ts           server-only: Graph API calls, Redis snapshots, stats,
                         self-refreshing token
-  weekly.ts             Sunday boundary math + immutable archive backfill
+  weekly.ts             Sunday boundary math + immutable archive backfill;
+                        API payload includes permanent first-seen origins
   rand.ts               seeded deterministic RNG (no Math.random in render —
                         SSR/hydration safety)
   species.test.ts       11 vitest cases: tier boundaries, depth monotonicity,

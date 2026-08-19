@@ -83,6 +83,7 @@ function MiniFish({ symbolId }: { symbolId: string }) {
   return (
     <span className={styles.miniFishSlot} aria-hidden="true">
       <svg
+        key={symbolId}
         className={styles.miniFish}
         viewBox={shape.viewBox}
         style={{
@@ -185,13 +186,18 @@ export default function LeaderboardPanel({
             ]
           : [
               {
-                opacity: Math.abs(delta) > 1 ? 0.72 : 0.88,
+                opacity: Math.abs(delta) > 1 ? 0.58 : 0.72,
+                filter: "blur(1.5px)",
                 transform: `translateY(${delta}px)`,
               },
-              { opacity: 1, transform: "translateY(0)" },
+              {
+                opacity: 1,
+                filter: "blur(0)",
+                transform: "translateY(0)",
+              },
             ],
         {
-          duration: 900,
+          duration: 1100,
           easing: "cubic-bezier(0.22, 0.78, 0.24, 1)",
         },
       );

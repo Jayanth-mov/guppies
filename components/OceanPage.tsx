@@ -10,7 +10,7 @@ import {
 } from "@/lib/roster";
 import type { WeeklyHistoryPayload } from "@/lib/weekly";
 import Ocean from "./Ocean";
-import { fishDomId } from "./Fish";
+import { fishDomId, SNAPSHOT_SWIM_MS } from "./Fish";
 import Clouds from "./Clouds";
 import DepthGauge from "./DepthGauge";
 import LeaderboardPanel, { type SortMode } from "./LeaderboardPanel";
@@ -94,6 +94,7 @@ export default function OceanPage() {
   const [copied, setCopied] = useState(false);
   const oceanRef = useRef<HTMLDivElement | null>(null);
   const hoverTimer = useRef<number | null>(null);
+  const previousSnapshotIndex = useRef(snapshotIndex);
 
   useEffect(() => {
     if (selected && !roster.some((entry) => entry.handle === selected)) {
@@ -139,6 +140,55 @@ export default function OceanPage() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.scrollTo({ top: Math.max(0, y), behavior: reduced ? "auto" : "smooth" });
   }, []);
+
+  // When time travel moves a selected fish, bind the vertical camera to its
+  // animated element for the whole route. A manual wheel/touch/keyboard input
+  // immediately releases the camera back to the visitor.
+  useEffect(() => {
+    const changed = previousSnapshotIndex.current !== snapshotIndex;
+    previousSnapshotIndex.current = snapshotIndex;
+    if (!changed || !selected) return;
+
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced) {
+      scrollToFish(selected);
+      return;
+    }
+
+    let frame = 0;
+    let cancelled = false;
+    const started = performance.now();
+    const release = () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+    };
+    const follow = (now: number) => {
+      if (cancelled) return;
+      const fish = document.getElementById(fishDomId(selected));
+      if (!fish) return;
+      const rect = fish.getBoundingClientRect();
+      const offset = rect.top + rect.height / 2 - window.innerHeight / 2;
+      if (Math.abs(offset) > 0.5) {
+        window.scrollBy({ top: offset, behavior: "auto" });
+      }
+      if (now - started < SNAPSHOT_SWIM_MS + 180) {
+        frame = window.requestAnimationFrame(follow);
+      }
+    };
+
+    frame = window.requestAnimationFrame(follow);
+    window.addEventListener("wheel", release, { passive: true });
+    window.addEventListener("touchstart", release, { passive: true });
+    window.addEventListener("keydown", release);
+    return () => {
+      release();
+      window.removeEventListener("wheel", release);
+      window.removeEventListener("touchstart", release);
+      window.removeEventListener("keydown", release);
+    };
+  }, [scrollToFish, selected, snapshotIndex]);
 
   // open a shared link (#handle): start at the hero, then glide down to the
   // selected fish so the recipient sees the descent

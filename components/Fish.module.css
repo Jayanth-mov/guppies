@@ -4,6 +4,10 @@
   transition: opacity 0.3s ease;
 }
 
+.migration {
+  display: block;
+}
+
 .wrap[data-dim] {
   opacity: 0.22;
 }
@@ -28,13 +32,6 @@
 /* A selected weekly snapshot changes the data behind each fish. Let its new
    historical depth, lane, and size settle into place instead of teleporting. */
 @media (prefers-reduced-motion: no-preference) {
-  .wrap {
-    transition:
-      top 2.2s cubic-bezier(0.22, 0.78, 0.24, 1),
-      left 2.2s cubic-bezier(0.22, 0.78, 0.24, 1),
-      opacity 0.3s ease;
-  }
-
   .hit {
     transition: width 2.2s cubic-bezier(0.22, 0.78, 0.24, 1);
   }
