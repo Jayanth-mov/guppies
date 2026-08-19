@@ -81,9 +81,8 @@ components/
                         12-segment dive track
   LeaderboardPanel.tsx/.css  right drawer (desktop, squeezes ocean) /
                         full-screen sheet (mobile); Followers & Growth tabs,
-                        growth sub-sort, range dropup, white mini-fish icons
-  WeeklySnapshotPanel.tsx/.css  full-screen Sunday time-travel archive:
-                        historical ranks/counts/deltas/species
+                        global Sunday snapshot picker, growth sub-sort, range
+                        dropup including All time, white mini-fish icons
   EvolutionToast.tsx/.css  localStorage species memory → tier-crossing toasts
 lib/
   species.ts            SINGLE SOURCE OF TRUTH: 12 tiers, band colors, depth &
@@ -232,12 +231,14 @@ special-cases this.
 4. Compute per-window stats (`latest` = vs previous snapshot, `day`/`week`/
    `month` = vs newest snapshot at/before the cutoff, **falling back to the
    oldest snapshot** when history is shorter than the window — "show so far").
+   `all` compares against the account's immutable first observed count.
 5. Append to history (cap `MAX_SNAPSHOTS = 800` ≈ 133 days at four-hour cadence), write
    latest, log `[cron] historyReadIn/wrote/readBack` for persistence
    diagnostics.
 6. Backfill and append the immutable Sunday archive. It begins July 19, 2026,
-   stores the first successful snapshot in each Sunday week, and is never
-   trimmed. Existing archived weeks always win and cannot be rewritten.
+   stores the first successful snapshot and its endpoint-relative growth stats
+   in each Sunday week, and is never trimmed. Existing archived counts always
+   win and cannot be rewritten.
 
 The 800-entry detailed cap bounds the size of the single JSON blob read and
 rewritten on every refresh. It was originally about 33 days at hourly cadence
@@ -248,7 +249,8 @@ and is about 133 days at four-hour cadence. `guppies:weekly` grows only about
 `UPSTASH_REDIS_REST_*` names): `guppies:history` (Snapshot[]),
 `guppies:latest` (LiveRoster incl. `snapshots` count and `failed[]` with
 Meta error+code per skipped handle — the main remote diagnostic),
-`guppies:token` (StoredToken), `guppies:weekly` (WeeklySnapshot[], permanent).
+`guppies:token` (StoredToken), `guppies:weekly` (WeeklySnapshot[], permanent),
+`guppies:origins` (first observed count per handle, permanent).
 
 **Token lifecycle** (the part everyone gets wrong):
 - Long-lived user tokens last **60 days max** (there is no 6-month token).
@@ -264,9 +266,11 @@ Meta error+code per skipped handle — the main remote diagnostic),
 **Frontend data**: the page renders bundled `accounts.json` instantly, then
 overlays `GET /api/roster` (latest snapshot) once fetched. `RosterSource` in
 `lib/roster.ts` is the seam; `sourceFromLive` adapts the live shape.
-The hero's **Weekly snapshots** action opens the archive served by
-`GET /api/history/weekly`; ranks and species are reconstructed from the saved
-counts, while profile pictures deliberately use their current versions.
+The leaderboard's **Ocean snapshot** selector reads
+`GET /api/history/weekly`. Choosing a Sunday reconstructs the page's shared
+roster from its saved counts, so the ocean and leaderboard move together:
+ranks, species, sizes, and depths are historical, and every growth range ends
+at the selected snapshot. Profile pictures deliberately use current versions.
 
 **Profile pictures**: Meta returns short-lived signed CDN URLs. The browser uses
 stable `/api/avatar/[handle]` URLs instead; the deployment CDN caches each image

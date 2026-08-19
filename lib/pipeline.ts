@@ -1,6 +1,7 @@
 // Server-side pipeline: called by /api/cron every four hours (GitHub Actions
 // scheduler), stores snapshots in Upstash Redis, and derives the change/percent
-// the site shows over each comparison window (latest / day / week / month).
+// the site shows over each comparison window (latest / day / week / month /
+// all time).
 // Never import this from client code.
 
 import raw from "@/data/accounts.json";
@@ -14,14 +15,16 @@ import {
 } from "./roster";
 import {
   WEEKLY_ARCHIVE_START_DATE,
+  buildOriginRecords,
   buildWeeklyArchive,
   type CountSnapshot,
+  type OriginRecords,
   type WeeklyHistoryPayload,
   type WeeklySnapshot,
 } from "./weekly";
 
 // window length for each range; "latest" is special-cased to the prior snapshot
-const RANGE_MS: Record<Exclude<RangeKey, "latest">, number> = {
+const RANGE_MS: Record<Exclude<RangeKey, "latest" | "all">, number> = {
   day: 24 * 3_600_000,
   week: 7 * 24 * 3_600_000,
   month: 30 * 24 * 3_600_000,
@@ -33,6 +36,7 @@ const KEY_HISTORY = "guppies:history";
 const KEY_LATEST = "guppies:latest";
 const KEY_TOKEN = "guppies:token";
 const KEY_WEEKLY = "guppies:weekly";
+const KEY_ORIGINS = "guppies:origins";
 
 // Cap on stored snapshots. At four-hour cadence 800 covers ~133 days — enough to
 // back the "past month" window. Each snapshot is small (~27 handle:count
@@ -55,6 +59,7 @@ export interface RunSummary {
   historyReadIn: number; // history length read at the start (persistence check)
   readBack: number; // history length re-read right after writing
   weeklySnapshots: number; // permanent Sunday archive length
+  origins: number; // immutable first-seen baselines retained for all-time stats
 }
 
 // ---- Redis (Upstash REST protocol; works with the Vercel marketplace vars) ----
@@ -235,9 +240,13 @@ export async function runSnapshot(): Promise<RunSummary> {
   const history = (await redisGetJSON<CountSnapshot[]>(KEY_HISTORY)) ?? [];
   const storedWeekly =
     (await redisGetJSON<WeeklySnapshot[]>(KEY_WEEKLY)) ?? [];
+  const storedOrigins =
+    (await redisGetJSON<OriginRecords>(KEY_ORIGINS)) ?? {};
+  const origins = buildOriginRecords(storedOrigins, history);
   const prev = history[history.length - 1] ?? null;
 
-  const nowMs = Date.now();
+  const now = new Date().toISOString();
+  const nowMs = new Date(now).getTime();
   // baseline follower count for a handle at the start of a window: the newest
   // snapshot at or before the cutoff (or the previous snapshot for "latest").
   // "Show so far": when history doesn't yet reach a full window back, fall back
@@ -245,6 +254,7 @@ export async function runSnapshot(): Promise<RunSummary> {
   // instead of showing a dash.
   const baselineCount = (handle: string, key: RangeKey): number | undefined => {
     if (key === "latest") return prev?.counts[handle];
+    if (key === "all") return origins[handle]?.count;
     const cutoff = nowMs - RANGE_MS[key];
     for (let i = history.length - 1; i >= 0; i--) {
       if (new Date(history[i].t).getTime() <= cutoff) {
@@ -265,7 +275,6 @@ export async function runSnapshot(): Promise<RunSummary> {
     return s;
   };
 
-  const now = new Date().toISOString();
   const counts: Record<string, number> = {};
   const accounts: LiveAccount[] = [];
   const failed: { handle: string; reason: string }[] = [];
@@ -274,6 +283,9 @@ export async function runSnapshot(): Promise<RunSummary> {
     try {
       const got = await fetchAccount(igUserId, token, handle, handle === host);
       const previous = previousByHandle.get(handle);
+      if (!origins[handle]) {
+        origins[handle] = { t: now, count: got.followers };
+      }
       counts[handle] = got.followers;
       accounts.push({
         handle,
@@ -319,9 +331,10 @@ export async function runSnapshot(): Promise<RunSummary> {
     failed,
   };
   const timezone = process.env.WEEK_START_TZ ?? "America/Chicago";
-  const weekly = buildWeeklyArchive(storedWeekly, history, timezone);
+  const weekly = buildWeeklyArchive(storedWeekly, history, timezone, origins);
   await redisSetJSON(KEY_HISTORY, history);
   await redisSetJSON(KEY_WEEKLY, weekly);
+  await redisSetJSON(KEY_ORIGINS, origins);
   await redisSetJSON(KEY_LATEST, latest);
 
   // read the history straight back so a persistence failure is visible in logs
@@ -330,7 +343,7 @@ export async function runSnapshot(): Promise<RunSummary> {
   console.log(
     `[cron] historyReadIn=${historyReadIn} wrote=${history.length} readBack=${verify} ` +
       `weekly=${weekly.length} fetched=${accounts.length - failed.length} ` +
-      `failed=${failed.length}`,
+      `origins=${Object.keys(origins).length} failed=${failed.length}`,
   );
 
   return {
@@ -342,6 +355,7 @@ export async function runSnapshot(): Promise<RunSummary> {
     historyReadIn,
     readBack: verify,
     weeklySnapshots: weekly.length,
+    origins: Object.keys(origins).length,
   };
 }
 
@@ -352,6 +366,12 @@ export async function readLatest(): Promise<LiveRoster | null> {
 export async function readWeeklyHistory(): Promise<WeeklyHistoryPayload> {
   const timezone = process.env.WEEK_START_TZ ?? "America/Chicago";
   const stored = (await redisGetJSON<WeeklySnapshot[]>(KEY_WEEKLY)) ?? [];
+  const history =
+    (await redisGetJSON<CountSnapshot[]>(KEY_HISTORY)) ?? [];
+  const origins = buildOriginRecords(
+    (await redisGetJSON<OriginRecords>(KEY_ORIGINS)) ?? {},
+    history,
+  );
   return {
     timezone,
     startsOn: WEEKLY_ARCHIVE_START_DATE,
@@ -359,11 +379,7 @@ export async function readWeeklyHistory(): Promise<WeeklyHistoryPayload> {
     // the permanent key. The cron is the only writer.
     weeks:
       stored.length > 0
-        ? buildWeeklyArchive(stored, [], timezone)
-        : buildWeeklyArchive(
-            [],
-            (await redisGetJSON<CountSnapshot[]>(KEY_HISTORY)) ?? [],
-            timezone,
-          ),
+        ? buildWeeklyArchive(stored, history, timezone, origins)
+        : buildWeeklyArchive([], history, timezone, origins),
   };
 }

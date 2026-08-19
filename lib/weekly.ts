@@ -1,3 +1,5 @@
+import type { Stats } from "./roster";
+
 export const WEEKLY_ARCHIVE_START_DATE = "2026-07-19";
 
 export interface CountSnapshot {
@@ -11,12 +13,97 @@ export interface WeeklySnapshot {
   /** Actual snapshot selected: the first successful refresh that Sunday. */
   capturedAt: string;
   counts: Record<string, number>;
+  /** Growth windows ending at this snapshot, frozen with the archive. */
+  stats?: Record<string, Stats>;
 }
+
+export interface OriginRecord {
+  t: string;
+  count: number;
+}
+
+export type OriginRecords = Record<string, OriginRecord>;
 
 export interface WeeklyHistoryPayload {
   timezone: string;
   startsOn: string;
   weeks: WeeklySnapshot[];
+}
+
+const RANGE_MS = {
+  day: 24 * 3_600_000,
+  week: 7 * 24 * 3_600_000,
+  month: 30 * 24 * 3_600_000,
+} as const;
+
+function blankStats(): Stats {
+  return { latest: null, day: null, week: null, month: null, all: null };
+}
+
+export function buildOriginRecords(
+  existing: OriginRecords,
+  history: CountSnapshot[],
+): OriginRecords {
+  const origins: OriginRecords = { ...existing };
+  const chronological = history
+    .filter((snapshot) => Number.isFinite(new Date(snapshot.t).getTime()))
+    .slice()
+    .sort((a, b) => a.t.localeCompare(b.t));
+
+  for (const snapshot of chronological) {
+    for (const [handle, count] of Object.entries(snapshot.counts)) {
+      if (!origins[handle]) origins[handle] = { t: snapshot.t, count };
+    }
+  }
+  return origins;
+}
+
+function stat(current: number, baseline: number | undefined) {
+  if (baseline == null || baseline <= 0) return null;
+  return {
+    change: current - baseline,
+    pct: ((current - baseline) / baseline) * 100,
+  };
+}
+
+function statsAtSnapshot(
+  snapshot: WeeklySnapshot,
+  history: CountSnapshot[],
+  origins: OriginRecords,
+): Record<string, Stats> {
+  const capturedMs = new Date(snapshot.capturedAt).getTime();
+  const available = history.filter(
+    (point) => new Date(point.t).getTime() <= capturedMs,
+  );
+  const result: Record<string, Stats> = {};
+
+  for (const [handle, current] of Object.entries(snapshot.counts)) {
+    const stats = blankStats();
+    const withHandle = available.filter(
+      (point) => point.counts[handle] !== undefined,
+    );
+    const previous = [...withHandle]
+      .reverse()
+      .find((point) => new Date(point.t).getTime() < capturedMs);
+    stats.latest = stat(current, previous?.counts[handle]);
+
+    for (const key of ["day", "week", "month"] as const) {
+      const cutoff = capturedMs - RANGE_MS[key];
+      const baseline = [...withHandle]
+        .reverse()
+        .find((point) => new Date(point.t).getTime() <= cutoff);
+      // Match the live leaderboard's "show so far" behavior when the archive
+      // had not yet accumulated a full range at this historical endpoint.
+      stats[key] = stat(
+        current,
+        baseline?.counts[handle] ?? withHandle[0]?.counts[handle],
+      );
+    }
+
+    stats.all = stat(current, origins[handle]?.count);
+    result[handle] = stats;
+  }
+  return result;
 }
 
 function tzOffsetMs(tz: string, at: Date): number {
@@ -82,6 +169,7 @@ export function buildWeeklyArchive(
   existing: WeeklySnapshot[],
   history: CountSnapshot[],
   timezone: string,
+  origins: OriginRecords = {},
 ): WeeklySnapshot[] {
   const startsAt = archiveStartISO(timezone);
   const byWeek = new Map<string, WeeklySnapshot>();
@@ -107,7 +195,18 @@ export function buildWeeklyArchive(
     });
   }
 
-  return [...byWeek.values()].sort((a, b) =>
-    a.weekStart.localeCompare(b.weekStart),
-  );
+  return [...byWeek.values()]
+    .sort((a, b) => a.weekStart.localeCompare(b.weekStart))
+    .map((snapshot) => {
+      const hasCompleteStats = Object.keys(snapshot.counts).every((handle) =>
+        ["latest", "day", "week", "month", "all"].every(
+          (key) => snapshot.stats?.[handle]?.[key as keyof Stats] !== undefined,
+        ),
+      );
+      if (hasCompleteStats || history.length === 0) return snapshot;
+      return {
+        ...snapshot,
+        stats: statsAtSnapshot(snapshot, history, origins),
+      };
+    });
 }

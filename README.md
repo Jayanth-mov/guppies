@@ -40,12 +40,10 @@ npm run build   # production build
 - [components/DepthGauge.tsx](components/DepthGauge.tsx) — desktop depth
   instrument; segments are clickable to dive to a zone.
 - [components/LeaderboardPanel.tsx](components/LeaderboardPanel.tsx) — right
-  drawer (desktop, squeezes the ocean) / bottom sheet (mobile, snaps 50%/full).
-  Sort by followers or weekly growth (weeks start Sunday 12:00am) — growth is
-  how the guppies win.
-- [components/WeeklySnapshotPanel.tsx](components/WeeklySnapshotPanel.tsx) —
-  Sunday time travel: historical counts, ranks, weekly deltas, and fish species
-  from the permanent archive beginning July 19, 2026.
+  drawer (desktop, squeezes the ocean) / full-screen sheet (mobile). Its ocean
+  snapshot selector time-travels the entire page: counts, ranks, fish species,
+  size, depth, and leaderboard growth all use the selected Sunday endpoint.
+  Comparison windows include latest, day, week, month, and all time.
 - [components/EvolutionToast.tsx](components/EvolutionToast.tsx) — remembers
   each swimmer's species in localStorage and announces tier crossings on the
   next load. Dormant until counts actually move.
@@ -62,6 +60,8 @@ same-origin proxy because Meta's signed CDN URLs expire; the proxy caches the
 image bytes for a month and then revalidates against the latest snapshot.
 The rolling detailed history is capped at 800 entries; a separate Sunday
 archive stores one immutable snapshot per week indefinitely.
+Each account's first observed count is stored separately, so all-time growth
+survives even after old four-hour detail rolls out of the 800-entry window.
 
 **Full step-by-step setup lives in [PIPELINE.md](PIPELINE.md)** — Meta app
 creation, tokens, the 60-day refresh trap, Vercel Cron, and the swap-in.

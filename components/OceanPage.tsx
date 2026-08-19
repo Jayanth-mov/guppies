@@ -1,28 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  emptyStats,
   getLastUpdated,
   getRoster,
   sourceFromLive,
   type LiveRoster,
 } from "@/lib/roster";
+import type { WeeklyHistoryPayload } from "@/lib/weekly";
 import Ocean from "./Ocean";
 import { fishDomId } from "./Fish";
 import Clouds from "./Clouds";
 import DepthGauge from "./DepthGauge";
 import LeaderboardPanel, { type SortMode } from "./LeaderboardPanel";
 import EvolutionToast from "./EvolutionToast";
-import WeeklySnapshotPanel from "./WeeklySnapshotPanel";
 import styles from "./OceanPage.module.css";
 
 export default function OceanPage() {
   // bundled accounts.json renders immediately; the live snapshot (if the
   // pipeline has ever run) overlays it a moment later
-  const [roster, setRoster] = useState(() => getRoster());
-  const [lastUpdated, setLastUpdated] = useState(() => getLastUpdated());
+  const [liveRoster, setLiveRoster] = useState(() => getRoster());
+  const [liveLastUpdated, setLiveLastUpdated] = useState(() => getLastUpdated());
   const [open, setOpen] = useState(false);
-  const [snapshotsOpen, setSnapshotsOpen] = useState(false);
+  const [weeklyHistory, setWeeklyHistory] =
+    useState<WeeklyHistoryPayload | null>(null);
+  const [snapshotIndex, setSnapshotIndex] = useState(-1);
+  const [snapshotStatus, setSnapshotStatus] =
+    useState<"loading" | "ready" | "error">("loading");
   // gates EvolutionToast until the roster has settled (live data applied, or
   // confirmed unavailable) — otherwise it'd compare against localStorage
   // twice in one visit (bundled, then live) and could double-fire a toast
@@ -41,8 +46,8 @@ export default function OceanPage() {
       .then((r) => (r.ok ? (r.json() as Promise<LiveRoster>) : null))
       .then((live) => {
         if (!cancelled && live) {
-          setRoster(getRoster(sourceFromLive(live)));
-          setLastUpdated(live.lastUpdated);
+          setLiveRoster(getRoster(sourceFromLive(live)));
+          setLiveLastUpdated(live.lastUpdated);
         }
       })
       .catch(() => {
@@ -55,6 +60,55 @@ export default function OceanPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/history/weekly", { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Weekly history is unavailable.");
+        return response.json() as Promise<WeeklyHistoryPayload>;
+      })
+      .then((payload) => {
+        setWeeklyHistory(payload);
+        setSnapshotStatus("ready");
+      })
+      .catch((error: Error) => {
+        if (error.name !== "AbortError") setSnapshotStatus("error");
+      });
+    return () => controller.abort();
+  }, []);
+
+  const snapshot =
+    snapshotIndex >= 0 ? weeklyHistory?.weeks[snapshotIndex] ?? null : null;
+  const roster = useMemo(() => {
+    if (!snapshot) return liveRoster;
+    const liveByHandle = new Map(
+      liveRoster.map((entry) => [entry.handle, entry]),
+    );
+    const hostHandle =
+      liveRoster.find((entry) => entry.isHost)?.handle ?? "jayanth.mov";
+    return getRoster({
+      hostHandle,
+      lastUpdated: snapshot.capturedAt,
+      fetchRoster: () =>
+        Object.entries(snapshot.counts).map(([handle, followers]) => {
+          const live = liveByHandle.get(handle);
+          return {
+            handle,
+            name: live?.name ?? handle,
+            followers,
+            // Weekly snapshots deliberately reuse the current profile image;
+            // counts, ranks, species, size, and depth are historical.
+            avatarUrl: live?.avatarUrl ?? null,
+            stats: {
+              ...emptyStats(),
+              ...(snapshot.stats?.[handle] ?? {}),
+            },
+          };
+        }),
+    });
+  }, [liveRoster, snapshot]);
+  const lastUpdated = snapshot?.capturedAt ?? liveLastUpdated;
   const [sortMode, setSortMode] = useState<SortMode>("followers");
   const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -62,6 +116,12 @@ export default function OceanPage() {
   const [copied, setCopied] = useState(false);
   const oceanRef = useRef<HTMLDivElement | null>(null);
   const hoverTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (selected && !roster.some((entry) => entry.handle === selected)) {
+      setSelected(null);
+    }
+  }, [roster, selected]);
 
   const handleCopyLink = useCallback(async () => {
     const url = window.location.href;
@@ -230,23 +290,13 @@ export default function OceanPage() {
           A fish-themed leaderboard for lighthearted, friendly competition
           within the circle.
         </p>
-        <div className={styles.heroActions}>
-          <button
-            type="button"
-            className={styles.heroCta}
-            onClick={() => setOpen(true)}
-          >
-            View the leaderboard
-          </button>
-          <button
-            type="button"
-            className={styles.heroCta}
-            data-secondary
-            onClick={() => setSnapshotsOpen(true)}
-          >
-            Weekly snapshots
-          </button>
-        </div>
+        <button
+          type="button"
+          className={styles.heroCta}
+          onClick={() => setOpen(true)}
+        >
+          View the leaderboard
+        </button>
         <p className={styles.hint}>
           scroll to dive{" "}
           <span className={styles.arrow} aria-hidden="true">
@@ -272,7 +322,9 @@ export default function OceanPage() {
         <h2 className={styles.floorTitle}>The sea floor</h2>
         <p className={styles.floorLine}>{roster.length} swimmers and counting.</p>
         <p className={styles.floorNote}>
-          Live Instagram follower counts, refreshed periodically.
+          {snapshot
+            ? "Historical follower counts; profile pictures use their current versions."
+            : "Live Instagram follower counts, refreshed every four hours."}
         </p>
       </footer>
 
@@ -289,15 +341,13 @@ export default function OceanPage() {
         onHoverRow={handleHoverRow}
         focusRow={focusRow}
         onFocusRowHandled={() => setFocusRow(null)}
+        weeklyHistory={weeklyHistory}
+        snapshotIndex={snapshotIndex}
+        snapshotStatus={snapshotStatus}
+        onSnapshotIndex={setSnapshotIndex}
       />
 
-      <WeeklySnapshotPanel
-        open={snapshotsOpen}
-        onClose={() => setSnapshotsOpen(false)}
-        roster={roster}
-      />
-
-      {rosterSettled && <EvolutionToast roster={roster} />}
+      {rosterSettled && <EvolutionToast roster={liveRoster} />}
     </div>
   );
 }

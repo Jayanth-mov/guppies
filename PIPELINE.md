@@ -132,7 +132,9 @@ The code is in place:
 - [app/api/history/weekly/route.ts](app/api/history/weekly/route.ts) — serves
   the permanent Sunday archive. The first post-deploy cron backfills July 19,
   2026 onward from `guppies:history`, then preserves the first successful
-  snapshot in every Sunday week indefinitely in `guppies:weekly`.
+  snapshot and its endpoint-relative growth stats in every Sunday week
+  indefinitely in `guppies:weekly`. `guppies:origins` separately preserves
+  every handle's first count for the All time range.
 - [.github/workflows/refresh.yml](.github/workflows/refresh.yml) — the
   scheduler. **Vercel's free Hobby plan only allows daily crons**, so a
   GitHub Action pings `/api/cron` every four hours instead (free, same repo).

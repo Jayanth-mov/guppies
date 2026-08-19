@@ -254,15 +254,8 @@
   }
 }
 
-.heroActions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 9px;
-  margin: 16px 0 0;
-}
-
 .heroCta {
+  margin: 16px 0 0;
   padding: 10px 22px;
   border-radius: 999px;
   background: rgba(4, 22, 38, 0.72);
@@ -277,12 +270,6 @@
 .heroCta:hover {
   border-color: var(--accent);
   transform: translateY(-1px);
-}
-
-.heroCta[data-secondary] {
-  background: rgba(233, 247, 255, 0.2);
-  border-color: rgba(10, 44, 71, 0.3);
-  color: var(--ink-dark);
 }
 
 /* Phones have a much smaller paint/compositing budget. Keep one gently moving

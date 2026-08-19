@@ -9,6 +9,7 @@ import {
   type RangeStat,
 } from "@/lib/roster";
 import { formatCount } from "@/lib/species";
+import type { WeeklyHistoryPayload } from "@/lib/weekly";
 import { avatarHue, initialsFor } from "./Fish";
 import { FISH_SHAPES } from "./FishShapes";
 import styles from "./LeaderboardPanel.module.css";
@@ -27,6 +28,10 @@ interface PanelProps {
   onHoverRow: (handle: string | null) => void;
   focusRow: string | null;
   onFocusRowHandled: () => void;
+  weeklyHistory: WeeklyHistoryPayload | null;
+  snapshotIndex: number;
+  snapshotStatus: "loading" | "ready" | "error";
+  onSnapshotIndex: (index: number) => void;
 }
 
 const RANGE_LABEL: Record<RangeKey, string> = {
@@ -34,7 +39,17 @@ const RANGE_LABEL: Record<RangeKey, string> = {
   day: "Past day",
   week: "Past week",
   month: "Past month",
+  all: "All time",
 };
+
+function snapshotDate(iso: string, timezone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(iso));
+}
 
 function formatAgo(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -88,6 +103,10 @@ export default function LeaderboardPanel({
   onHoverRow,
   focusRow,
   onFocusRowHandled,
+  weeklyHistory,
+  snapshotIndex,
+  snapshotStatus,
+  onSnapshotIndex,
 }: PanelProps) {
   const rowRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const rangeRef = useRef<HTMLDivElement | null>(null);
@@ -96,6 +115,12 @@ export default function LeaderboardPanel({
   const [range, setRange] = useState<RangeKey>("day");
   const [growthSort, setGrowthSort] = useState<GrowthSort>("pct");
   const [menuOpen, setMenuOpen] = useState(false);
+  const selectedSnapshot =
+    snapshotIndex >= 0 ? weeklyHistory?.weeks[snapshotIndex] ?? null : null;
+  const selectedDate =
+    selectedSnapshot && weeklyHistory
+      ? snapshotDate(selectedSnapshot.weekStart, weeklyHistory.timezone)
+      : null;
 
   // each tab has its own default window; switching tabs resets to it
   useEffect(() => {
@@ -201,6 +226,35 @@ export default function LeaderboardPanel({
         <h2 className={styles.title}>Leaderboard</h2>
       </header>
 
+      <div className={styles.snapshotPicker}>
+        <label htmlFor="ocean-snapshot">Ocean snapshot</label>
+        <select
+          id="ocean-snapshot"
+          value={snapshotIndex}
+          disabled={snapshotStatus !== "ready"}
+          onChange={(event) => onSnapshotIndex(Number(event.target.value))}
+        >
+          <option value={-1}>Live · latest</option>
+          {weeklyHistory?.weeks
+            .map((week, index) => ({ week, index }))
+            .reverse()
+            .map(({ week, index }) => (
+              <option key={week.weekStart} value={index}>
+                Week of {snapshotDate(week.weekStart, weeklyHistory.timezone)}
+              </option>
+            ))}
+        </select>
+        <p className={styles.snapshotNote}>
+          {snapshotStatus === "loading"
+            ? "Loading weekly history…"
+            : snapshotStatus === "error"
+              ? "Weekly history is temporarily unavailable."
+              : selectedDate
+                ? `Ocean and leaderboard as of ${selectedDate}. Every growth range ends at this snapshot.`
+                : "Current ocean. Choose a week to move every fish and rank back in time."}
+        </p>
+      </div>
+
       <div className={styles.toggle} role="group" aria-label="Sort leaderboard">
         <button
           type="button"
@@ -303,9 +357,15 @@ export default function LeaderboardPanel({
           <div className={styles.menu} role="menu">
             <div className={styles.menuHead}>
               <span className={styles.menuUpdated}>
-                last updated {updatedAgo ?? "—"}
+                {selectedDate
+                  ? `snapshot ${selectedDate}`
+                  : `last updated ${updatedAgo ?? "—"}`}
               </span>
-              <span className={styles.menuHint}>updates every 4 hours</span>
+              <span className={styles.menuHint}>
+                {selectedDate
+                  ? "every range ends at this snapshot"
+                  : "updates every 4 hours · all time starts at first tracking"}
+              </span>
             </div>
             {RANGE_KEYS.map((k) => (
               <button

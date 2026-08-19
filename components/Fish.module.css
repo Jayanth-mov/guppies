@@ -25,6 +25,21 @@
   border-radius: 8px;
 }
 
+/* A selected weekly snapshot changes the data behind each fish. Let its new
+   historical depth, lane, and size settle into place instead of teleporting. */
+@media (prefers-reduced-motion: no-preference) {
+  .wrap {
+    transition:
+      top 0.85s cubic-bezier(0.4, 0, 0.2, 1),
+      left 0.85s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.3s ease;
+  }
+
+  .hit {
+    transition: width 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
 /* generous invisible hit area so a drifting fish doesn't flicker out from
    under the cursor; extra depth above/below covers the count readout and
    the label gap */

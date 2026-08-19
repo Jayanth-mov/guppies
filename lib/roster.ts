@@ -8,8 +8,14 @@ import {
 } from "./species";
 
 // Comparison windows offered by the leaderboard's range selector.
-export type RangeKey = "latest" | "day" | "week" | "month";
-export const RANGE_KEYS: RangeKey[] = ["latest", "day", "week", "month"];
+export type RangeKey = "latest" | "day" | "week" | "month" | "all";
+export const RANGE_KEYS: RangeKey[] = [
+  "latest",
+  "day",
+  "week",
+  "month",
+  "all",
+];
 
 // Follower change + percent over a window; null until history reaches back far
 // enough for an honest baseline.
@@ -20,7 +26,7 @@ export interface RangeStat {
 export type Stats = Record<RangeKey, RangeStat | null>;
 
 export function emptyStats(): Stats {
-  return { latest: null, day: null, week: null, month: null };
+  return { latest: null, day: null, week: null, month: null, all: null };
 }
 
 // Never expose Meta's short-lived signed CDN URL as an image src. The stable
@@ -140,7 +146,9 @@ export function sourceFromLive(live: LiveRoster): RosterSource {
         name: a.name ?? a.handle,
         followers: a.followers,
         avatarUrl: a.avatarUrl,
-        stats: a.stats ?? emptyStats(),
+        // Older cached live snapshots predate newer range keys. Fill them so
+        // the client can switch ranges safely during a rolling deployment.
+        stats: { ...emptyStats(), ...(a.stats ?? {}) },
       })),
   };
 }
