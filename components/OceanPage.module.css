@@ -233,27 +233,6 @@
   }
 }
 
-@keyframes sunPulse {
-  from {
-    box-shadow:
-      0 0 36px 12px rgba(255, 250, 232, 0.78),
-      0 0 84px 36px rgba(255, 243, 208, 0.5),
-      0 0 180px 84px rgba(255, 236, 186, 0.28);
-  }
-  to {
-    box-shadow:
-      0 0 48px 18px rgba(255, 250, 232, 0.9),
-      0 0 104px 48px rgba(255, 243, 208, 0.6),
-      0 0 210px 100px rgba(255, 236, 186, 0.36);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .sun {
-    animation: sunPulse 7s ease-in-out infinite alternate;
-  }
-}
-
 .heroCta {
   margin: 16px 0 0;
   padding: 10px 22px;
@@ -273,8 +252,7 @@
 }
 
 /* Phones have a much smaller paint/compositing budget. Keep one gently moving
-   wave so the surface still feels alive, but freeze the two rear layers and
-   the paint-heavy animated sun glow. */
+   wave so the surface still feels alive, but freeze the two rear layers. */
 @media (max-width: 760px), (hover: none) and (pointer: coarse) {
   .wave {
     will-change: auto;
@@ -289,10 +267,6 @@
   .wave[data-w="front"] {
     animation-duration: 12s;
     will-change: transform;
-  }
-
-  .sun {
-    animation: none;
   }
 
   .surfaceGlint {

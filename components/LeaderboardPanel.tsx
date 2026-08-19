@@ -293,36 +293,6 @@ export default function LeaderboardPanel({
     >
       <header className={styles.head}>
         <h2 className={styles.title}>Leaderboard</h2>
-        <div className={styles.snapshotPicker}>
-          <label htmlFor="ocean-snapshot">Snapshot</label>
-          <select
-            id="ocean-snapshot"
-            value={snapshotIndex}
-            disabled={snapshotStatus !== "ready"}
-            title={
-              snapshotStatus === "error"
-                ? "Weekly history is temporarily unavailable"
-                : "Choose the date shown by the ocean and leaderboard"
-            }
-            onChange={(event) => onSnapshotIndex(Number(event.target.value))}
-          >
-            <option value={-1}>
-              {snapshotStatus === "loading"
-                ? "Loading snapshots…"
-                : snapshotStatus === "error"
-                  ? "Snapshots unavailable"
-                  : "Live · latest"}
-            </option>
-            {weeklyHistory?.weeks
-              .map((week, index) => ({ week, index }))
-              .reverse()
-              .map(({ week, index }) => (
-                <option key={week.weekStart} value={index}>
-                  Week of {snapshotDate(week.weekStart, weeklyHistory.timezone)}
-                </option>
-              ))}
-          </select>
-        </div>
       </header>
 
       <div className={styles.toggle} role="group" aria-label="Sort leaderboard">
@@ -424,55 +394,95 @@ export default function LeaderboardPanel({
         ))}
       </ol>
 
-      <div className={styles.rangeBar} ref={rangeRef}>
-        {menuOpen && (
-          <div className={styles.menu} role="menu">
-            <div className={styles.menuHead}>
-              <span className={styles.menuUpdated}>
-                {selectedDate
-                  ? `snapshot ${selectedDate}`
-                  : `last updated ${updatedAgo ?? "—"}`}
-              </span>
-              <span className={styles.menuHint}>
-                {selectedDate
-                  ? "every range ends at this snapshot"
-                  : "updates every 4 hours · all time starts at first tracking"}
-              </span>
-            </div>
-            {RANGE_KEYS.map((k) => (
-              <button
-                key={k}
-                type="button"
-                role="menuitemradio"
-                aria-checked={range === k}
-                className={styles.menuItem}
-                data-on={range === k || undefined}
-                onClick={() => {
-                  setRange(k);
-                  setMenuOpen(false);
-                }}
-              >
-                {RANGE_LABEL[k]}
-              </button>
-            ))}
+      <div className={styles.controlsBar}>
+        <div className={styles.snapshotPicker}>
+          <label className={styles.controlCaption} htmlFor="ocean-snapshot">
+            Snapshot
+          </label>
+          <div className={styles.snapshotSelectWrap}>
+            <select
+              id="ocean-snapshot"
+              value={snapshotIndex}
+              disabled={snapshotStatus !== "ready"}
+              title={
+                snapshotStatus === "error"
+                  ? "Weekly history is temporarily unavailable"
+                  : "Choose the date shown by the ocean and leaderboard"
+              }
+              onChange={(event) => onSnapshotIndex(Number(event.target.value))}
+            >
+              <option value={-1}>
+                {snapshotStatus === "loading"
+                  ? "Loading snapshots…"
+                  : snapshotStatus === "error"
+                    ? "Snapshots unavailable"
+                    : "Live · latest"}
+              </option>
+              {weeklyHistory?.weeks
+                .map((week, index) => ({ week, index }))
+                .reverse()
+                .map(({ week, index }) => (
+                  <option key={week.weekStart} value={index}>
+                    Week of {snapshotDate(week.weekStart, weeklyHistory.timezone)}
+                  </option>
+                ))}
+            </select>
+            <span className={styles.selectChevron} aria-hidden="true">
+              ▾
+            </span>
           </div>
-        )}
-        <button
-          type="button"
-          className={styles.rangeBtn}
-          data-open={menuOpen || undefined}
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          <span className={styles.rangeCaption}>
-            {sortMode === "growth" ? "growth over" : "showing"}
-          </span>
-          <span className={styles.rangeValue}>{RANGE_LABEL[range]}</span>
-          <span className={styles.chevron} aria-hidden="true">
-            ▾
-          </span>
-        </button>
+        </div>
+
+        <div className={styles.rangeBar} ref={rangeRef}>
+          {menuOpen && (
+            <div className={styles.menu} role="menu">
+              <div className={styles.menuHead}>
+                <span className={styles.menuUpdated}>
+                  {selectedDate
+                    ? `snapshot ${selectedDate}`
+                    : `last updated ${updatedAgo ?? "—"}`}
+                </span>
+                <span className={styles.menuHint}>
+                  {selectedDate
+                    ? "every range ends at this snapshot"
+                    : "updates every 4 hours · all time starts at first tracking"}
+                </span>
+              </div>
+              {RANGE_KEYS.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={range === k}
+                  className={styles.menuItem}
+                  data-on={range === k || undefined}
+                  onClick={() => {
+                    setRange(k);
+                    setMenuOpen(false);
+                  }}
+                >
+                  {RANGE_LABEL[k]}
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            className={styles.rangeBtn}
+            data-open={menuOpen || undefined}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span className={styles.rangeCaption}>Showing</span>
+            <span className={styles.rangeValueRow}>
+              <span className={styles.rangeValue}>{RANGE_LABEL[range]}</span>
+              <span className={styles.chevron} aria-hidden="true">
+                ▾
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
     </section>
   );
