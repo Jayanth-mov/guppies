@@ -11,7 +11,9 @@
     },
     {
       "handle": "mann.ascends",
-      "name": "Mann"
+      "name": "Mann",
+      "alwaysShowHistory": true,
+      "historicalHandles": ["mannascends"]
     },
     {
       "handle": "akrit.agra",
@@ -127,7 +129,8 @@
       "handle": "evannrama"
     },
     {
-      "handle": "acegotchuu"
+      "handle": "acegotchuu",
+      "historyStartsOn": "2026-08-16"
     },
     {
       "handle": "nathaneo_j"

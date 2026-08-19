@@ -43,7 +43,8 @@ npm run build   # production build
   drawer (desktop, squeezes the ocean) / full-screen sheet (mobile). Its ocean
   snapshot selector time-travels the entire page: counts, ranks, fish species,
   size, depth, and leaderboard growth all use the selected Sunday endpoint.
-  Comparison windows include latest, day, week, month, and all time.
+  Comparison windows include latest, day, week, month, and all time. Rows glide
+  into their historical order while fish visibly swim to their new depth.
 - [components/EvolutionToast.tsx](components/EvolutionToast.tsx) — remembers
   each swimmer's species in localStorage and announces tier crossings on the
   next load. Dormant until counts actually move.
@@ -62,6 +63,8 @@ The rolling detailed history is capped at 800 entries; a separate Sunday
 archive stores one immutable snapshot per week indefinitely.
 Each account's first observed count is stored separately, so all-time growth
 survives even after old four-hour detail rolls out of the 800-entry window.
+Historical membership comes from the snapshot itself, with optional per-account
+continuity/start metadata in `accounts.json` for known handle anomalies.
 
 **Full step-by-step setup lives in [PIPELINE.md](PIPELINE.md)** — Meta app
 creation, tokens, the 60-day refresh trap, Vercel Cron, and the swap-in.

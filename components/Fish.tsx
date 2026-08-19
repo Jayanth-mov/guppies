@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { avatarProxyUrl, type FishEntry } from "@/lib/roster";
 import { formatCount } from "@/lib/species";
 import { pick, rng } from "@/lib/rand";
@@ -40,6 +40,26 @@ export default function Fish({
   onSelect,
   swimSeed,
 }: FishProps) {
+  const previousDepth = useRef(entry.depth);
+  const migrationCycle = useRef(0);
+  const [migrating, setMigrating] = useState<{
+    direction: "up" | "down";
+    cycle: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const before = previousDepth.current;
+    previousDepth.current = entry.depth;
+    if (Math.abs(entry.depth - before) < 0.0001) return;
+    migrationCycle.current += 1;
+    setMigrating({
+      direction: entry.depth > before ? "down" : "up",
+      cycle: migrationCycle.current,
+    });
+    const timer = window.setTimeout(() => setMigrating(null), 2400);
+    return () => window.clearTimeout(timer);
+  }, [entry.depth]);
+
   const shape = FISH_SHAPES[entry.species.symbolId];
   // depth stays data-driven (it encodes rank); only lane + animation timing
   // reshuffle with the per-visit seed
@@ -90,6 +110,7 @@ export default function Fish({
       data-highlight={highlighted || undefined}
       data-dim={dimmed || undefined}
       data-abyssal={abyssal || undefined}
+      data-migrating={migrating?.direction}
       style={style}
     >
       <div className={styles.drifter}>
@@ -105,6 +126,7 @@ export default function Fish({
             </span>
             <span className={styles.flip}>
               <svg
+                key={`${entry.species.symbolId}:${migrating?.cycle ?? "idle"}`}
                 className={styles.sprite}
                 viewBox={shape.viewBox}
                 style={{ aspectRatio: `${shape.w} / ${shape.h}` }}

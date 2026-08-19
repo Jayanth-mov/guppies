@@ -1,4 +1,4 @@
-import raw from "@/data/accounts.json";
+import raw from "../data/accounts.json";
 import {
   Species,
   depthFor,
@@ -6,6 +6,7 @@ import {
   speciesIndexFor,
   widthFor,
 } from "./species";
+import type { WeeklyHistoryPayload, WeeklySnapshot } from "./weekly";
 
 // Comparison windows offered by the leaderboard's range selector.
 export type RangeKey = "latest" | "day" | "week" | "month" | "all";
@@ -80,13 +81,20 @@ interface AccountRow {
   name?: string;
   followers?: number;
   profilePictureUrl?: string;
+  /** Product-level membership date when legacy data predates roster entry. */
+  historyStartsOn?: string;
+  /** Preserve a continuous historical identity across handle/API gaps. */
+  alwaysShowHistory?: boolean;
+  historicalHandles?: string[];
 }
+
+const configuredAccounts = raw.accounts as AccountRow[];
 
 const localSource: RosterSource = {
   hostHandle: raw.hostAccount,
   lastUpdated: raw.lastUpdated,
   fetchRoster: () =>
-    (raw.accounts as AccountRow[]).map((a) => ({
+    configuredAccounts.map((a) => ({
       handle: a.handle,
       name: a.name ?? a.handle,
       followers: a.followers ?? 0,
@@ -150,5 +158,122 @@ export function sourceFromLive(live: LiveRoster): RosterSource {
         // the client can switch ranges safely during a rolling deployment.
         stats: { ...emptyStats(), ...(a.stats ?? {}) },
       })),
+  };
+}
+
+interface HistoricalValue {
+  followers: number;
+  stats: Stats;
+}
+
+function valueInSnapshot(
+  snapshot: WeeklySnapshot,
+  handles: string[],
+): HistoricalValue | null {
+  for (const handle of handles) {
+    const followers = snapshot.counts[handle];
+    if (followers === undefined) continue;
+    return {
+      followers,
+      stats: { ...emptyStats(), ...(snapshot.stats?.[handle] ?? {}) },
+    };
+  }
+  return null;
+}
+
+function continuousHistoricalValue(
+  history: WeeklyHistoryPayload,
+  snapshotIndex: number,
+  handles: string[],
+): HistoricalValue | null {
+  // If an identity temporarily disappears, carry its last real observation.
+  for (let index = snapshotIndex - 1; index >= 0; index--) {
+    const previous = valueInSnapshot(history.weeks[index], handles);
+    if (previous) return previous;
+  }
+
+  // Mann's only gap predates his first archived canonical-handle snapshot.
+  // Recover the immutable origin from that later row's all-time delta rather
+  // than pretending his much-larger later count existed in the first week.
+  for (let index = snapshotIndex + 1; index < history.weeks.length; index++) {
+    const later = valueInSnapshot(history.weeks[index], handles);
+    if (!later) continue;
+    const origin = later.stats.all
+      ? Math.round(later.followers - later.stats.all.change)
+      : later.followers;
+    return {
+      followers: origin,
+      stats: {
+        ...emptyStats(),
+        all: origin > 0 ? { change: 0, pct: 0 } : null,
+      },
+    };
+  }
+  return null;
+}
+
+/**
+ * Adapts one permanent weekly snapshot into the same source used by the live
+ * ocean. Snapshot membership is authoritative: accounts without a count do
+ * not appear, except explicitly continuous identities such as Mann.
+ */
+export function sourceFromWeekly(
+  history: WeeklyHistoryPayload,
+  snapshotIndex: number,
+  liveRoster: FishEntry[],
+): RosterSource {
+  const snapshot = history.weeks[snapshotIndex];
+  const liveByHandle = new Map(
+    liveRoster.map((entry) => [entry.handle, entry]),
+  );
+  const configuredByHandle = new Map(
+    configuredAccounts.map((account) => [account.handle, account]),
+  );
+  const canonicalByHistoricalHandle = new Map<string, string>();
+  for (const account of configuredAccounts) {
+    for (const historical of account.historicalHandles ?? []) {
+      canonicalByHistoricalHandle.set(historical, account.handle);
+    }
+  }
+
+  const values = new Map<string, HistoricalValue>();
+  for (const handle of Object.keys(snapshot.counts)) {
+    const canonical = canonicalByHistoricalHandle.get(handle) ?? handle;
+    const policy = configuredByHandle.get(canonical);
+    if (
+      policy?.historyStartsOn &&
+      snapshot.weekStart.slice(0, 10) < policy.historyStartsOn
+    ) {
+      continue;
+    }
+    const value = valueInSnapshot(snapshot, [canonical, handle]);
+    if (value) values.set(canonical, value);
+  }
+
+  for (const account of configuredAccounts) {
+    if (!account.alwaysShowHistory || values.has(account.handle)) continue;
+    const value = continuousHistoricalValue(history, snapshotIndex, [
+      account.handle,
+      ...(account.historicalHandles ?? []),
+    ]);
+    if (value) values.set(account.handle, value);
+  }
+
+  return {
+    hostHandle:
+      liveRoster.find((entry) => entry.isHost)?.handle ?? raw.hostAccount,
+    lastUpdated: snapshot.capturedAt,
+    fetchRoster: () =>
+      [...values.entries()].map(([handle, value]) => {
+        const live = liveByHandle.get(handle);
+        const configured = configuredByHandle.get(handle);
+        return {
+          handle,
+          name: live?.name ?? configured?.name ?? handle,
+          followers: value.followers,
+          avatarUrl: live?.avatarUrl ?? null,
+          stats: value.stats,
+        };
+      }),
   };
 }

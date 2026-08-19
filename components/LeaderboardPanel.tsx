@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   avatarProxyUrl,
   RANGE_KEYS,
@@ -109,6 +115,8 @@ export default function LeaderboardPanel({
   onSnapshotIndex,
 }: PanelProps) {
   const rowRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const previousRowTops = useRef<Map<string, number>>(new Map());
+  const rowAnimations = useRef<Map<string, Animation>>(new Map());
   const rangeRef = useRef<HTMLDivElement | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [updatedAgo, setUpdatedAgo] = useState<string | null>(null);
@@ -150,6 +158,57 @@ export default function LeaderboardPanel({
     return arr; // roster arrives sorted by followers
   }, [roster, sortMode, range, growthSort]);
 
+  // FLIP animation: remember every row's old screen position, let React put
+  // it in the new rank order, then visually glide it from old to new.
+  useLayoutEffect(() => {
+    const nextTops = new Map<string, number>();
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const hadPreviousRows = previousRowTops.current.size > 0;
+
+    for (const entry of sorted) {
+      const row = rowRefs.current.get(entry.handle);
+      if (!row) continue;
+      const nextTop = row.getBoundingClientRect().top;
+      nextTops.set(entry.handle, nextTop);
+      if (!open || reduced || typeof row.animate !== "function") continue;
+
+      rowAnimations.current.get(entry.handle)?.cancel();
+      const previousTop = previousRowTops.current.get(entry.handle);
+      const delta = previousTop == null ? 0 : previousTop - nextTop;
+      const animation = row.animate(
+        previousTop == null && hadPreviousRows
+          ? [
+              { opacity: 0, transform: "translateY(12px)" },
+              { opacity: 1, transform: "translateY(0)" },
+            ]
+          : [
+              {
+                opacity: Math.abs(delta) > 1 ? 0.72 : 0.88,
+                transform: `translateY(${delta}px)`,
+              },
+              { opacity: 1, transform: "translateY(0)" },
+            ],
+        {
+          duration: 900,
+          easing: "cubic-bezier(0.22, 0.78, 0.24, 1)",
+        },
+      );
+      rowAnimations.current.set(entry.handle, animation);
+    }
+    previousRowTops.current = nextTops;
+  }, [open, snapshotIndex, sorted]);
+
+  useEffect(
+    () => () => {
+      for (const animation of rowAnimations.current.values()) {
+        animation.cancel();
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -190,9 +249,10 @@ export default function LeaderboardPanel({
   }, [open, focusRow, onFocusRowHandled]);
 
   const renderNums = (stat: RangeStat | null, followers: number) => {
+    const valueKey = `${sortMode}:${followers}:${stat?.change ?? "x"}:${stat?.pct ?? "x"}`;
     if (sortMode === "followers") {
       return (
-        <span className={styles.nums}>
+        <span key={valueKey} className={`${styles.nums} ${styles.valueSwap}`}>
           <span className={styles.primary}>{formatCount(followers)}</span>
           <span className={styles.secondary} data-dir={dirOf(stat?.change)}>
             {changeChip(stat?.change ?? null)}
@@ -202,7 +262,10 @@ export default function LeaderboardPanel({
     }
     // growth: absolute change | percent, with a divider between
     return (
-      <span className={styles.growthCell}>
+      <span
+        key={valueKey}
+        className={`${styles.growthCell} ${styles.valueSwap}`}
+      >
         <span className={styles.growthNum} data-dir={dirOf(stat?.change)}>
           {changeNum(stat?.change ?? null)}
         </span>
@@ -224,36 +287,37 @@ export default function LeaderboardPanel({
     >
       <header className={styles.head}>
         <h2 className={styles.title}>Leaderboard</h2>
+        <div className={styles.snapshotPicker}>
+          <label htmlFor="ocean-snapshot">Snapshot</label>
+          <select
+            id="ocean-snapshot"
+            value={snapshotIndex}
+            disabled={snapshotStatus !== "ready"}
+            title={
+              snapshotStatus === "error"
+                ? "Weekly history is temporarily unavailable"
+                : "Choose the date shown by the ocean and leaderboard"
+            }
+            onChange={(event) => onSnapshotIndex(Number(event.target.value))}
+          >
+            <option value={-1}>
+              {snapshotStatus === "loading"
+                ? "Loading snapshots…"
+                : snapshotStatus === "error"
+                  ? "Snapshots unavailable"
+                  : "Live · latest"}
+            </option>
+            {weeklyHistory?.weeks
+              .map((week, index) => ({ week, index }))
+              .reverse()
+              .map(({ week, index }) => (
+                <option key={week.weekStart} value={index}>
+                  Week of {snapshotDate(week.weekStart, weeklyHistory.timezone)}
+                </option>
+              ))}
+          </select>
+        </div>
       </header>
-
-      <div className={styles.snapshotPicker}>
-        <label htmlFor="ocean-snapshot">Ocean snapshot</label>
-        <select
-          id="ocean-snapshot"
-          value={snapshotIndex}
-          disabled={snapshotStatus !== "ready"}
-          onChange={(event) => onSnapshotIndex(Number(event.target.value))}
-        >
-          <option value={-1}>Live · latest</option>
-          {weeklyHistory?.weeks
-            .map((week, index) => ({ week, index }))
-            .reverse()
-            .map(({ week, index }) => (
-              <option key={week.weekStart} value={index}>
-                Week of {snapshotDate(week.weekStart, weeklyHistory.timezone)}
-              </option>
-            ))}
-        </select>
-        <p className={styles.snapshotNote}>
-          {snapshotStatus === "loading"
-            ? "Loading weekly history…"
-            : snapshotStatus === "error"
-              ? "Weekly history is temporarily unavailable."
-              : selectedDate
-                ? `Ocean and leaderboard as of ${selectedDate}. Every growth range ends at this snapshot.`
-                : "Current ocean. Choose a week to move every fish and rank back in time."}
-        </p>
-      </div>
 
       <div className={styles.toggle} role="group" aria-label="Sort leaderboard">
         <button
@@ -318,7 +382,9 @@ export default function LeaderboardPanel({
               onFocus={() => onHoverRow(e.handle)}
               onBlur={() => onHoverRow(null)}
             >
-              <span className={styles.rank}>{i + 1}</span>
+              <span key={`${e.handle}:${i}`} className={styles.rank}>
+                {i + 1}
+              </span>
               <span
                 className={styles.avatar}
                 style={{

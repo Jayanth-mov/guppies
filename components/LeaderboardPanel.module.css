@@ -14,7 +14,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: 340px;
+    width: 400px;
     border-left: 1px solid var(--panel-line);
     transform: translateX(100%);
     transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.38s;
@@ -42,16 +42,20 @@
 }
 
 .head {
-  padding: 18px 16px 6px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px 10px;
 }
 
 @media (min-width: 980px) {
   .head {
-    padding: 14px 16px 6px;
+    padding: 14px 16px 10px;
   }
 }
 
 .title {
+  flex: none;
   margin: 0;
   font-size: 19px;
   font-weight: 600;
@@ -59,16 +63,16 @@
 }
 
 .snapshotPicker {
-  margin: 4px 16px 10px;
-  padding: 10px;
-  border: 1px solid var(--panel-line);
-  border-radius: 9px;
-  background: rgba(2, 10, 20, 0.42);
+  min-width: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
 }
 
 .snapshotPicker label {
-  display: block;
-  margin-bottom: 5px;
+  flex: none;
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.09em;
@@ -77,7 +81,8 @@
 }
 
 .snapshotPicker select {
-  width: 100%;
+  width: 190px;
+  min-width: 0;
   padding: 7px 30px 7px 9px;
   border: 1px solid rgba(108, 200, 235, 0.3);
   border-radius: 7px;
@@ -91,11 +96,23 @@
   opacity: 0.55;
 }
 
-.snapshotNote {
-  margin: 7px 0 0;
-  font-size: 10.5px;
-  line-height: 1.4;
-  opacity: 0.58;
+@media (max-width: 420px) {
+  .head {
+    gap: 9px;
+  }
+
+  .snapshotPicker label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .snapshotPicker select {
+    width: min(174px, 48vw);
+    font-size: 11px;
+  }
 }
 
 .toggle {
@@ -164,6 +181,26 @@
   text-decoration: none;
   border-bottom: 1px solid var(--panel-line);
   transition: background-color 0.15s ease;
+}
+
+@keyframes valueSwap {
+  from {
+    opacity: 0.2;
+    transform: translateY(5px);
+    filter: blur(1px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .valueSwap,
+  .rank {
+    animation: valueSwap 0.65s cubic-bezier(0.22, 0.78, 0.24, 1);
+  }
 }
 
 .row:hover,

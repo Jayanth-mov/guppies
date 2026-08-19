@@ -8,7 +8,7 @@
   }
 
   .squeezed {
-    margin-right: 340px;
+    margin-right: 400px;
   }
 }
 
@@ -55,7 +55,7 @@
 
 @media (min-width: 980px) {
   .squeezed .fab {
-    right: 356px;
+    right: 416px;
   }
 }
 

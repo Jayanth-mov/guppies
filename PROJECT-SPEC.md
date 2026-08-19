@@ -82,7 +82,8 @@ components/
   LeaderboardPanel.tsx/.css  right drawer (desktop, squeezes ocean) /
                         full-screen sheet (mobile); Followers & Growth tabs,
                         global Sunday snapshot picker, growth sub-sort, range
-                        dropup including All time, white mini-fish icons
+                        dropup including All time, FLIP row transitions,
+                        white mini-fish icons
   EvolutionToast.tsx/.css  localStorage species memory → tier-crossing toasts
 lib/
   species.ts            SINGLE SOURCE OF TRUTH: 12 tiers, band colors, depth &
@@ -96,7 +97,8 @@ lib/
   species.test.ts       11 vitest cases: tier boundaries, depth monotonicity,
                         size invariants
   weekly.test.ts        Sunday/DST, July 19 start, immutable backfill tests
-data/accounts.json      the roster (28 handles) + bundled fallback counts
+data/accounts.json      the roster (28 handles) + bundled fallback counts;
+                        optional historical membership/alias policies
 scripts/
   fetch-followers.mjs   manual local fetch → writes real counts into
                         accounts.json (token via env, never committed)

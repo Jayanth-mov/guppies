@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  emptyStats,
   getLastUpdated,
   getRoster,
   sourceFromLive,
+  sourceFromWeekly,
   type LiveRoster,
 } from "@/lib/roster";
 import type { WeeklyHistoryPayload } from "@/lib/weekly";
@@ -81,33 +81,11 @@ export default function OceanPage() {
   const snapshot =
     snapshotIndex >= 0 ? weeklyHistory?.weeks[snapshotIndex] ?? null : null;
   const roster = useMemo(() => {
-    if (!snapshot) return liveRoster;
-    const liveByHandle = new Map(
-      liveRoster.map((entry) => [entry.handle, entry]),
+    if (!snapshot || !weeklyHistory) return liveRoster;
+    return getRoster(
+      sourceFromWeekly(weeklyHistory, snapshotIndex, liveRoster),
     );
-    const hostHandle =
-      liveRoster.find((entry) => entry.isHost)?.handle ?? "jayanth.mov";
-    return getRoster({
-      hostHandle,
-      lastUpdated: snapshot.capturedAt,
-      fetchRoster: () =>
-        Object.entries(snapshot.counts).map(([handle, followers]) => {
-          const live = liveByHandle.get(handle);
-          return {
-            handle,
-            name: live?.name ?? handle,
-            followers,
-            // Weekly snapshots deliberately reuse the current profile image;
-            // counts, ranks, species, size, and depth are historical.
-            avatarUrl: live?.avatarUrl ?? null,
-            stats: {
-              ...emptyStats(),
-              ...(snapshot.stats?.[handle] ?? {}),
-            },
-          };
-        }),
-    });
-  }, [liveRoster, snapshot]);
+  }, [liveRoster, snapshot, snapshotIndex, weeklyHistory]);
   const lastUpdated = snapshot?.capturedAt ?? liveLastUpdated;
   const [sortMode, setSortMode] = useState<SortMode>("followers");
   const [hovered, setHovered] = useState<string | null>(null);
