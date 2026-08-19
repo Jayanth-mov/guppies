@@ -126,10 +126,14 @@ export default function LeaderboardPanel({
   const snapshotRef = useRef<HTMLDivElement | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [updatedAgo, setUpdatedAgo] = useState<string | null>(null);
-  const [range, setRange] = useState<RangeKey>("day");
+  const [ranges, setRanges] = useState<Record<SortMode, RangeKey>>({
+    followers: "day",
+    growth: "week",
+  });
   const [growthSort, setGrowthSort] = useState<GrowthSort>("pct");
   const [menuOpen, setMenuOpen] = useState(false);
   const [snapshotMenuOpen, setSnapshotMenuOpen] = useState(false);
+  const range = ranges[sortMode];
   const selectedSnapshot =
     snapshotIndex >= 0 ? weeklyHistory?.weeks[snapshotIndex] ?? null : null;
   const selectedDate =
@@ -137,9 +141,9 @@ export default function LeaderboardPanel({
       ? snapshotDate(selectedSnapshot.weekStart, weeklyHistory.timezone)
       : null;
 
-  // each tab has its own default window; switching tabs resets to it
+  // Each tab starts with its own sensible default, then remembers the user's
+  // choice for the rest of the visit instead of resetting on every switch.
   useEffect(() => {
-    setRange(sortMode === "growth" ? "week" : "day");
     setMenuOpen(false);
     setSnapshotMenuOpen(false);
   }, [sortMode]);
@@ -435,7 +439,10 @@ export default function LeaderboardPanel({
                   className={styles.menuItem}
                   data-on={range === k || undefined}
                   onClick={() => {
-                    setRange(k);
+                    setRanges((current) => ({
+                      ...current,
+                      [sortMode]: k,
+                    }));
                     setMenuOpen(false);
                   }}
                 >

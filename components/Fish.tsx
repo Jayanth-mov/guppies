@@ -21,6 +21,12 @@ export function fishDomId(handle: string): string {
 
 export const SNAPSHOT_SWIM_MS = 2200;
 
+const DRIFT_EASINGS = [
+  "ease-in-out",
+  "cubic-bezier(0.42, 0, 0.48, 1)",
+  "cubic-bezier(0.36, 0, 0.58, 1)",
+] as const;
+
 export function initialsFor(name: string): string {
   return name
     .split(/\s+/)
@@ -113,12 +119,15 @@ export default function Fish({
   // Prestige adds visual mass: deep creatures cross less water, take longer
   // to complete each pass, bob more gently, and wag with slower authority.
   const prestige = entry.speciesIndex / Math.max(1, SPECIES.length - 1);
-  const driftDur = pick(r, 26, 38) + prestige * 48;
+  const driftDur = pick(r, 24, 43) + prestige * 46;
   const phase = -pick(r, 0, driftDur);
   const traverse = pick(r, 120, 300) * (1 - prestige * 0.35);
-  const bobDur = pick(r, 3.5, 5.5) + prestige * 4.5;
+  const driftEase = DRIFT_EASINGS[
+    Math.floor(pick(r, 0, DRIFT_EASINGS.length))
+  ];
+  const bobDur = pick(r, 3.2, 6.2) + prestige * 4.2;
   const bobPhase = -pick(r, 0, bobDur);
-  const bobDistance = 7 - prestige * 3.5;
+  const bobDistance = (7 - prestige * 3.5) * pick(r, 0.82, 1.18);
   const wagDur = 0.7 + prestige * 1.8;
   const migrationTilt = 7 - prestige * 3;
   const migrationScale = 1.025 - prestige * 0.012;
@@ -145,6 +154,7 @@ export default function Fish({
     "--fw": `${width}px`,
     "--traverse": `${traverse.toFixed(0)}px`,
     "--drift-dur": `${driftDur.toFixed(1)}s`,
+    "--drift-ease": driftEase,
     "--phase": `${phase.toFixed(1)}s`,
     "--bob-dur": `${bobDur.toFixed(1)}s`,
     "--bob-phase": `${bobPhase.toFixed(1)}s`,

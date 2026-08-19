@@ -78,6 +78,8 @@ describe("historical roster membership", () => {
     const mann = roster.find((entry) => entry.handle === "mann.ascends");
     expect(mann?.followers).toBe(120);
     expect(mann?.stats.all).toEqual({ change: 0, pct: 0 });
+    expect(mann?.stats.month).toEqual({ change: 0, pct: 0 });
+    expect(mann?.stats.week).toEqual({ change: 0, pct: 0 });
   });
 
   it("shows a member once its configured start week arrives", () => {

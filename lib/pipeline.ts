@@ -4,7 +4,7 @@
 // all time).
 // Never import this from client code.
 
-import raw from "@/data/accounts.json";
+import raw from "../data/accounts.json";
 import {
   RANGE_KEYS,
   emptyStats,
@@ -60,6 +60,45 @@ export interface RunSummary {
   readBack: number; // history length re-read right after writing
   weeklySnapshots: number; // permanent Sunday archive length
   origins: number; // immutable first-seen baselines retained for all-time stats
+}
+
+/**
+ * Find an account's baseline without treating a snapshot that merely omits
+ * that account as the end of its history. Handle-level gaps happen when Meta
+ * temporarily fails or an account changes usernames.
+ */
+export function baselineCountForRange(
+  history: CountSnapshot[],
+  origins: OriginRecords,
+  handle: string,
+  key: RangeKey,
+  nowMs: number,
+): number | undefined {
+  if (key === "all") return origins[handle]?.count;
+
+  if (key === "latest") {
+    for (let i = history.length - 1; i >= 0; i--) {
+      const count = history[i].counts[handle];
+      if (count !== undefined) return count;
+    }
+    return origins[handle]?.count;
+  }
+
+  const cutoff = nowMs - RANGE_MS[key];
+  for (let i = history.length - 1; i >= 0; i--) {
+    if (new Date(history[i].t).getTime() > cutoff) continue;
+    const count = history[i].counts[handle];
+    if (count !== undefined) return count;
+  }
+
+  // "Show so far" for accounts added inside the selected window. Origins
+  // survive the rolling-detail cap; the scan supports older stored payloads.
+  if (origins[handle]) return origins[handle].count;
+  for (const snapshot of history) {
+    const count = snapshot.counts[handle];
+    if (count !== undefined) return count;
+  }
+  return undefined;
 }
 
 // ---- Redis (Upstash REST protocol; works with the Vercel marketplace vars) ----
@@ -243,8 +282,6 @@ export async function runSnapshot(): Promise<RunSummary> {
   const storedOrigins =
     (await redisGetJSON<OriginRecords>(KEY_ORIGINS)) ?? {};
   const origins = buildOriginRecords(storedOrigins, history);
-  const prev = history[history.length - 1] ?? null;
-
   const now = new Date().toISOString();
   const nowMs = new Date(now).getTime();
   // baseline follower count for a handle at the start of a window: the newest
@@ -252,17 +289,8 @@ export async function runSnapshot(): Promise<RunSummary> {
   // "Show so far": when history doesn't yet reach a full window back, fall back
   // to the earliest snapshot we have, so the change accumulates from day one
   // instead of showing a dash.
-  const baselineCount = (handle: string, key: RangeKey): number | undefined => {
-    if (key === "latest") return prev?.counts[handle];
-    if (key === "all") return origins[handle]?.count;
-    const cutoff = nowMs - RANGE_MS[key];
-    for (let i = history.length - 1; i >= 0; i--) {
-      if (new Date(history[i].t).getTime() <= cutoff) {
-        return history[i].counts[handle];
-      }
-    }
-    return history[0]?.counts[handle];
-  };
+  const baselineCount = (handle: string, key: RangeKey) =>
+    baselineCountForRange(history, origins, handle, key, nowMs);
 
   const statsFor = (handle: string, current: number): Stats => {
     const s = emptyStats();
@@ -303,7 +331,10 @@ export async function runSnapshot(): Promise<RunSummary> {
       const carried = previousByHandle.get(handle);
       if (carried) {
         counts[handle] = carried.followers;
-        accounts.push({ ...carried, stats: emptyStats() });
+        accounts.push({
+          ...carried,
+          stats: statsFor(handle, carried.followers),
+        });
       }
     }
   }

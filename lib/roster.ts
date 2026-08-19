@@ -168,6 +168,12 @@ interface HistoricalValue {
   stats: Stats;
 }
 
+function zeroStats(): Stats {
+  return Object.fromEntries(
+    RANGE_KEYS.map((key) => [key, { change: 0, pct: 0 }]),
+  ) as Stats;
+}
+
 function valueInSnapshot(
   snapshot: WeeklySnapshot,
   handles: string[],
@@ -201,10 +207,7 @@ function continuousHistoricalValue(
   if (origin) {
     return {
       followers: origin.count,
-      stats: {
-        ...emptyStats(),
-        all: origin.count > 0 ? { change: 0, pct: 0 } : null,
-      },
+      stats: origin.count > 0 ? zeroStats() : emptyStats(),
     };
   }
 
@@ -219,10 +222,7 @@ function continuousHistoricalValue(
       : later.followers;
     return {
       followers: origin,
-      stats: {
-        ...emptyStats(),
-        all: origin > 0 ? { change: 0, pct: 0 } : null,
-      },
+      stats: origin > 0 ? zeroStats() : emptyStats(),
     };
   }
   return null;
