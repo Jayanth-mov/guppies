@@ -43,9 +43,9 @@ export default function ArtBoard() {
                 ["--detail" as string]: pale
                   ? "rgba(6, 26, 46, 0.55)"
                   : "rgba(255, 255, 255, 0.55)",
-                ["--orca-body" as string]: "#03090f",
-                ["--orca-mark" as string]: "#f2fbff",
-                ["--orca-saddle" as string]: "#7d98a6",
+                ["--orca-body" as string]: "#123a5c",
+                ["--orca-mark" as string]: "#c6e4f4",
+                ["--orca-saddle" as string]: "#c6e4f4",
               }}
             >
               <g fill="currentColor">{shape.tail}</g>

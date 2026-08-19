@@ -91,9 +91,9 @@ function MiniFish({ symbolId }: { symbolId: string }) {
           aspectRatio: `${shape.w} / ${shape.h}`,
           color: "#eaf6ff",
           ["--detail" as string]: "rgba(4, 16, 31, 0.5)",
-          ["--orca-body" as string]: "#02070c",
-          ["--orca-mark" as string]: "#eaf6ff",
-          ["--orca-saddle" as string]: "#7894a1",
+          ["--orca-body" as string]: "#123a5c",
+          ["--orca-mark" as string]: "#c6e4f4",
+          ["--orca-saddle" as string]: "#c6e4f4",
         }}
       >
         <g fill="currentColor">{shape.tail}</g>
@@ -455,7 +455,7 @@ export default function LeaderboardPanel({
               setMenuOpen((v) => !v);
             }}
           >
-            <span className={styles.rangeCaption}>Showing</span>
+            <span className={styles.rangeCaption}>Growth From</span>
             <span className={styles.rangeValueRow}>
               <span className={styles.rangeValue}>{RANGE_LABEL[range]}</span>
               <span className={styles.chevron} aria-hidden="true">

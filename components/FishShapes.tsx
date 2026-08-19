@@ -291,10 +291,11 @@ export const FISH_SHAPES: Record<string, FishShape> = {
           d="M294 62 C280 65 266 72 251 81 C228 93 207 95 181 92 C145 89 114 78 88 67 C103 88 134 100 176 103 C221 106 261 90 285 73 C290 69 293 65 294 62 Z"
           fill="var(--orca-mark)"
         />
-        {/* The gray saddle sits immediately behind the dorsal fin. */}
+        {/* A subtle saddle sits fully inside the back, behind the dorsal fin. */}
         <path
-          d="M141 24 C128 25 116 28 104 33 C116 35 127 38 140 41 C146 36 147 29 141 24 Z"
+          d="M153 31 C140 30 125 33 111 38 C124 41 138 44 151 45 C156 41 157 35 153 31 Z"
           fill="var(--orca-saddle)"
+          opacity="0.62"
         />
         {/* Tall dorsal fin and long, paddle-shaped pectoral flipper. */}
         <path
