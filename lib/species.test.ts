@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   SPECIES,
+  BAND_COLORS,
   bandSpans,
   depthFor,
   formatRange,
@@ -23,6 +24,10 @@ describe("species tiers", () => {
     }
   });
 
+  it("has one depth color per species", () => {
+    expect(BAND_COLORS).toHaveLength(SPECIES.length);
+  });
+
   it("treats upper bounds as exclusive", () => {
     expect(speciesFor(0).name).toBe("Guppy");
     expect(speciesFor(1_999).name).toBe("Guppy");
@@ -30,24 +35,25 @@ describe("species tiers", () => {
     expect(speciesFor(4_999).name).toBe("Clownfish");
     expect(speciesFor(5_000).name).toBe("Goldfish");
     expect(speciesFor(9_999).name).toBe("Goldfish");
-    expect(speciesFor(10_000).name).toBe("Rainbow trout");
-    expect(speciesFor(14_999).name).toBe("Rainbow trout");
-    expect(speciesFor(15_000).name).toBe("Sockeye salmon");
-    expect(speciesFor(19_999).name).toBe("Sockeye salmon");
-    expect(speciesFor(20_000).name).toBe("Atlantic cod");
-    expect(speciesFor(24_999).name).toBe("Atlantic cod");
-    expect(speciesFor(25_000).name).toBe("Ocean sunfish");
-    expect(speciesFor(34_999).name).toBe("Ocean sunfish");
-    expect(speciesFor(35_000).name).toBe("Swordfish");
+    expect(speciesFor(10_000).name).toBe("Salmon");
+    expect(speciesFor(24_999).name).toBe("Salmon");
+    expect(speciesFor(25_000).name).toBe("Swordfish");
     expect(speciesFor(49_999).name).toBe("Swordfish");
     expect(speciesFor(50_000).name).toBe("Giant manta ray");
-    expect(speciesFor(74_999).name).toBe("Giant manta ray");
-    expect(speciesFor(75_000).name).toBe("Great white shark");
-    expect(speciesFor(99_999).name).toBe("Great white shark");
-    expect(speciesFor(100_000).name).toBe("Basking shark");
-    expect(speciesFor(249_999).name).toBe("Basking shark");
+    expect(speciesFor(99_999).name).toBe("Giant manta ray");
+    expect(speciesFor(100_000).name).toBe("Great white shark");
+    expect(speciesFor(249_999).name).toBe("Great white shark");
     expect(speciesFor(250_000).name).toBe("Whale shark");
-    expect(speciesFor(5_000_000).name).toBe("Whale shark");
+    expect(speciesFor(499_999).name).toBe("Whale shark");
+    expect(speciesFor(500_000).name).toBe("Giant squid");
+    expect(speciesFor(749_999).name).toBe("Giant squid");
+    expect(speciesFor(750_000).name).toBe("Humpback whale");
+    expect(speciesFor(999_999).name).toBe("Humpback whale");
+    expect(speciesFor(1_000_000).name).toBe("Orca");
+    expect(speciesFor(2_499_999).name).toBe("Orca");
+    expect(speciesFor(2_500_000).name).toBe("Blue whale");
+    expect(speciesFor(4_999_999).name).toBe("Blue whale");
+    expect(speciesFor(5_000_000).name).toBe("Leviathan");
   });
 });
 
@@ -55,12 +61,16 @@ describe("depth", () => {
   it("clamps at the surface and the seabed", () => {
     expect(depthFor(0)).toBe(0);
     expect(depthFor(100)).toBe(0);
-    expect(depthFor(1_000_000)).toBe(1);
-    expect(depthFor(9_999_999)).toBe(1);
+    expect(depthFor(5_000_000)).toBeLessThan(1);
+    expect(depthFor(10_000_000)).toBe(1);
+    expect(depthFor(99_999_999)).toBe(1);
   });
 
   it("is continuous and monotonic, not band-snapped", () => {
-    const counts = [150, 890, 1_450, 2_100, 4_800, 9_100, 27_600, 84_200, 312_000];
+    const counts = [
+      150, 890, 1_450, 2_100, 4_800, 9_100, 27_600, 84_200, 312_000,
+      640_000, 880_000, 1_700_000, 4_200_000, 7_500_000,
+    ];
     for (let i = 1; i < counts.length; i++) {
       expect(depthFor(counts[i])).toBeGreaterThan(depthFor(counts[i - 1]));
     }
@@ -78,9 +88,10 @@ describe("depth", () => {
 describe("size within species", () => {
   it("is monotone in follower count, including across tier boundaries", () => {
     const counts = [
-      0, 500, 1_999, 2_000, 4_999, 5_000, 9_999, 10_000, 14_999, 15_000,
-      19_999, 20_000, 24_999, 25_000, 34_999, 35_000, 49_999, 50_000, 74_999,
-      75_000, 99_999, 100_000, 249_999, 250_000, 600_000, 1_000_000,
+      0, 500, 1_999, 2_000, 4_999, 5_000, 9_999, 10_000, 24_999, 25_000,
+      49_999, 50_000, 99_999, 100_000, 249_999, 250_000, 499_999, 500_000,
+      749_999, 750_000, 999_999, 1_000_000, 2_499_999, 2_500_000,
+      4_999_999, 5_000_000, 9_000_000,
     ];
     for (let i = 1; i < counts.length; i++) {
       expect(widthFor(counts[i])).toBeGreaterThan(widthFor(counts[i - 1]));
@@ -104,7 +115,7 @@ describe("size within species", () => {
 describe("band spans", () => {
   it("tiles the ocean exactly from 0 to 1", () => {
     const spans = bandSpans();
-    expect(spans).toHaveLength(12);
+    expect(spans).toHaveLength(13);
     expect(spans[0].top).toBe(0);
     expect(spans[spans.length - 1].bottom).toBe(1);
     for (let i = 0; i < spans.length - 1; i++) {
@@ -116,6 +127,6 @@ describe("band spans", () => {
 describe("range labels", () => {
   it("formats closed and open ranges", () => {
     expect(formatRange(SPECIES[0])).toBe("0 – 1,999");
-    expect(formatRange(SPECIES[11])).toBe("250,000+");
+    expect(formatRange(SPECIES[12])).toBe("5,000,000+");
   });
 });

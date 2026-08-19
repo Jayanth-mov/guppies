@@ -10,7 +10,7 @@ is current as of 2026-07-23.
 
 ## 1. The one idea (do not invert this)
 
-**Bigger fish live deeper.** Guppies bob in the sunlit shallows; whale sharks
+**Bigger fish live deeper.** Guppies bob in the sunlit shallows; Leviathans
 haunt the abyss. Climbing the leaderboard means *descending*. The page is a
 tall vertical scroll — scrolling down is diving. The ocean is the primary UI;
 the ranked list is a secondary panel opened on demand.
@@ -57,7 +57,7 @@ app/
                         metadata (tab title: "guppies leaderboard"), icon.svg
   page.tsx              renders <OceanPage/>
   globals.css           palette custom properties, resets, focus styles
-  art/page.tsx          dev artboard: all 12 fish silhouettes side by side
+  art/page.tsx          dev artboard: all 13 ocean-creature silhouettes
   api/cron/route.ts     runs a snapshot (CRON_SECRET bearer-guarded)
   api/roster/route.ts   serves the latest snapshot from Redis
   api/history/weekly/route.ts  serves permanent Sunday snapshots
@@ -65,11 +65,11 @@ components/
   OceanPage.tsx/.css    top-level client component: all page state, hero (sky,
                         sun, water surface, copy-link kicker, CTA), fish
                         deep-link handling, footer
-  Ocean.tsx/.css        7200px water column: smooth 12-color gradient, band
+  Ocean.tsx/.css        7200px water column: smooth 13-color gradient, band
                         labels, fish instances
   Fish.tsx/.css         one fish: SVG sprite, drift/bob/tail-wag/flip motion,
                         avatar+handle label chip, hover follower-count pill
-  FishShapes.tsx        the art budget: 12 hand-drawn SVG silhouettes,
+  FishShapes.tsx        the art budget: 13 hand-drawn SVG silhouettes,
                         tail in its own <g> for the wag
   Atmosphere.tsx/.css   godrays (fanning from the sun), sunbeam entry glow,
                         dappled surface light, 3-tier scroll-parallax
@@ -78,7 +78,7 @@ components/
                         najarro93's CodePen NWvmyGQ), randomized per reload,
                         split into back/front layers around the hero text
   DepthGauge.tsx/.css   desktop-only fixed submarine readout + clickable
-                        12-segment dive track
+                        13-segment dive track
   LeaderboardPanel.tsx/.css  right drawer (desktop, squeezes ocean) /
                         full-screen sheet (mobile); Followers & Growth tabs,
                         global Sunday snapshot picker, growth sub-sort, range
@@ -86,7 +86,7 @@ components/
                         white mini-fish icons
   EvolutionToast.tsx/.css  localStorage species memory → tier-crossing toasts
 lib/
-  species.ts            SINGLE SOURCE OF TRUTH: 12 tiers, band colors, depth &
+  species.ts            SINGLE SOURCE OF TRUTH: 13 tiers, band colors, depth &
                         size math, formatters
   roster.ts             data seam: bundled fallback + live overlay types
   pipeline.ts           server-only: Graph API calls, Redis snapshots, stats,
@@ -116,18 +116,19 @@ gitignored). `npm test`, `npm run build` must both pass before pushing.
 ## 4. Domain model (`lib/species.ts` — everything derives from here)
 
 **Species tiers** (upper bounds exclusive): Guppy 0–2k, Clownfish 2–5k,
-Goldfish 5–10k, Rainbow trout 10–15k, Sockeye salmon 15–20k, Atlantic cod
-20–25k, Ocean sunfish 25–35k, Swordfish 35–50k, Giant manta ray 50–75k,
-Great white shark 75–100k, Basking shark 100–250k, Whale shark 250k+.
+Goldfish 5–10k, Salmon 10–25k, Swordfish 25–50k, Giant manta ray 50–100k,
+Great white shark 100–250k, Whale shark 250–500k, Giant squid 500–750k,
+Humpback whale 750k–1m, Orca 1m–2.5m, Blue whale 2.5m–5m, and Leviathan 5m+.
 Band color ramp light→dark: `#BFE6F5 #A5DAF0 #8ACDEA #6FBEE3 #56AEDA #3F9BCE
-#2E86BE #2270A8 #1A5B8E #144773 #0E3358 #08203C`. Text ink flips dark→pale at
-band 7 (index 6).
+#2E86BE #2270A8 #1A5B8E #144773 #0E3358 #08203C #051426`. Text ink flips
+dark→pale at band 7 (index 6).
 
-**Depth** (`depthFor`): each of the 12 bands gets an equal 1/12 slice of the
+**Depth** (`depthFor`): each of the 13 bands gets an equal 1/13 slice of the
 7200px ocean; position *within* a band is log-interpolated across that
 species' follower range. Continuous, never band-snapped — a 4.8k clownfish
 sits visibly deeper than a 2.1k one. (A pure log scale was tried first and
-gave the guppy shallows a third of the ocean; don't regress to it.)
+gave the guppy shallows a third of the ocean; don't regress to it.) The open
+Leviathan band reaches the seabed at the 10m depth ceiling.
 
 **Size** (`widthFor`): locked to species with a gentle within-band scale
 (~±30%). Boundary widths sit at the geometric mean of neighboring species'
@@ -145,7 +146,7 @@ Follow this pattern for any new randomized visual.
 
 ## 5. Frontend behaviors (inventory)
 
-**Hero**: blue-sky gradient; clean pulsing sun with soft glint;
+**Hero**: blue-sky gradient; static sun with soft glint;
 turbulence-displacement clouds (5–6, randomized each reload, half behind the
 title at z-1 / half in front at z-3 with the text at z-2; front clouds are
 0.72 opacity so obscured text stays readable; drift edges fade in/out);

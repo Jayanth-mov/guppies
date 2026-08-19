@@ -10,15 +10,16 @@ export const SPECIES: Species[] = [
   { name: "Guppy", symbolId: "guppy", min: 0, max: 2_000, width: 34 },
   { name: "Clownfish", symbolId: "clownfish", min: 2_000, max: 5_000, width: 46 },
   { name: "Goldfish", symbolId: "goldfish", min: 5_000, max: 10_000, width: 56 },
-  { name: "Rainbow trout", symbolId: "trout", min: 10_000, max: 15_000, width: 74 },
-  { name: "Sockeye salmon", symbolId: "sockeye", min: 15_000, max: 20_000, width: 84 },
-  { name: "Atlantic cod", symbolId: "cod", min: 20_000, max: 25_000, width: 96 },
-  { name: "Ocean sunfish", symbolId: "sunfish", min: 25_000, max: 35_000, width: 112 },
-  { name: "Swordfish", symbolId: "swordfish", min: 35_000, max: 50_000, width: 150 },
-  { name: "Giant manta ray", symbolId: "manta", min: 50_000, max: 75_000, width: 185 },
-  { name: "Great white shark", symbolId: "greatwhite", min: 75_000, max: 100_000, width: 210 },
-  { name: "Basking shark", symbolId: "basking", min: 100_000, max: 250_000, width: 250 },
-  { name: "Whale shark", symbolId: "whaleshark", min: 250_000, max: Infinity, width: 300 },
+  { name: "Salmon", symbolId: "salmon", min: 10_000, max: 25_000, width: 88 },
+  { name: "Swordfish", symbolId: "swordfish", min: 25_000, max: 50_000, width: 145 },
+  { name: "Giant manta ray", symbolId: "manta", min: 50_000, max: 100_000, width: 190 },
+  { name: "Great white shark", symbolId: "greatwhite", min: 100_000, max: 250_000, width: 235 },
+  { name: "Whale shark", symbolId: "whaleshark", min: 250_000, max: 500_000, width: 300 },
+  { name: "Giant squid", symbolId: "giantsquid", min: 500_000, max: 750_000, width: 340 },
+  { name: "Humpback whale", symbolId: "humpback", min: 750_000, max: 1_000_000, width: 390 },
+  { name: "Orca", symbolId: "orca", min: 1_000_000, max: 2_500_000, width: 435 },
+  { name: "Blue whale", symbolId: "bluewhale", min: 2_500_000, max: 5_000_000, width: 500 },
+  { name: "Leviathan", symbolId: "leviathan", min: 5_000_000, max: Infinity, width: 590 },
 ];
 
 export const BAND_COLORS = [
@@ -34,6 +35,7 @@ export const BAND_COLORS = [
   "#144773",
   "#0e3358",
   "#08203c",
+  "#051426",
 ];
 
 // 0-based band index at which ink flips from dark navy to pale.
@@ -54,13 +56,13 @@ export function speciesFor(count: number): Species {
   return SPECIES[speciesIndexFor(count)];
 }
 
-// Depth is continuous — never snapped to the band. Each of the 12 bands gets
+// Depth is continuous — never snapped to the band. Each of the 13 bands gets
 // an equal slice of the ocean (a pure log scale gave the guppy shallows a
 // third of the water column), and a fish's position inside its band is the
 // log-interpolated position within that species' follower range. A 4.8k
 // clownfish still sits visibly deeper than a 2.1k one.
 export const DEPTH_FLOOR = 100; // counts at or below this pin to the band top
-export const DEPTH_CEIL = 1_000_000; // counts at or above this pin to the seabed
+export const DEPTH_CEIL = 10_000_000; // counts at or above this pin to the seabed
 
 /** 0 = top of the species' band, 1 = bottom, log-interpolated. */
 function bandT(count: number, index: number): number {

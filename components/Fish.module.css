@@ -202,10 +202,10 @@
 
 @keyframes bob {
   from {
-    transform: translateY(-7px);
+    transform: translateY(var(--bob-min));
   }
   to {
-    transform: translateY(7px);
+    transform: translateY(var(--bob-max));
   }
 }
 
@@ -224,10 +224,10 @@
     transform: rotate(0deg) scale(1);
   }
   12% {
-    transform: rotate(-7deg) scale(1.025);
+    transform: rotate(var(--climb-tilt)) scale(var(--migration-scale));
   }
   78% {
-    transform: rotate(-3deg) scale(1.01);
+    transform: rotate(var(--climb-settle-tilt)) scale(var(--migration-settle-scale));
   }
 }
 
@@ -237,10 +237,10 @@
     transform: rotate(0deg) scale(1);
   }
   12% {
-    transform: rotate(7deg) scale(1.025);
+    transform: rotate(var(--dive-tilt)) scale(var(--migration-scale));
   }
   78% {
-    transform: rotate(3deg) scale(1.01);
+    transform: rotate(var(--dive-settle-tilt)) scale(var(--migration-settle-scale));
   }
 }
 

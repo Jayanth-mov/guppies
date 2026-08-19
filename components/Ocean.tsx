@@ -27,7 +27,7 @@ const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
 
   const gradient = useMemo(() => {
     // one stop at each band's center so CSS blends smoothly between tiers —
-    // a continuous descent rather than 12 hard stripes (the dashed labels
+    // a continuous descent rather than 13 hard stripes (the dashed labels
     // still mark the zone boundaries)
     const stops = [
       `${bands[0].color} 0%`,

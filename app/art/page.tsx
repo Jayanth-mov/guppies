@@ -1,16 +1,16 @@
-import { SPECIES, formatRange } from "@/lib/species";
+import { BAND_COLORS, SPECIES, formatRange, paleInk } from "@/lib/species";
 import { FISH_SHAPES } from "@/components/FishShapes";
 
 export const metadata = { title: "guppies — art board" };
 
-// Dev artboard: all 12 silhouettes at species-locked sizes, on a shallow and
+// Dev artboard: all 13 silhouettes at species-locked sizes, on a shallow and
 // an abyss swatch, for eyeballing the shapes without diving the whole ocean.
 export default function ArtBoard() {
   return (
     <main
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
+        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
         gap: 0,
         minHeight: "100vh",
         background: "#0b2a44",
@@ -18,7 +18,7 @@ export default function ArtBoard() {
     >
       {SPECIES.map((s, i) => {
         const shape = FISH_SHAPES[s.symbolId];
-        const pale = i >= 6;
+        const pale = paleInk(i);
         return (
           <div
             key={s.symbolId}
@@ -29,7 +29,7 @@ export default function ArtBoard() {
               justifyContent: "center",
               gap: 8,
               padding: 12,
-              background: pale ? "#0e3358" : "#8acdea",
+              background: BAND_COLORS[i],
               color: pale ? "#c6e4f4" : "#123a5c",
               minHeight: 170,
             }}
@@ -37,7 +37,7 @@ export default function ArtBoard() {
             <svg
               viewBox={shape.viewBox}
               style={{
-                width: Math.min(s.width, 210),
+                width: Math.min(s.width, 280),
                 aspectRatio: `${shape.w} / ${shape.h}`,
                 overflow: "visible",
                 ["--detail" as string]: pale

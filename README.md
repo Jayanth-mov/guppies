@@ -1,7 +1,7 @@
 # guppies
 
 An ocean-themed follower leaderboard for a group of Instagram creators.
-**Bigger fish live deeper** — guppies bob in the sunlit shallows, whale sharks
+**Bigger fish live deeper** — guppies bob in the sunlit shallows, Leviathans
 haunt the abyss, and scrolling down is diving. The ocean is the primary UI;
 the ranked list is a panel you open on demand.
 
@@ -16,11 +16,11 @@ npm test        # species-tier boundary tests
 npm run build   # production build
 ```
 
-`/art` is a dev artboard showing all 12 fish silhouettes side by side.
+`/art` is a dev artboard showing all 13 ocean-creature silhouettes side by side.
 
 ## How it fits together
 
-- [lib/species.ts](lib/species.ts) — the single source of truth: 12 species
+- [lib/species.ts](lib/species.ts) — the single source of truth: 13 species
   tiers `{ name, min, max, symbolId, width }`, the band color ramp, and the
   depth math (equal-height bands, log-interpolated position within each —
   continuous, never snapped). `widthFor` scales fish gently within their
@@ -33,7 +33,7 @@ npm run build   # production build
   testing and must be deleted once the pipeline is live; never show them as
   real.
 - [components/FishShapes.tsx](components/FishShapes.tsx) — the art budget:
-  12 hand-drawn SVG silhouettes, tail in its own group for the wag.
+  13 hand-drawn SVG silhouettes, tail in its own group for the wag.
 - [components/Ocean.tsx](components/Ocean.tsx) — the 7,200px water column;
   [components/Fish.tsx](components/Fish.tsx) — drift/bob/flip motion, all CSS
   keyframes, seeded per-handle so server and client render identically.

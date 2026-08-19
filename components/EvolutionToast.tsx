@@ -5,7 +5,10 @@ import type { FishEntry } from "@/lib/roster";
 import { SPECIES } from "@/lib/species";
 import styles from "./EvolutionToast.module.css";
 
-const STORAGE_KEY = "guppies.species.v1";
+// A depth-map redesign is not a follower-driven evolution. Version the memory
+// so returning visitors establish a fresh baseline instead of seeing false
+// "grew" / "shrank" notices for the taxonomy change.
+const STORAGE_KEY = "guppies.species.v2";
 
 interface Toast {
   id: string;

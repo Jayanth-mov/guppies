@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-// The art budget lives here: 12 distinct silhouettes, each drawn facing right
+// The art budget lives here: every active silhouette is drawn facing right
 // (head at high x, tail trailing left). `tail` is separate from `body` so the
 // Fish component can wrap it in a wagging <g>. Fills use currentColor so depth
 // decides the silhouette color; accents (eyes, stripes, spots, gills) use
@@ -81,27 +81,7 @@ export const FISH_SHAPES: Record<string, FishShape> = {
     ),
   },
 
-  trout: {
-    viewBox: "0 0 120 44",
-    w: 120,
-    h: 44,
-    head: [104, 19],
-    tail: (
-      <path d="M28 22 C20 14 11 10 4 10 C8 15 10 19 10 22 C10 25 8 29 4 34 C11 34 20 30 28 22 Z" />
-    ),
-    body: (
-      <>
-        <path d="M117 22 C110 13 90 8 68 9 C48 10 32 15 25 22 C32 29 48 34 68 35 C90 36 110 31 117 22 Z" />
-        <path d="M70 9 C68 3 58 1 51 4 C56 6 60 8 62 10 Z" />
-        {/* adipose fin — the trout tell */}
-        <path d="M42 11 C43 8 47 8 48 11 Z" />
-        <path d="M56 34 C54 39 49 41 44 41 C47 37 49 35 50 32 Z" />
-        <circle cx="107" cy="19" r="2.2" fill="var(--detail)" />
-      </>
-    ),
-  },
-
-  sockeye: {
+  salmon: {
     viewBox: "0 0 130 52",
     w: 130,
     h: 52,
@@ -117,58 +97,6 @@ export const FISH_SHAPES: Record<string, FishShape> = {
         <path d="M74 8 C72 2 62 0 55 3 C60 5 64 7 66 9 Z" />
         <path d="M84 43 C82 48 76 51 70 50 C74 47 77 44 78 41 Z" />
         <circle cx="114" cy="22" r="2.4" fill="var(--detail)" />
-      </>
-    ),
-  },
-
-  cod: {
-    viewBox: "0 0 140 54",
-    w: 140,
-    h: 54,
-    head: [122, 23],
-    tail: (
-      <path d="M32 27 C24 21 14 18 5 19 C8 23 9 25 9 27 C9 29 8 31 5 35 C14 36 24 33 32 27 Z" />
-    ),
-    body: (
-      <>
-        <path d="M134 27 C128 18 108 12 84 12 C60 12 40 18 30 27 C40 36 60 41 84 41 C108 41 128 36 134 27 Z" />
-        {/* three dorsal fins — unmistakably cod */}
-        <path d="M110 13 C109 6 101 4 95 7 C99 9 102 11 103 14 Z" />
-        <path d="M88 12 C87 5 78 3 72 6 C76 8 79 10 80 13 Z" />
-        <path d="M64 13 C63 7 55 5 49 8 C53 10 56 12 57 14 Z" />
-        <path d="M92 40 C91 47 83 49 77 46 C81 44 84 42 85 39 Z" />
-        <path d="M66 40 C65 46 58 48 52 45 C56 43 59 41 60 38 Z" />
-        {/* chin barbel */}
-        <path
-          d="M126 33 C126 37 124 40 121 41"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-        <circle cx="123" cy="21" r="2.4" fill="var(--detail)" />
-      </>
-    ),
-  },
-
-  sunfish: {
-    viewBox: "0 0 100 112",
-    w: 100,
-    h: 112,
-    head: [78, 48],
-    // no true tail — the wavy clavus gets the (very subtle) wag
-    tail: (
-      <path d="M26 36 C18 41 14 48 14 56 C14 64 18 71 26 76 C23 69 22 62 22 56 C22 50 23 43 26 36 Z" />
-    ),
-    body: (
-      <>
-        <path d="M88 56 C86 38 72 26 54 26 C37 26 24 38 21 56 C24 74 37 86 54 86 C72 86 86 74 88 56 Z" />
-        {/* the lopsided disc: towering dorsal + anal fins */}
-        <path d="M58 28 C62 16 58 6 49 3 C46 13 45 21 47 29 Z" />
-        <path d="M58 84 C62 96 58 106 49 109 C46 99 45 91 47 83 Z" />
-        <path d="M60 52 C64 46 64 40 60 36 C57 41 56 47 58 52 Z" />
-        <circle cx="76" cy="48" r="3" fill="var(--detail)" />
-        <circle cx="87" cy="55" r="1.8" fill="var(--detail)" />
       </>
     ),
   },
@@ -236,30 +164,6 @@ export const FISH_SHAPES: Record<string, FishShape> = {
     ),
   },
 
-  basking: {
-    viewBox: "0 0 200 76",
-    w: 200,
-    h: 76,
-    head: [170, 28],
-    tail: (
-      <path d="M52 40 C44 30 36 21 26 15 C30 25 32 34 31 40 C32 46 30 55 26 62 C36 57 44 48 52 42 Z" />
-    ),
-    body: (
-      <>
-        {/* the gaping mouth is the notch at the snout */}
-        <path d="M196 31 C188 25 172 21 152 20 C112 18 72 26 50 40 C72 52 114 58 154 56 C170 55 184 51 191 48 C182 44 177 40 177 36 C181 33 188 31 196 31 Z" />
-        <path d="M122 20 C120 7 110 2 100 4 C106 10 110 16 111 21 Z" />
-        <path d="M130 54 C126 63 118 68 108 67 C114 60 118 56 120 51 Z" />
-        {/* enormous gill slits */}
-        <path d="M148 24 C145 31 145 45 148 52" fill="none" stroke="var(--detail)" strokeWidth="1.6" />
-        <path d="M156 23 C153 31 153 45 156 52" fill="none" stroke="var(--detail)" strokeWidth="1.6" />
-        <path d="M164 23 C161 30 161 44 164 51" fill="none" stroke="var(--detail)" strokeWidth="1.6" />
-        <path d="M172 24 C169 30 169 42 172 49" fill="none" stroke="var(--detail)" strokeWidth="1.6" />
-        <circle cx="184" cy="26" r="1.8" fill="var(--detail)" />
-      </>
-    ),
-  },
-
   whaleshark: {
     viewBox: "0 0 220 84",
     w: 220,
@@ -287,6 +191,159 @@ export const FISH_SHAPES: Record<string, FishShape> = {
           <circle key={`${x}-${y}`} cx={x} cy={y} r="1.9" fill="var(--detail)" />
         ))}
         <circle cx="203" cy="30" r="1.7" fill="var(--detail)" />
+      </>
+    ),
+  },
+
+  giantsquid: {
+    viewBox: "0 0 250 112",
+    w: 250,
+    h: 112,
+    head: [148, 48],
+    // A loose bundle of arms and two long feeding tentacles trails behind.
+    tail: (
+      <>
+        <path d="M116 43 C89 31 67 21 42 20 C60 29 75 39 91 51 C61 42 32 40 8 45 C38 49 66 57 93 63 C65 64 38 71 17 83 C48 76 79 72 116 66 Z" />
+        <path d="M112 50 C78 47 42 51 6 63 C47 57 80 58 116 61 Z" />
+        <path d="M113 59 C80 69 49 82 24 101 C58 84 87 76 120 68 Z" />
+      </>
+    ),
+    body: (
+      <>
+        {/* Eye-bearing head in front of a pointed, finned mantle. */}
+        <path d="M108 55 C115 40 130 32 147 33 C163 34 174 43 178 55 C174 68 163 77 147 78 C130 79 115 70 108 55 Z" />
+        <path d="M151 36 C181 27 216 31 244 55 C216 80 181 84 151 75 C165 62 165 48 151 36 Z" />
+        <path d="M132 72 C124 82 115 85 106 82 C114 75 118 68 119 61 Z" />
+        <ellipse cx="143" cy="47" rx="6" ry="7.5" fill="var(--detail)" />
+        <circle cx="144" cy="46" r="2" />
+        <path d="M123 58 C119 64 114 67 109 66" fill="none" stroke="var(--detail)" strokeWidth="1.8" strokeLinecap="round" />
+      </>
+    ),
+  },
+
+  humpback: {
+    viewBox: "0 0 280 120",
+    w: 280,
+    h: 120,
+    head: [249, 48],
+    tail: (
+      <>
+        <path d="M55 58 C38 51 23 38 7 27 C14 43 18 53 20 61 C32 63 44 62 55 60 Z" />
+        <path d="M55 61 C39 69 23 84 8 97 C15 79 19 69 20 61 C32 59 44 59 55 61 Z" />
+      </>
+    ),
+    body: (
+      <>
+        {/* Arched back, knuckled snout, and extremely long pectoral fin. */}
+        <path d="M271 55 C266 38 246 29 220 27 C197 19 165 15 132 18 C96 21 68 34 49 58 C68 80 102 91 144 91 C187 91 230 80 260 67 C269 63 273 59 271 55 Z" />
+        <path d="M124 20 C118 11 108 9 99 13 C108 15 114 18 117 22 Z" />
+        <path d="M176 78 C166 95 147 110 126 116 C136 99 145 85 151 74 Z" />
+        <path d="M249 36 C255 31 261 32 266 37 C259 38 254 40 250 43 Z" />
+        <circle cx="249" cy="43" r="2.4" fill="var(--detail)" />
+        {[0, 1, 2, 3].map((line) => (
+          <path
+            key={line}
+            d={`M${216 - line * 9} ${61 + line * 2} C${224 - line * 8} ${70 + line * 2} ${236 - line * 7} ${72 + line * 2} ${248 - line * 6} ${68 + line}`}
+            fill="none"
+            stroke="var(--detail)"
+            strokeWidth="1.5"
+            opacity="0.7"
+          />
+        ))}
+      </>
+    ),
+  },
+
+  orca: {
+    viewBox: "0 0 270 112",
+    w: 270,
+    h: 112,
+    head: [243, 45],
+    tail: (
+      <>
+        <path d="M54 56 C37 49 22 36 8 24 C15 41 18 51 20 58 C31 60 43 59 54 58 Z" />
+        <path d="M54 59 C38 67 22 82 8 94 C15 77 18 67 20 59 C31 57 43 57 54 59 Z" />
+      </>
+    ),
+    body: (
+      <>
+        <path d="M263 54 C256 34 229 24 194 24 C153 23 103 32 50 58 C88 82 139 89 187 85 C226 82 255 70 264 59 C265 57 265 55 263 54 Z" />
+        {/* Towering dorsal fin gives the orca its apex-predator profile. */}
+        <path d="M158 27 C155 8 145 0 132 2 C141 11 146 19 147 29 Z" />
+        <path d="M168 78 C157 93 142 103 126 105 C137 91 143 82 146 73 Z" />
+        <path d="M224 33 C233 29 242 31 248 36 C239 39 231 43 225 47 C220 43 220 37 224 33 Z" fill="var(--detail)" />
+        <path d="M202 73 C217 76 235 72 248 63 C235 79 215 84 192 84 C190 79 194 75 202 73 Z" fill="var(--detail)" />
+        <circle cx="247" cy="46" r="2.2" fill="var(--detail)" />
+      </>
+    ),
+  },
+
+  bluewhale: {
+    viewBox: "0 0 330 112",
+    w: 330,
+    h: 112,
+    head: [298, 47],
+    tail: (
+      <>
+        <path d="M58 55 C39 48 23 35 7 25 C15 41 19 51 21 57 C33 59 46 58 58 57 Z" />
+        <path d="M58 58 C40 66 23 80 7 91 C15 75 19 65 21 58 C33 56 46 56 58 58 Z" />
+      </>
+    ),
+    body: (
+      <>
+        {/* Long, low rostrum and tiny dorsal fin: the largest real animal. */}
+        <path d="M322 54 C315 36 284 28 239 27 C185 23 120 29 54 57 C112 80 180 86 239 82 C282 79 313 68 323 59 C325 57 324 55 322 54 Z" />
+        <path d="M137 32 C134 23 127 20 119 22 C126 26 130 29 131 33 Z" />
+        <path d="M184 79 C174 91 161 98 147 99 C157 88 162 81 165 75 Z" />
+        <circle cx="300" cy="45" r="2.2" fill="var(--detail)" />
+        {[0, 1, 2, 3, 4].map((line) => (
+          <path
+            key={line}
+            d={`M${245 - line * 15} ${61 + line} C${263 - line * 14} ${69 + line} ${286 - line * 11} ${69 + line} ${308 - line * 8} ${62 + line}`}
+            fill="none"
+            stroke="var(--detail)"
+            strokeWidth="1.4"
+            opacity="0.68"
+          />
+        ))}
+      </>
+    ),
+  },
+
+  leviathan: {
+    viewBox: "0 0 380 150",
+    w: 380,
+    h: 150,
+    head: [342, 58],
+    tail: (
+      <>
+        <path d="M68 73 C45 62 27 43 8 25 C18 49 23 65 24 75 C38 79 53 77 68 75 Z" />
+        <path d="M68 76 C47 89 28 111 10 132 C19 104 23 87 24 76 C38 73 53 73 68 76 Z" />
+      </>
+    ),
+    body: (
+      <>
+        {/* A whale-serpent final boss: armored spine, hooked jaw, and scars. */}
+        <path d="M365 70 C355 42 322 31 281 32 C246 16 202 14 158 22 C117 29 82 47 59 75 C84 104 128 119 181 119 C236 119 296 103 343 88 C361 82 370 76 365 70 Z" />
+        <path d="M349 69 L377 75 L348 85 C350 79 350 74 349 69 Z" />
+        {[
+          [260, 35, 277, 8, 288, 38],
+          [229, 29, 241, 3, 252, 34],
+          [197, 25, 206, 4, 219, 31],
+          [166, 25, 173, 8, 190, 31],
+          [136, 31, 141, 16, 158, 34],
+        ].map(([x1, y1, x2, y2, x3, y3]) => (
+          <path key={`${x1}-${y1}`} d={`M${x1} ${y1} C${x2} ${y2} ${x2} ${y2} ${x3} ${y3} Z`} />
+        ))}
+        <path d="M244 107 C228 130 204 143 178 143 C197 125 207 112 213 99 Z" />
+        <path d="M304 40 C315 30 329 31 338 40 C326 42 316 48 309 55 Z" />
+        <circle cx="337" cy="56" r="4.2" fill="var(--detail)" />
+        <circle cx="338" cy="55" r="1.6" />
+        <path d="M319 75 C334 80 348 80 363 75" fill="none" stroke="var(--detail)" strokeWidth="2" strokeLinecap="round" />
+        {[0, 1, 2, 3].map((tooth) => (
+          <path key={tooth} d={`M${332 + tooth * 7} ${77 + (tooth % 2)} l3 6 l3 -5 Z`} fill="var(--detail)" />
+        ))}
+        <path d="M286 55 l-15 28 M272 52 l-15 27 M257 50 l-14 25" fill="none" stroke="var(--detail)" strokeWidth="2" opacity="0.65" />
       </>
     ),
   },

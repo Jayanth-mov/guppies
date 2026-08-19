@@ -1,5 +1,5 @@
 :root {
-  /* 12-band depth ramp, shallows → abyss */
+  /* 13-band depth ramp, shallows → abyss */
   --band-1: #bfe6f5;
   --band-2: #a5daf0;
   --band-3: #8acdea;
@@ -12,12 +12,13 @@
   --band-10: #144773;
   --band-11: #0e3358;
   --band-12: #08203c;
+  --band-13: #051426;
 
   --sky: #e9f7ff;
   --abyss-floor: #04101f;
 
   --ink-dark: #0a2c47; /* text on light bands (1–6) */
-  --ink-pale: #cfeaf7; /* text on dark bands (7–12) */
+  --ink-pale: #cfeaf7; /* text on dark bands (7–13) */
 
   --accent: #6cf5e2; /* bioluminescent cyan: highlights, focus */
   --rise: #3adea6; /* delta up */

@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { avatarProxyUrl, type FishEntry } from "@/lib/roster";
-import { formatCount } from "@/lib/species";
+import { formatCount, SPECIES } from "@/lib/species";
 import { pick, rng } from "@/lib/rand";
 import { FISH_SHAPES } from "./FishShapes";
 import styles from "./Fish.module.css";
@@ -110,15 +110,21 @@ export default function Fish({
   // keep big fish from drifting off the right edge
   const laneMax = Math.max(10, 58 - width / 8);
   const lane = pick(r, 5, laneMax);
-  const driftDur = pick(r, 20, 60);
+  // Prestige adds visual mass: deep creatures cross less water, take longer
+  // to complete each pass, bob more gently, and wag with slower authority.
+  const prestige = entry.speciesIndex / Math.max(1, SPECIES.length - 1);
+  const driftDur = pick(r, 26, 38) + prestige * 48;
   const phase = -pick(r, 0, driftDur);
-  const traverse = pick(r, 120, 300);
-  const bobDur = pick(r, 3.5, 7);
+  const traverse = pick(r, 120, 300) * (1 - prestige * 0.35);
+  const bobDur = pick(r, 3.5, 5.5) + prestige * 4.5;
   const bobPhase = -pick(r, 0, bobDur);
-  const wagDur = 0.7 + (width / 300) * 1.1;
+  const bobDistance = 7 - prestige * 3.5;
+  const wagDur = 0.7 + prestige * 1.8;
+  const migrationTilt = 7 - prestige * 3;
+  const migrationScale = 1.025 - prestige * 0.012;
 
   const pale = entry.speciesIndex >= 6;
-  const abyssal = entry.speciesIndex >= 9;
+  const abyssal = entry.speciesIndex >= 8;
   const ink = pale ? "#c6e4f4" : "#123a5c";
   const detail = pale ? "rgba(6, 26, 46, 0.55)" : "rgba(255, 255, 255, 0.55)";
 
@@ -139,7 +145,15 @@ export default function Fish({
     "--phase": `${phase.toFixed(1)}s`,
     "--bob-dur": `${bobDur.toFixed(1)}s`,
     "--bob-phase": `${bobPhase.toFixed(1)}s`,
+    "--bob-min": `${(-bobDistance).toFixed(2)}px`,
+    "--bob-max": `${bobDistance.toFixed(2)}px`,
     "--wag-dur": `${wagDur.toFixed(2)}s`,
+    "--climb-tilt": `${(-migrationTilt).toFixed(2)}deg`,
+    "--dive-tilt": `${migrationTilt.toFixed(2)}deg`,
+    "--climb-settle-tilt": `${(-migrationTilt * 0.43).toFixed(2)}deg`,
+    "--dive-settle-tilt": `${(migrationTilt * 0.43).toFixed(2)}deg`,
+    "--migration-scale": migrationScale.toFixed(3),
+    "--migration-settle-scale": (1 + (migrationScale - 1) * 0.4).toFixed(3),
     "--av": `${avatarSize}px`,
     "--av-bg": `linear-gradient(135deg, hsl(${avatarHue(entry.handle)} 55% 42%), hsl(${avatarHue(entry.handle)} 65% 28%))`,
   } as CSSProperties;
