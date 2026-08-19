@@ -86,6 +86,8 @@ interface AccountRow {
   /** Preserve a continuous historical identity across handle/API gaps. */
   alwaysShowHistory?: boolean;
   historicalHandles?: string[];
+  /** Include in refreshes, but keep off the bundled fallback until verified. */
+  pendingValidation?: boolean;
 }
 
 const configuredAccounts = raw.accounts as AccountRow[];
@@ -94,7 +96,7 @@ const localSource: RosterSource = {
   hostHandle: raw.hostAccount,
   lastUpdated: raw.lastUpdated,
   fetchRoster: () =>
-    configuredAccounts.map((a) => ({
+    configuredAccounts.filter((a) => !a.pendingValidation).map((a) => ({
       handle: a.handle,
       name: a.name ?? a.handle,
       followers: a.followers ?? 0,
