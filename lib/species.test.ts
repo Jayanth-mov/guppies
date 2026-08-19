@@ -4,6 +4,7 @@ import {
   BAND_COLORS,
   bandSpans,
   depthFor,
+  formatGaugeRange,
   formatRange,
   speciesFor,
   widthFor,
@@ -128,5 +129,14 @@ describe("range labels", () => {
   it("formats closed and open ranges", () => {
     expect(formatRange(SPECIES[0])).toBe("0 – 1,999");
     expect(formatRange(SPECIES[12])).toBe("5,000,000+");
+  });
+
+  it("compacts deep-water gauge floors without rounding their ceilings", () => {
+    expect(formatGaugeRange(SPECIES[5])).toBe("50,000 – 99,999");
+    expect(formatGaugeRange(SPECIES[6])).toBe("100K – 249,999");
+    expect(formatGaugeRange(SPECIES[9])).toBe("750K – 999,999");
+    expect(formatGaugeRange(SPECIES[10])).toBe("1M – 2,499,999");
+    expect(formatGaugeRange(SPECIES[11])).toBe("2.5M – 4,999,999");
+    expect(formatGaugeRange(SPECIES[12])).toBe("5M+");
   });
 });

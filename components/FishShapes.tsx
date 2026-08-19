@@ -82,22 +82,24 @@ export const FISH_SHAPES: Record<string, FishShape> = {
   },
 
   salmon: {
-    viewBox: "0 0 130 52",
-    w: 130,
+    viewBox: "0 0 156 52",
+    w: 156,
     h: 52,
-    head: [112, 24],
+    head: [134, 24],
     tail: (
-      <path d="M30 28 C22 20 12 15 4 15 C9 20 11 25 11 28 C11 31 9 36 4 41 C12 41 22 36 30 28 Z" />
+      <g transform="scale(1.2 1)">
+        <path d="M30 28 C22 20 12 15 4 15 C9 20 11 25 11 28 C11 31 9 36 4 41 C12 41 22 36 30 28 Z" />
+      </g>
     ),
     body: (
-      <>
+      <g transform="scale(1.2 1)">
         {/* humped back, hooked jaw */}
         <path d="M127 28 C124 22 118 18 110 15 C100 8 80 5 62 8 C46 11 32 19 26 28 C34 37 52 44 74 44 C96 44 118 37 127 30 C128 29 128 29 127 28 Z" />
         <path d="M127 29 C129 32 127 35 122 37 C122 34 123 31 124 29 Z" />
         <path d="M74 8 C72 2 62 0 55 3 C60 5 64 7 66 9 Z" />
         <path d="M84 43 C82 48 76 51 70 50 C74 47 77 44 78 41 Z" />
         <circle cx="114" cy="22" r="2.4" fill="var(--detail)" />
-      </>
+      </g>
     ),
   },
 

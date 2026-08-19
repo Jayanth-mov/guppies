@@ -10,7 +10,7 @@ export const SPECIES: Species[] = [
   { name: "Guppy", symbolId: "guppy", min: 0, max: 2_000, width: 34 },
   { name: "Clownfish", symbolId: "clownfish", min: 2_000, max: 5_000, width: 46 },
   { name: "Goldfish", symbolId: "goldfish", min: 5_000, max: 10_000, width: 56 },
-  { name: "Salmon", symbolId: "salmon", min: 10_000, max: 25_000, width: 88 },
+  { name: "Salmon", symbolId: "salmon", min: 10_000, max: 25_000, width: 125 },
   { name: "Swordfish", symbolId: "swordfish", min: 25_000, max: 50_000, width: 145 },
   { name: "Giant manta ray", symbolId: "manta", min: 50_000, max: 100_000, width: 190 },
   { name: "Great white shark", symbolId: "greatwhite", min: 100_000, max: 250_000, width: 235 },
@@ -131,6 +131,23 @@ export function formatCount(n: number): string {
 export function formatRange(s: Species): string {
   if (s.max === Infinity) return `${nf.format(s.min)}+`;
   return `${nf.format(s.min)} – ${nf.format(s.max - 1)}`;
+}
+
+function formatCompactFloor(n: number): string {
+  if (n >= 1_000_000) {
+    const millions = n / 1_000_000;
+    return `${Number.isInteger(millions) ? millions : millions.toFixed(1)}M`;
+  }
+  return `${n / 1_000}K`;
+}
+
+// The gauge has a deliberately narrow readout. From Great White onward,
+// shorten the tier floor while preserving the exact inclusive upper bound.
+export function formatGaugeRange(s: Species): string {
+  if (s.min < 100_000) return formatRange(s);
+  const floor = formatCompactFloor(s.min);
+  if (s.max === Infinity) return `${floor}+`;
+  return `${floor} – ${nf.format(s.max - 1)}`;
 }
 
 // Flavor for the depth gauge: the ocean maps to a fictional 0–4,000 m water column.

@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useMemo } from "react";
-import { bandSpans, formatCount, formatRange } from "@/lib/species";
+import { bandSpans, formatRange } from "@/lib/species";
 import type { FishEntry } from "@/lib/roster";
 import Fish from "./Fish";
 import Atmosphere from "./Atmosphere";
@@ -39,11 +39,6 @@ const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
     return `linear-gradient(180deg, ${stops})`;
   }, [bands]);
 
-  const populated = useMemo(
-    () => new Set(roster.map((e) => e.speciesIndex)),
-    [roster],
-  );
-
   return (
     <div
       ref={ref}
@@ -63,11 +58,6 @@ const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
           <span className={styles.bandRange}>
             {formatRange(b.species)} followers
           </span>
-          {!populated.has(b.index) && b.species.min > 0 && (
-            <span className={styles.vacant}>
-              vacant waters — {formatCount(b.species.min)} followers to enter
-            </span>
-          )}
         </div>
       ))}
 

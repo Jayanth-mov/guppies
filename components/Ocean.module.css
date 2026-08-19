@@ -44,13 +44,6 @@
   letter-spacing: 0.04em;
 }
 
-.vacant {
-  font-size: 12.5px;
-  font-style: italic;
-  opacity: 0.6;
-  margin-top: 3px;
-}
-
 @media (max-width: 720px) {
   .bandLabel {
     padding: 8px 14px 0 14px;

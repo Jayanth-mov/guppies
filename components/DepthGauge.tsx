@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type RefObject } from "react";
 import {
   bandSpans,
   formatCount,
+  formatGaugeRange,
   formatRange,
   metersFor,
 } from "@/lib/species";
@@ -73,7 +74,7 @@ export default function DepthGauge({ oceanRef }: DepthGaugeProps) {
           {zone ? zone.species.name : "Surface"}
         </span>
         <span className={styles.range}>
-          {zone ? `${formatRange(zone.species)} followers` : "come on in"}
+          {zone ? `${formatGaugeRange(zone.species)} followers` : "come on in"}
         </span>
       </div>
 

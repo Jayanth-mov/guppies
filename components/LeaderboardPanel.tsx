@@ -119,11 +119,13 @@ export default function LeaderboardPanel({
   const previousRowTops = useRef<Map<string, number>>(new Map());
   const rowAnimations = useRef<Map<string, Animation>>(new Map());
   const rangeRef = useRef<HTMLDivElement | null>(null);
+  const snapshotRef = useRef<HTMLDivElement | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [updatedAgo, setUpdatedAgo] = useState<string | null>(null);
   const [range, setRange] = useState<RangeKey>("day");
   const [growthSort, setGrowthSort] = useState<GrowthSort>("pct");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [snapshotMenuOpen, setSnapshotMenuOpen] = useState(false);
   const selectedSnapshot =
     snapshotIndex >= 0 ? weeklyHistory?.weeks[snapshotIndex] ?? null : null;
   const selectedDate =
@@ -135,6 +137,7 @@ export default function LeaderboardPanel({
   useEffect(() => {
     setRange(sortMode === "growth" ? "week" : "day");
     setMenuOpen(false);
+    setSnapshotMenuOpen(false);
   }, [sortMode]);
 
   // ticks every second so "35sec ago" stays honest, not just on the minute
@@ -219,25 +222,34 @@ export default function LeaderboardPanel({
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (menuOpen) setMenuOpen(false);
+        if (snapshotMenuOpen) setSnapshotMenuOpen(false);
+        else if (menuOpen) setMenuOpen(false);
         else onClose();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose, menuOpen]);
+  }, [open, onClose, menuOpen, snapshotMenuOpen]);
 
-  // close the range menu on an outside click
+  // Close either bottom menu on an outside click.
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen && !snapshotMenuOpen) return;
     const onDown = (e: MouseEvent) => {
-      if (rangeRef.current && !rangeRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (menuOpen && rangeRef.current && !rangeRef.current.contains(target)) {
         setMenuOpen(false);
+      }
+      if (
+        snapshotMenuOpen &&
+        snapshotRef.current &&
+        !snapshotRef.current.contains(target)
+      ) {
+        setSnapshotMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
-  }, [menuOpen]);
+  }, [menuOpen, snapshotMenuOpen]);
 
   // fish click → scroll its row into view and flash it
   useEffect(() => {
@@ -395,44 +407,6 @@ export default function LeaderboardPanel({
       </ol>
 
       <div className={styles.controlsBar}>
-        <div className={styles.snapshotPicker}>
-          <label className={styles.controlCaption} htmlFor="ocean-snapshot">
-            Snapshot
-          </label>
-          <div className={styles.snapshotSelectWrap}>
-            <select
-              id="ocean-snapshot"
-              value={snapshotIndex}
-              disabled={snapshotStatus !== "ready"}
-              title={
-                snapshotStatus === "error"
-                  ? "Weekly history is temporarily unavailable"
-                  : "Choose the date shown by the ocean and leaderboard"
-              }
-              onChange={(event) => onSnapshotIndex(Number(event.target.value))}
-            >
-              <option value={-1}>
-                {snapshotStatus === "loading"
-                  ? "Loading snapshots…"
-                  : snapshotStatus === "error"
-                    ? "Snapshots unavailable"
-                    : "Live · latest"}
-              </option>
-              {weeklyHistory?.weeks
-                .map((week, index) => ({ week, index }))
-                .reverse()
-                .map(({ week, index }) => (
-                  <option key={week.weekStart} value={index}>
-                    Week of {snapshotDate(week.weekStart, weeklyHistory.timezone)}
-                  </option>
-                ))}
-            </select>
-            <span className={styles.selectChevron} aria-hidden="true">
-              ▾
-            </span>
-          </div>
-        </div>
-
         <div className={styles.rangeBar} ref={rangeRef}>
           {menuOpen && (
             <div className={styles.menu} role="menu">
@@ -445,7 +419,7 @@ export default function LeaderboardPanel({
                 <span className={styles.menuHint}>
                   {selectedDate
                     ? "every range ends at this snapshot"
-                    : "updates every 4 hours · all time starts at first tracking"}
+                    : "updates every 4 hours"}
                 </span>
               </div>
               {RANGE_KEYS.map((k) => (
@@ -472,11 +446,88 @@ export default function LeaderboardPanel({
             data-open={menuOpen || undefined}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
+            onClick={() => {
+              setSnapshotMenuOpen(false);
+              setMenuOpen((v) => !v);
+            }}
           >
             <span className={styles.rangeCaption}>Showing</span>
             <span className={styles.rangeValueRow}>
               <span className={styles.rangeValue}>{RANGE_LABEL[range]}</span>
+              <span className={styles.chevron} aria-hidden="true">
+                ▾
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <div className={styles.snapshotPicker} ref={snapshotRef}>
+          {snapshotMenuOpen && (
+            <div
+              className={`${styles.menu} ${styles.snapshotMenu}`}
+              role="menu"
+            >
+              <button
+                type="button"
+                role="menuitemradio"
+                aria-checked={snapshotIndex === -1}
+                className={styles.menuItem}
+                data-on={snapshotIndex === -1 || undefined}
+                onClick={() => {
+                  onSnapshotIndex(-1);
+                  setSnapshotMenuOpen(false);
+                }}
+              >
+                Live · latest
+              </button>
+              {weeklyHistory?.weeks
+                .map((week, index) => ({ week, index }))
+                .reverse()
+                .map(({ week, index }) => (
+                  <button
+                    key={week.weekStart}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={snapshotIndex === index}
+                    className={styles.menuItem}
+                    data-on={snapshotIndex === index || undefined}
+                    onClick={() => {
+                      onSnapshotIndex(index);
+                      setSnapshotMenuOpen(false);
+                    }}
+                  >
+                    Week of{" "}
+                    {snapshotDate(week.weekStart, weeklyHistory.timezone)}
+                  </button>
+                ))}
+            </div>
+          )}
+          <button
+            type="button"
+            className={styles.snapshotBtn}
+            data-open={snapshotMenuOpen || undefined}
+            aria-haspopup="menu"
+            aria-expanded={snapshotMenuOpen}
+            disabled={snapshotStatus !== "ready"}
+            title={
+              snapshotStatus === "error"
+                ? "Weekly history is temporarily unavailable"
+                : "Choose the date shown by the ocean and leaderboard"
+            }
+            onClick={() => {
+              setMenuOpen(false);
+              setSnapshotMenuOpen((value) => !value);
+            }}
+          >
+            <span className={styles.controlCaption}>Snapshot</span>
+            <span className={styles.rangeValueRow}>
+              <span className={styles.rangeValue}>
+                {snapshotStatus === "loading"
+                  ? "Loading…"
+                  : snapshotStatus === "error"
+                    ? "Unavailable"
+                    : selectedDate ?? "Live · latest"}
+              </span>
               <span className={styles.chevron} aria-hidden="true">
                 ▾
               </span>

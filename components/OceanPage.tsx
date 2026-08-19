@@ -95,6 +95,7 @@ export default function OceanPage() {
   const oceanRef = useRef<HTMLDivElement | null>(null);
   const hoverTimer = useRef<number | null>(null);
   const previousSnapshotIndex = useRef(snapshotIndex);
+  const pendingDeepLink = useRef<string | null>(null);
 
   useEffect(() => {
     if (selected && !roster.some((entry) => entry.handle === selected)) {
@@ -160,9 +161,14 @@ export default function OceanPage() {
     let frame = 0;
     let cancelled = false;
     const started = performance.now();
+    const root = document.documentElement;
+    const previousScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
     const release = () => {
+      if (cancelled) return;
       cancelled = true;
       window.cancelAnimationFrame(frame);
+      root.style.scrollBehavior = previousScrollBehavior;
     };
     const follow = (now: number) => {
       if (cancelled) return;
@@ -175,6 +181,8 @@ export default function OceanPage() {
       }
       if (now - started < SNAPSHOT_SWIM_MS + 180) {
         frame = window.requestAnimationFrame(follow);
+      } else {
+        release();
       }
     };
 
@@ -190,8 +198,9 @@ export default function OceanPage() {
     };
   }, [scrollToFish, selected, snapshotIndex]);
 
-  // open a shared link (#handle): start at the hero, then glide down to the
-  // selected fish so the recipient sees the descent
+  // Open a shared link (#handle) at the hero. The actual camera handoff waits
+  // for the live roster below; otherwise a fish can finish its live-data FLIP
+  // migration after the one-shot scroll and leave the viewport behind.
   useEffect(() => {
     const raw = window.location.hash.slice(1);
     if (!raw) return;
@@ -201,12 +210,68 @@ export default function OceanPage() {
       window.history.scrollRestoration = "manual";
     }
     window.scrollTo(0, 0);
+    pendingDeepLink.current = handle;
     setSelected(handle);
-    const t = window.setTimeout(() => scrollToFish(handle), 900);
-    return () => window.clearTimeout(t);
     // once, on mount — `roster` here is the bundled data and has every handle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Once live data has either landed or failed, bind the camera to the linked
+  // fish for the whole migration. This keeps reloads centered even when the
+  // bundled fallback and current follower count put it in very different seas.
+  useEffect(() => {
+    const handle = pendingDeepLink.current;
+    if (!rosterSettled || !handle) return;
+    pendingDeepLink.current = null;
+
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced) {
+      const frame = window.requestAnimationFrame(() => scrollToFish(handle));
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    let frame = 0;
+    let cancelled = false;
+    const started = performance.now();
+    const root = document.documentElement;
+    const previousScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    const release = () => {
+      if (cancelled) return;
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+      root.style.scrollBehavior = previousScrollBehavior;
+    };
+    const follow = (now: number) => {
+      if (cancelled) return;
+      const fish = document.getElementById(fishDomId(handle));
+      if (fish) {
+        const rect = fish.getBoundingClientRect();
+        const offset = rect.top + rect.height / 2 - window.innerHeight / 2;
+        if (Math.abs(offset) > 0.5) {
+          window.scrollBy({ top: offset, behavior: "auto" });
+        }
+      }
+      if (now - started < SNAPSHOT_SWIM_MS + 240) {
+        frame = window.requestAnimationFrame(follow);
+      } else {
+        release();
+      }
+    };
+
+    frame = window.requestAnimationFrame(follow);
+    window.addEventListener("wheel", release, { passive: true });
+    window.addEventListener("touchstart", release, { passive: true });
+    window.addEventListener("keydown", release);
+    return () => {
+      release();
+      window.removeEventListener("wheel", release);
+      window.removeEventListener("touchstart", release);
+      window.removeEventListener("keydown", release);
+    };
+  }, [rosterSettled, scrollToFish]);
 
   // hovering a row lights up its fish and glides the ocean to it (debounced
   // so sweeping the cursor down the list doesn't thrash the scroll)
