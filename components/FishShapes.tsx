@@ -4,7 +4,8 @@ import type { ReactNode } from "react";
 // (head at high x, tail trailing left). `tail` is separate from `body` so the
 // Fish component can wrap it in a wagging <g>. Fills use currentColor so depth
 // decides the silhouette color; accents (eyes, stripes, spots, gills) use
-// var(--detail) so they flip contrast with the band.
+// var(--detail) so they flip contrast with the band. Species whose markings
+// define their identity (notably the orca) use dedicated color variables.
 
 export interface FishShape {
   viewBox: string;
@@ -257,25 +258,59 @@ export const FISH_SHAPES: Record<string, FishShape> = {
   },
 
   orca: {
-    viewBox: "0 0 270 112",
-    w: 270,
-    h: 112,
-    head: [243, 45],
+    viewBox: "0 0 300 124",
+    w: 300,
+    h: 124,
+    head: [274, 48],
     tail: (
       <>
-        <path d="M54 56 C37 49 22 36 8 24 C15 41 18 51 20 58 C31 60 43 59 54 58 Z" />
-        <path d="M54 59 C38 67 22 82 8 94 C15 77 18 67 20 59 C31 57 43 57 54 59 Z" />
+        <path
+          d="M58 60 C40 52 23 37 7 24 C15 43 20 54 22 61 C34 63 47 62 58 62 Z"
+          fill="var(--orca-body)"
+        />
+        <path
+          d="M58 63 C40 72 23 88 7 101 C15 82 20 70 22 63 C34 61 47 61 58 63 Z"
+          fill="var(--orca-body)"
+        />
+        <path
+          d="M38 72 C27 80 19 89 12 96 C18 83 22 76 27 70 C31 70 35 71 38 72 Z"
+          fill="var(--orca-mark)"
+          opacity="0.92"
+        />
       </>
     ),
     body: (
       <>
-        <path d="M263 54 C256 34 229 24 194 24 C153 23 103 32 50 58 C88 82 139 89 187 85 C226 82 255 70 264 59 C265 57 265 55 263 54 Z" />
-        {/* Towering dorsal fin gives the orca its apex-predator profile. */}
-        <path d="M158 27 C155 8 145 0 132 2 C141 11 146 19 147 29 Z" />
-        <path d="M168 78 C157 93 142 103 126 105 C137 91 143 82 146 73 Z" />
-        <path d="M224 33 C233 29 242 31 248 36 C239 39 231 43 225 47 C220 43 220 37 224 33 Z" fill="var(--detail)" />
-        <path d="M202 73 C217 76 235 72 248 63 C235 79 215 84 192 84 C190 79 194 75 202 73 Z" fill="var(--detail)" />
-        <circle cx="247" cy="46" r="2.2" fill="var(--detail)" />
+        {/* Black, robust dolphin body with a blunt melon and narrow peduncle. */}
+        <path
+          d="M295 54 C288 35 260 24 220 22 C177 20 120 30 53 62 C103 92 160 106 214 100 C255 96 284 78 295 67 C299 63 299 58 295 54 Z"
+          fill="var(--orca-body)"
+        />
+        {/* Continuous white jaw and ventral field, interrupted by the flipper. */}
+        <path
+          d="M294 62 C280 65 266 72 251 81 C228 93 207 95 181 92 C145 89 114 78 88 67 C103 88 134 100 176 103 C221 106 261 90 285 73 C290 69 293 65 294 62 Z"
+          fill="var(--orca-mark)"
+        />
+        {/* The gray saddle sits immediately behind the dorsal fin. */}
+        <path
+          d="M141 24 C128 25 116 28 104 33 C116 35 127 38 140 41 C146 36 147 29 141 24 Z"
+          fill="var(--orca-saddle)"
+        />
+        {/* Tall dorsal fin and long, paddle-shaped pectoral flipper. */}
+        <path
+          d="M169 28 C165 7 153 -3 139 3 C149 12 154 21 155 30 Z"
+          fill="var(--orca-body)"
+        />
+        <path
+          d="M181 85 C169 104 151 117 130 121 C145 102 152 90 155 78 Z"
+          fill="var(--orca-body)"
+        />
+        {/* Large post-ocular patch: above and behind the true eye. */}
+        <path
+          d="M246 35 C262 30 278 34 285 43 C272 44 258 50 247 56 C238 51 238 40 246 35 Z"
+          fill="var(--orca-mark)"
+        />
+        <circle cx="278" cy="51" r="1.9" fill="var(--orca-mark)" />
       </>
     ),
   },

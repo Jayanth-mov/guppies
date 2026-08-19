@@ -97,6 +97,27 @@ export default function OceanPage() {
   const previousSnapshotIndex = useRef(snapshotIndex);
   const pendingDeepLink = useRef<string | null>(null);
 
+  const handleDeselectFish = useCallback(() => {
+    pendingDeepLink.current = null;
+    setSelected(null);
+    setFocusRow(null);
+    if (window.location.hash) {
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}`,
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && selected) handleDeselectFish();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleDeselectFish, selected]);
+
   useEffect(() => {
     if (selected && !roster.some((entry) => entry.handle === selected)) {
       setSelected(null);
@@ -407,18 +428,77 @@ export default function OceanPage() {
           hovered={hovered}
           selected={selected}
           onSelectFish={handleSelectFish}
+          onDeselectFish={handleDeselectFish}
           swimSeed={swimSeed}
         />
       </main>
 
       <footer className={styles.floor}>
-        <h2 className={styles.floorTitle}>The sea floor</h2>
-        <p className={styles.floorLine}>{roster.length} swimmers and counting.</p>
-        <p className={styles.floorNote}>
-          {snapshot
-            ? "Historical follower counts; profile pictures use their current versions."
-            : "Live Instagram follower counts, refreshed every four hours."}
-        </p>
+        <svg
+          className={styles.seabedArt}
+          viewBox="0 0 1440 360"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            className={styles.seabedBack}
+            d="M0 112 C150 77 278 91 405 117 C545 146 650 121 775 86 C918 47 1037 73 1162 105 C1273 133 1362 124 1440 97 L1440 360 L0 360 Z"
+          />
+          <path
+            className={styles.seabedGround}
+            d="M0 151 C113 126 232 138 340 162 C470 191 596 168 711 139 C842 106 956 112 1081 151 C1212 192 1333 166 1440 137 L1440 360 L0 360 Z"
+          />
+          <path
+            className={styles.seabedLip}
+            d="M0 151 C113 126 232 138 340 162 C470 191 596 168 711 139 C842 106 956 112 1081 151 C1212 192 1333 166 1440 137"
+          />
+
+          <g className={styles.seabedRocks}>
+            <path d="M115 146 C125 111 157 91 194 101 C224 109 240 131 235 153 Z" />
+            <path d="M176 139 C184 116 205 108 226 117 C243 125 250 140 246 153 Z" />
+            <path d="M1110 150 C1126 107 1167 86 1208 101 C1241 113 1258 137 1254 163 Z" />
+            <path d="M1210 155 C1222 127 1249 117 1274 129 C1292 138 1301 153 1298 168 Z" />
+            <path d="M658 151 C670 120 699 106 728 116 C751 124 763 143 759 162 Z" />
+            <path d="M754 159 C764 137 785 130 805 139 C819 146 827 158 825 169 Z" />
+            <ellipse cx="312" cy="166" rx="24" ry="11" />
+            <ellipse cx="975" cy="151" rx="31" ry="13" />
+            <ellipse cx="1335" cy="159" rx="18" ry="9" />
+          </g>
+          <g className={styles.seabedRockFaces}>
+            <path d="M132 137 C149 109 186 103 211 120 C188 117 163 126 150 145 Z" />
+            <path d="M1135 140 C1155 104 1193 99 1224 119 C1193 115 1169 128 1153 150 Z" />
+            <path d="M675 144 C690 117 717 114 742 130 C719 126 697 135 686 153 Z" />
+          </g>
+
+          <g className={styles.sedimentLines}>
+            <path d="M386 194 C442 182 497 184 548 196" />
+            <path d="M610 207 C671 194 727 196 778 207" />
+            <path d="M840 180 C890 169 936 171 976 181" />
+            <path d="M1031 223 C1080 212 1124 214 1161 224" />
+            <path d="M207 235 C250 225 289 226 326 236" />
+          </g>
+
+          <g className={styles.whaleFall}>
+            <path d="M1001 259 C1033 241 1067 239 1099 253" />
+            <path d="M1018 252 C1014 233 1020 219 1032 208" />
+            <path d="M1038 247 C1036 227 1043 211 1056 200" />
+            <path d="M1060 247 C1061 229 1069 215 1082 207" />
+            <ellipse cx="996" cy="261" rx="12" ry="9" />
+          </g>
+        </svg>
+
+        <div className={styles.floorCopy}>
+          <h2 className={styles.floorTitle}>The sea floor</h2>
+          <p className={styles.floorLine}>
+            {roster.length} swimmers and counting.
+          </p>
+          <p className={styles.floorNote}>
+            {snapshot
+              ? "Historical follower counts; profile pictures use their current versions."
+              : "Live Instagram follower counts, refreshed every four hours."}
+          </p>
+        </div>
       </footer>
 
       <DepthGauge oceanRef={oceanRef} />

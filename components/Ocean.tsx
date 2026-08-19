@@ -14,11 +14,12 @@ interface OceanProps {
   hovered: string | null;
   selected: string | null;
   onSelectFish: (handle: string) => void;
+  onDeselectFish: () => void;
   swimSeed: string;
 }
 
 const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
-  { roster, hovered, selected, onSelectFish, swimSeed },
+  { roster, hovered, selected, onSelectFish, onDeselectFish, swimSeed },
   ref,
 ) {
   // hover wins while active; otherwise the clicked/linked fish stays lit
@@ -44,6 +45,11 @@ const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
       ref={ref}
       className={styles.ocean}
       style={{ height: OCEAN_HEIGHT, backgroundImage: gradient }}
+      onClick={(event) => {
+        const target = event.target;
+        if (target instanceof Element && target.closest("button")) return;
+        onDeselectFish();
+      }}
     >
       <Atmosphere />
 

@@ -85,11 +85,15 @@ function MiniFish({ symbolId }: { symbolId: string }) {
       <svg
         key={symbolId}
         className={styles.miniFish}
+        data-orca={symbolId === "orca" || undefined}
         viewBox={shape.viewBox}
         style={{
           aspectRatio: `${shape.w} / ${shape.h}`,
           color: "#eaf6ff",
           ["--detail" as string]: "rgba(4, 16, 31, 0.5)",
+          ["--orca-body" as string]: "#02070c",
+          ["--orca-mark" as string]: "#eaf6ff",
+          ["--orca-saddle" as string]: "#7894a1",
         }}
       >
         <g fill="currentColor">{shape.tail}</g>

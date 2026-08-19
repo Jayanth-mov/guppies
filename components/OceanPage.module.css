@@ -42,7 +42,12 @@
 }
 
 .fab[data-open] {
-  padding: 9px 13px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+  border-radius: 50%;
   border-color: rgba(108, 245, 226, 0.5);
 }
 
@@ -51,12 +56,6 @@
   font-size: 20px;
   line-height: 1;
   color: var(--accent);
-}
-
-@media (min-width: 980px) {
-  .squeezed .fab {
-    right: 416px;
-  }
 }
 
 /* ---- surface ---- */
@@ -372,12 +371,80 @@
 /* ---- sea floor ---- */
 
 .floor {
-  padding: 110px 24px 130px;
+  position: relative;
+  isolation: isolate;
+  min-height: 360px;
+  overflow: hidden;
+  padding: 154px 24px 110px;
   text-align: center;
   color: var(--ink-pale);
-  /* starts at the ocean's vignetted bottom tone (band-12 darkened) so the
-     seam between the ocean and the sea floor is seamless */
-  background: linear-gradient(180deg, #05172e 0%, var(--abyss-floor) 60%);
+  background: #051426;
+}
+
+.seabedArt {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.seabedBack {
+  fill: #0a2430;
+}
+
+.seabedGround {
+  fill: #102c30;
+}
+
+.seabedLip {
+  fill: none;
+  stroke: #28505a;
+  stroke-width: 5;
+  opacity: 0.72;
+}
+
+.seabedRocks {
+  fill: #193a3d;
+}
+
+.seabedRockFaces {
+  fill: #2a4b4c;
+  opacity: 0.75;
+}
+
+.sedimentLines {
+  fill: none;
+  stroke: #315053;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.48;
+}
+
+.whaleFall {
+  fill: none;
+  stroke: #708c86;
+  stroke-width: 5;
+  stroke-linecap: round;
+  opacity: 0.43;
+}
+
+.whaleFall ellipse {
+  fill: #708c86;
+  stroke: none;
+}
+
+.floorCopy {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+  width: min(560px, 100%);
+  padding: 22px 18px 24px;
+  border-radius: 16px;
+  background: rgba(4, 16, 31, 0.48);
+  border: 1px solid rgba(112, 152, 151, 0.2);
+  box-shadow: 0 16px 42px rgba(1, 8, 16, 0.22);
 }
 
 .floorTitle {
@@ -404,4 +471,23 @@
   font-size: 12.5px;
   font-style: italic;
   opacity: 0.45;
+}
+
+@media (max-width: 720px) {
+  .floor {
+    min-height: 340px;
+    padding: 142px 18px 84px;
+  }
+
+  .seabedArt {
+    width: 1360px;
+    max-width: none;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .floorCopy {
+    padding: 19px 14px 21px;
+  }
 }

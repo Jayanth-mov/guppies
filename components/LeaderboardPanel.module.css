@@ -249,6 +249,10 @@
   overflow: visible;
 }
 
+.miniFish[data-orca] {
+  filter: drop-shadow(0 0 1px rgba(234, 246, 255, 0.9));
+}
+
 .nums {
   display: flex;
   flex-direction: column;
