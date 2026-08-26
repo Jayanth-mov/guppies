@@ -41,6 +41,21 @@ export function avatarHue(handle: string): number {
   return Math.round(pick(rng(`hue:${handle}`), 165, 225));
 }
 
+function dayChangeChip(change: number | null): string {
+  if (change == null) return "—";
+  return change >= 0
+    ? `+${formatCount(change)} ▲`
+    : `${formatCount(change)} ▼`;
+}
+
+function dayChangeLabel(change: number | null): string {
+  if (change == null) return "Past-day follower change unavailable.";
+  if (change === 0) return "No follower change in the past day.";
+  return change > 0
+    ? `Gained ${formatCount(change)} followers in the past day.`
+    : `Lost ${formatCount(Math.abs(change))} followers in the past day.`;
+}
+
 export default function Fish({
   entry,
   highlighted,
@@ -140,6 +155,7 @@ export default function Fish({
   // fixed regardless of species, sized to sit naturally next to the 11px
   // label text rather than to the fish's own body
   const avatarSize = 22;
+  const dayChange = entry.stats.day?.change ?? null;
 
   const style = {
     // clamp keeps the shallowest fish (and their avatars, riding above the
@@ -192,7 +208,7 @@ export default function Fish({
               type="button"
               className={styles.hit}
               onClick={() => onSelect(entry.handle)}
-              aria-label={`${entry.handle} — ${entry.species.name}, ${formatCount(entry.followers)} followers. Open in leaderboard.`}
+              aria-label={`${entry.handle} — ${entry.species.name}, ${formatCount(entry.followers)} followers. ${dayChangeLabel(dayChange)} Open in leaderboard.`}
             >
               <span className={styles.countAbove} aria-hidden="true">
                 {formatCount(entry.followers)}
@@ -231,6 +247,19 @@ export default function Fish({
                   />
                 </span>
                 <span className={styles.labelName}>{entry.handle}</span>
+                <span
+                  className={styles.labelDelta}
+                  data-dir={
+                    dayChange == null
+                      ? undefined
+                      : dayChange >= 0
+                        ? "up"
+                        : "down"
+                  }
+                  aria-hidden="true"
+                >
+                  {dayChangeChip(dayChange)}
+                </span>
               </span>
             </button>
           </div>

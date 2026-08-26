@@ -348,6 +348,47 @@
   opacity: 0.65;
 }
 
+.rosterLoading {
+  height: 22px;
+  margin: 14px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-dark);
+  opacity: 0.62;
+  transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+.rosterLoading[data-ready] {
+  opacity: 0;
+  transform: translateY(3px);
+  pointer-events: none;
+}
+
+.loadingDots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.loadingDots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.loadingDots span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.loadingDots span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
 .arrow {
   display: inline-block;
 }
@@ -362,9 +403,26 @@
   }
 }
 
+@keyframes loadingBubble {
+  0%,
+  70%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(1px) scale(0.82);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .arrow {
     animation: beckon 1.7s ease-in-out infinite;
+  }
+
+  .loadingDots span {
+    animation: loadingBubble 0.9s ease-in-out infinite;
   }
 }
 

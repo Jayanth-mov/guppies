@@ -417,6 +417,20 @@ export default function OceanPage() {
             ↓
           </span>
         </p>
+        <div
+          className={styles.rosterLoading}
+          data-ready={rosterSettled || undefined}
+          role="status"
+          aria-live="polite"
+          aria-hidden={rosterSettled}
+        >
+          <span>loading ocean</span>
+          <span className={styles.loadingDots} aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        </div>
 
         <Clouds />
       </header>

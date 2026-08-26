@@ -147,6 +147,26 @@
   color: var(--ink-pale);
 }
 
+.labelDelta {
+  margin-left: 1px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-pale);
+  opacity: 0.64;
+}
+
+.labelDelta[data-dir="up"] {
+  color: var(--rise);
+  opacity: 0.92;
+}
+
+.labelDelta[data-dir="down"] {
+  color: var(--fall);
+  opacity: 0.92;
+}
+
 .avatar {
   flex: none;
   width: max(20px, calc(var(--av) * var(--fish-scale, 1)));
