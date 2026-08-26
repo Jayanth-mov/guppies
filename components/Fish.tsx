@@ -44,8 +44,8 @@ export function avatarHue(handle: string): number {
 function dayChangeChip(change: number | null): string {
   if (change == null) return "—";
   return change >= 0
-    ? `+${formatCount(change)} ▲`
-    : `${formatCount(change)} ▼`;
+    ? `+${formatCount(change)}`
+    : formatCount(change);
 }
 
 function dayChangeLabel(change: number | null): string {
