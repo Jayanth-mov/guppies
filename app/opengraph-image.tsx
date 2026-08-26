@@ -65,7 +65,7 @@ export default function OpenGraphImage() {
           left: 0,
           right: 0,
           top: 0,
-          height: 318,
+          height: 357,
           display: "flex",
           background:
             "linear-gradient(180deg, #68b8e5 0%, #bce8f7 100%)",
@@ -76,7 +76,7 @@ export default function OpenGraphImage() {
           position: "absolute",
           left: 0,
           right: 0,
-          top: 310,
+          top: 357,
           bottom: 0,
           display: "flex",
           background:
@@ -120,20 +120,6 @@ export default function OpenGraphImage() {
       <div
         style={{
           position: "absolute",
-          left: 78,
-          top: 50,
-          display: "flex",
-          fontSize: 22,
-          letterSpacing: "0.28em",
-          fontWeight: 700,
-          color: "#155071",
-        }}
-      >
-        GUPPIES.JAYANTH.MOV
-      </div>
-      <div
-        style={{
-          position: "absolute",
           left: 70,
           top: 82,
           display: "flex",
@@ -145,19 +131,6 @@ export default function OpenGraphImage() {
         }}
       >
         guppies
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: 78,
-          top: 217,
-          display: "flex",
-          fontSize: 30,
-          fontWeight: 500,
-          color: "#174a67",
-        }}
-      >
-        An ocean of creators. Bigger fish live deeper.
       </div>
 
       <Fish left={98} top={380} width={114} />
@@ -182,23 +155,6 @@ export default function OpenGraphImage() {
         />
       ))}
 
-      <div
-        style={{
-          position: "absolute",
-          right: 72,
-          bottom: 38,
-          display: "flex",
-          padding: "10px 18px",
-          borderRadius: 999,
-          background: "rgba(3, 17, 34, 0.58)",
-          border: "1px solid rgba(108,245,226,0.38)",
-          color: "#d7f0f7",
-          fontSize: 19,
-          letterSpacing: "0.06em",
-        }}
-      >
-        scroll to dive ↓
-      </div>
     </div>,
     size,
   );
