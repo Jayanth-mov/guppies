@@ -54,4 +54,44 @@ describe("pipeline range baselines", () => {
       ),
     ).toBe(500);
   });
+
+  it("keeps range baselines continuous across a renamed handle", () => {
+    const history: CountSnapshot[] = [
+      {
+        t: "2026-07-20T20:00:00.000Z",
+        counts: { "aryan.builds07": 599 },
+      },
+      {
+        t: "2026-08-27T20:00:00.000Z",
+        counts: { "aryan.builds07": 610 },
+      },
+    ];
+    const origins: OriginRecords = {
+      "aryan.builds07": {
+        t: "2026-07-20T20:00:00.000Z",
+        count: 599,
+      },
+    };
+
+    expect(
+      baselineCountForRange(
+        history,
+        origins,
+        "aryan_builds07",
+        "all",
+        new Date("2026-08-28T20:00:00.000Z").getTime(),
+        ["aryan.builds07"],
+      ),
+    ).toBe(599);
+    expect(
+      baselineCountForRange(
+        history,
+        origins,
+        "aryan_builds07",
+        "day",
+        new Date("2026-08-28T20:00:00.000Z").getTime(),
+        ["aryan.builds07"],
+      ),
+    ).toBe(610);
+  });
 });

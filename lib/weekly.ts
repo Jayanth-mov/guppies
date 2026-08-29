@@ -72,6 +72,7 @@ function statsAtSnapshot(
   snapshot: WeeklySnapshot,
   history: CountSnapshot[],
   origins: OriginRecords,
+  historicalHandlesByCanonical: Record<string, string[]>,
 ): Record<string, Stats> {
   const capturedMs = new Date(snapshot.capturedAt).getTime();
   const available = history.filter(
@@ -80,14 +81,28 @@ function statsAtSnapshot(
   const result: Record<string, Stats> = {};
 
   for (const [handle, current] of Object.entries(snapshot.counts)) {
+    const identityHandles = [
+      handle,
+      ...(historicalHandlesByCanonical[handle] ?? []),
+    ];
+    const countInSnapshot = (point: CountSnapshot) => {
+      for (const identityHandle of identityHandles) {
+        const count = point.counts[identityHandle];
+        if (count !== undefined) return count;
+      }
+      return undefined;
+    };
     const stats = blankStats();
     const withHandle = available.filter(
-      (point) => point.counts[handle] !== undefined,
+      (point) => countInSnapshot(point) !== undefined,
     );
     const previous = [...withHandle]
       .reverse()
       .find((point) => new Date(point.t).getTime() < capturedMs);
-    stats.latest = stat(current, previous?.counts[handle]);
+    stats.latest = stat(
+      current,
+      previous ? countInSnapshot(previous) : undefined,
+    );
 
     for (const key of ["day", "week", "month"] as const) {
       const cutoff = capturedMs - RANGE_MS[key];
@@ -98,11 +113,19 @@ function statsAtSnapshot(
       // had not yet accumulated a full range at this historical endpoint.
       stats[key] = stat(
         current,
-        baseline?.counts[handle] ?? withHandle[0]?.counts[handle],
+        baseline
+          ? countInSnapshot(baseline)
+          : withHandle[0]
+            ? countInSnapshot(withHandle[0])
+            : undefined,
       );
     }
 
-    stats.all = stat(current, origins[handle]?.count);
+    const origin = identityHandles
+      .map((identityHandle) => origins[identityHandle])
+      .filter((record) => record !== undefined)
+      .sort((a, b) => a.t.localeCompare(b.t))[0];
+    stats.all = stat(current, origin?.count);
     result[handle] = stats;
   }
   return result;
@@ -172,6 +195,7 @@ export function buildWeeklyArchive(
   history: CountSnapshot[],
   timezone: string,
   origins: OriginRecords = {},
+  historicalHandlesByCanonical: Record<string, string[]> = {},
 ): WeeklySnapshot[] {
   const startsAt = archiveStartISO(timezone);
   const byWeek = new Map<string, WeeklySnapshot>();
@@ -208,7 +232,12 @@ export function buildWeeklyArchive(
       if (hasCompleteStats || history.length === 0) return snapshot;
       return {
         ...snapshot,
-        stats: statsAtSnapshot(snapshot, history, origins),
+        stats: statsAtSnapshot(
+          snapshot,
+          history,
+          origins,
+          historicalHandlesByCanonical,
+        ),
       };
     });
 }

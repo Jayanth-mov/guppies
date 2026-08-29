@@ -86,4 +86,26 @@ describe("historical roster membership", () => {
     const roster = getRoster(sourceFromWeekly(history, 2, liveRoster()));
     expect(roster.map((entry) => entry.handle)).toContain("acegotchuu");
   });
+
+  it("shows an old handle's weekly history under its current handle", () => {
+    const renamedHistory: WeeklyHistoryPayload = {
+      timezone: "America/Chicago",
+      startsOn: "2026-07-19",
+      origins: {
+        "aryan.builds07": { t: "2026-07-20T05:00:00.000Z", count: 599 },
+      },
+      weeks: [
+        {
+          weekStart: "2026-07-19T05:00:00.000Z",
+          capturedAt: "2026-07-20T05:00:00.000Z",
+          counts: { "aryan.builds07": 599 },
+        },
+      ],
+    };
+
+    const roster = getRoster(sourceFromWeekly(renamedHistory, 0, liveRoster()));
+    expect(roster.find((entry) => entry.handle === "aryan_builds07")?.followers)
+      .toBe(599);
+    expect(roster.map((entry) => entry.handle)).not.toContain("aryan.builds07");
+  });
 });

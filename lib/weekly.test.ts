@@ -112,4 +112,30 @@ describe("weekly archive", () => {
     expect(augustSecond?.stats?.alpha.month?.change).toBe(35);
     expect(augustSecond?.stats?.alpha.all?.change).toBe(35);
   });
+
+  it("calculates a renamed handle's weekly growth from its old history", () => {
+    const history: CountSnapshot[] = [
+      {
+        t: "2026-07-19T05:01:00Z",
+        counts: { "aryan.builds07": 599 },
+      },
+      {
+        t: "2026-08-23T05:01:00Z",
+        counts: { aryan_builds07: 625 },
+      },
+    ];
+    const archive = buildWeeklyArchive(
+      [],
+      history,
+      TZ,
+      buildOriginRecords({}, history),
+      { aryan_builds07: ["aryan.builds07"] },
+    );
+    const renamedWeek = archive.find((week) =>
+      week.weekStart.startsWith("2026-08-23"),
+    );
+
+    expect(renamedWeek?.stats?.aryan_builds07.all?.change).toBe(26);
+    expect(renamedWeek?.stats?.aryan_builds07.month?.change).toBe(26);
+  });
 });

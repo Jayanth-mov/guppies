@@ -73,29 +73,43 @@ export function baselineCountForRange(
   handle: string,
   key: RangeKey,
   nowMs: number,
+  historicalHandles: string[] = [],
 ): number | undefined {
-  if (key === "all") return origins[handle]?.count;
+  const identityHandles = [...new Set([handle, ...historicalHandles])];
+  const countInSnapshot = (snapshot: CountSnapshot) => {
+    for (const identityHandle of identityHandles) {
+      const count = snapshot.counts[identityHandle];
+      if (count !== undefined) return count;
+    }
+    return undefined;
+  };
+  const origin = identityHandles
+    .map((identityHandle) => origins[identityHandle])
+    .filter((record) => record !== undefined)
+    .sort((a, b) => a.t.localeCompare(b.t))[0];
+
+  if (key === "all") return origin?.count;
 
   if (key === "latest") {
     for (let i = history.length - 1; i >= 0; i--) {
-      const count = history[i].counts[handle];
+      const count = countInSnapshot(history[i]);
       if (count !== undefined) return count;
     }
-    return origins[handle]?.count;
+    return origin?.count;
   }
 
   const cutoff = nowMs - RANGE_MS[key];
   for (let i = history.length - 1; i >= 0; i--) {
     if (new Date(history[i].t).getTime() > cutoff) continue;
-    const count = history[i].counts[handle];
+    const count = countInSnapshot(history[i]);
     if (count !== undefined) return count;
   }
 
   // "Show so far" for accounts added inside the selected window. Origins
   // survive the rolling-detail cap; the scan supports older stored payloads.
-  if (origins[handle]) return origins[handle].count;
+  if (origin) return origin.count;
   for (const snapshot of history) {
-    const count = snapshot.counts[handle];
+    const count = countInSnapshot(snapshot);
     if (count !== undefined) return count;
   }
   return undefined;
@@ -266,11 +280,21 @@ export async function runSnapshot(): Promise<RunSummary> {
   const token = await getWorkingToken();
 
   const host = raw.hostAccount;
-  const handles = raw.accounts.map((a) => ({
+  const configuredAccounts = raw.accounts as Array<{
+    handle: string;
+    name?: string;
+    profilePictureUrl?: string;
+    historicalHandles?: string[];
+  }>;
+  const handles = configuredAccounts.map((a) => ({
     handle: a.handle,
-    name: (a as { name?: string }).name,
-    bundledAvatarUrl: (a as { profilePictureUrl?: string }).profilePictureUrl,
+    name: a.name,
+    bundledAvatarUrl: a.profilePictureUrl,
+    historicalHandles: a.historicalHandles ?? [],
   }));
+  const historicalHandlesByCanonical = Object.fromEntries(
+    handles.map(({ handle, historicalHandles }) => [handle, historicalHandles]),
+  );
 
   const prevLatest = await redisGetJSON<LiveRoster>(KEY_LATEST);
   const previousByHandle = new Map(
@@ -289,13 +313,28 @@ export async function runSnapshot(): Promise<RunSummary> {
   // "Show so far": when history doesn't yet reach a full window back, fall back
   // to the earliest snapshot we have, so the change accumulates from day one
   // instead of showing a dash.
-  const baselineCount = (handle: string, key: RangeKey) =>
-    baselineCountForRange(history, origins, handle, key, nowMs);
+  const baselineCount = (
+    handle: string,
+    key: RangeKey,
+    historicalHandles: string[],
+  ) =>
+    baselineCountForRange(
+      history,
+      origins,
+      handle,
+      key,
+      nowMs,
+      historicalHandles,
+    );
 
-  const statsFor = (handle: string, current: number): Stats => {
+  const statsFor = (
+    handle: string,
+    current: number,
+    historicalHandles: string[],
+  ): Stats => {
     const s = emptyStats();
     for (const key of RANGE_KEYS) {
-      const base = baselineCount(handle, key);
+      const base = baselineCount(handle, key, historicalHandles);
       if (base !== undefined && base > 0) {
         s[key] = { change: current - base, pct: ((current - base) / base) * 100 };
       }
@@ -307,10 +346,26 @@ export async function runSnapshot(): Promise<RunSummary> {
   const accounts: LiveAccount[] = [];
   const failed: { handle: string; reason: string }[] = [];
 
-  for (const { handle, name, bundledAvatarUrl } of handles) {
+  for (const {
+    handle,
+    name,
+    bundledAvatarUrl,
+    historicalHandles,
+  } of handles) {
+    const identityHandles = [handle, ...historicalHandles];
+    const previous = identityHandles
+      .map((identityHandle) => previousByHandle.get(identityHandle))
+      .find((account) => account !== undefined);
+    if (!origins[handle]) {
+      const previousOrigin = identityHandles
+        .map((identityHandle) => origins[identityHandle])
+        .filter((record) => record !== undefined)
+        .sort((a, b) => a.t.localeCompare(b.t))[0];
+      if (previousOrigin) origins[handle] = previousOrigin;
+    }
+
     try {
       const got = await fetchAccount(igUserId, token, handle, handle === host);
-      const previous = previousByHandle.get(handle);
       if (!origins[handle]) {
         origins[handle] = { t: now, count: got.followers };
       }
@@ -323,17 +378,19 @@ export async function runSnapshot(): Promise<RunSummary> {
         // business_discovery succeeds. Never erase a picture we already had.
         avatarUrl:
           got.avatarUrl ?? previous?.avatarUrl ?? bundledAvatarUrl ?? null,
-        stats: statsFor(handle, got.followers),
+        stats: statsFor(handle, got.followers, historicalHandles),
       });
     } catch (err) {
       failed.push({ handle, reason: (err as Error).message });
       // carry the last-known entry forward so the fish doesn't vanish
-      const carried = previousByHandle.get(handle);
+      const carried = previous;
       if (carried) {
         counts[handle] = carried.followers;
         accounts.push({
           ...carried,
-          stats: statsFor(handle, carried.followers),
+          handle,
+          name: name ?? carried.name,
+          stats: statsFor(handle, carried.followers, historicalHandles),
         });
       }
     }
@@ -362,7 +419,13 @@ export async function runSnapshot(): Promise<RunSummary> {
     failed,
   };
   const timezone = process.env.WEEK_START_TZ ?? "America/Chicago";
-  const weekly = buildWeeklyArchive(storedWeekly, history, timezone, origins);
+  const weekly = buildWeeklyArchive(
+    storedWeekly,
+    history,
+    timezone,
+    origins,
+    historicalHandlesByCanonical,
+  );
   await redisSetJSON(KEY_HISTORY, history);
   await redisSetJSON(KEY_WEEKLY, weekly);
   await redisSetJSON(KEY_ORIGINS, origins);
@@ -403,6 +466,15 @@ export async function readWeeklyHistory(): Promise<WeeklyHistoryPayload> {
     (await redisGetJSON<OriginRecords>(KEY_ORIGINS)) ?? {},
     history,
   );
+  const historicalHandlesByCanonical = Object.fromEntries(
+    (raw.accounts as Array<{
+      handle: string;
+      historicalHandles?: string[];
+    }>).map((account) => [
+      account.handle,
+      account.historicalHandles ?? [],
+    ]),
+  );
   return {
     timezone,
     startsOn: WEEKLY_ARCHIVE_START_DATE,
@@ -411,7 +483,19 @@ export async function readWeeklyHistory(): Promise<WeeklyHistoryPayload> {
     // the permanent key. The cron is the only writer.
     weeks:
       stored.length > 0
-        ? buildWeeklyArchive(stored, history, timezone, origins)
-        : buildWeeklyArchive([], history, timezone, origins),
+        ? buildWeeklyArchive(
+            stored,
+            history,
+            timezone,
+            origins,
+            historicalHandlesByCanonical,
+          )
+        : buildWeeklyArchive(
+            [],
+            history,
+            timezone,
+            origins,
+            historicalHandlesByCanonical,
+          ),
   };
 }
