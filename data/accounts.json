@@ -189,7 +189,8 @@
       "handle": "jake.leyden"
     },
     {
-      "handle": "joaquin3ccd"
+      "handle": "joaquin3ccd",
+      "pendingValidation": true
     }
   ]
 }
