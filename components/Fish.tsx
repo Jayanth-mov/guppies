@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import { avatarProxyUrl, type FishEntry } from "@/lib/roster";
+import { avatarProxyUrl, type FishEntry, type RangeKey } from "@/lib/roster";
 import { formatCount, SPECIES } from "@/lib/species";
 import { pick, rng } from "@/lib/rand";
 import { FISH_SHAPES } from "./FishShapes";
@@ -13,6 +13,7 @@ interface FishProps {
   dimmed: boolean;
   onSelect: (handle: string) => void;
   swimSeed: string;
+  range: RangeKey;
 }
 
 export function fishDomId(handle: string): string {
@@ -41,19 +42,28 @@ export function avatarHue(handle: string): number {
   return Math.round(pick(rng(`hue:${handle}`), 165, 225));
 }
 
-function dayChangeChip(change: number | null): string {
+function changeChip(change: number | null): string {
   if (change == null) return "—";
   return change >= 0
     ? `+${formatCount(change)}`
     : formatCount(change);
 }
 
-function dayChangeLabel(change: number | null): string {
-  if (change == null) return "Past-day follower change unavailable.";
-  if (change === 0) return "No follower change in the past day.";
+const RANGE_PHRASE: Record<RangeKey, string> = {
+  latest: "since the latest refresh",
+  day: "in the past day",
+  week: "in the past week",
+  month: "in the past month",
+  all: "since tracking began",
+};
+
+function changeLabel(change: number | null, range: RangeKey): string {
+  const phrase = RANGE_PHRASE[range];
+  if (change == null) return `Follower change ${phrase} is unavailable.`;
+  if (change === 0) return `No follower change ${phrase}.`;
   return change > 0
-    ? `Gained ${formatCount(change)} followers in the past day.`
-    : `Lost ${formatCount(Math.abs(change))} followers in the past day.`;
+    ? `Gained ${formatCount(change)} followers ${phrase}.`
+    : `Lost ${formatCount(Math.abs(change))} followers ${phrase}.`;
 }
 
 export default function Fish({
@@ -62,6 +72,7 @@ export default function Fish({
   dimmed,
   onSelect,
   swimSeed,
+  range,
 }: FishProps) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const migrationRef = useRef<HTMLDivElement | null>(null);
@@ -155,7 +166,7 @@ export default function Fish({
   // fixed regardless of species, sized to sit naturally next to the 11px
   // label text rather than to the fish's own body
   const avatarSize = 22;
-  const dayChange = entry.stats.day?.change ?? null;
+  const change = entry.stats[range]?.change ?? null;
 
   const style = {
     // clamp keeps the shallowest fish (and their avatars, riding above the
@@ -208,7 +219,7 @@ export default function Fish({
               type="button"
               className={styles.hit}
               onClick={() => onSelect(entry.handle)}
-              aria-label={`${entry.handle} — ${entry.species.name}, ${formatCount(entry.followers)} followers. ${dayChangeLabel(dayChange)} Open in leaderboard.`}
+              aria-label={`${entry.handle} — ${entry.species.name}, ${formatCount(entry.followers)} followers. ${changeLabel(change, range)} Open in leaderboard.`}
             >
               <span className={styles.countAbove} aria-hidden="true">
                 {formatCount(entry.followers)}
@@ -250,15 +261,15 @@ export default function Fish({
                 <span
                   className={styles.labelDelta}
                   data-dir={
-                    dayChange == null
+                    change == null
                       ? undefined
-                      : dayChange >= 0
+                      : change >= 0
                         ? "up"
                         : "down"
                   }
                   aria-hidden="true"
                 >
-                  {dayChangeChip(dayChange)}
+                  {changeChip(change)}
                 </span>
               </span>
             </button>

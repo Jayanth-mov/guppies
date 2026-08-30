@@ -2,7 +2,7 @@
 
 import { forwardRef, useMemo } from "react";
 import { bandSpans, formatRange } from "@/lib/species";
-import type { FishEntry } from "@/lib/roster";
+import type { FishEntry, RangeKey } from "@/lib/roster";
 import Fish from "./Fish";
 import Atmosphere from "./Atmosphere";
 import styles from "./Ocean.module.css";
@@ -16,10 +16,19 @@ interface OceanProps {
   onSelectFish: (handle: string) => void;
   onDeselectFish: () => void;
   swimSeed: string;
+  range: RangeKey;
 }
 
 const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
-  { roster, hovered, selected, onSelectFish, onDeselectFish, swimSeed },
+  {
+    roster,
+    hovered,
+    selected,
+    onSelectFish,
+    onDeselectFish,
+    swimSeed,
+    range,
+  },
   ref,
 ) {
   // hover wins while active; otherwise the clicked/linked fish stays lit
@@ -75,6 +84,7 @@ const Ocean = forwardRef<HTMLDivElement, OceanProps>(function Ocean(
           dimmed={hovered !== null && hovered !== e.handle}
           onSelect={onSelectFish}
           swimSeed={swimSeed}
+          range={range}
         />
       ))}
     </div>

@@ -7,6 +7,7 @@ import {
   sourceFromLive,
   sourceFromWeekly,
   type LiveRoster,
+  type RangeKey,
 } from "@/lib/roster";
 import type { WeeklyHistoryPayload } from "@/lib/weekly";
 import Ocean from "./Ocean";
@@ -88,6 +89,13 @@ export default function OceanPage() {
   }, [liveRoster, snapshot, snapshotIndex, weeklyHistory]);
   const lastUpdated = snapshot?.capturedAt ?? liveLastUpdated;
   const [sortMode, setSortMode] = useState<SortMode>("followers");
+  // Each leaderboard tab keeps its own range selection, while the currently
+  // active range also drives the signed follower change beside every fish.
+  const [ranges, setRanges] = useState<Record<SortMode, RangeKey>>({
+    followers: "day",
+    growth: "week",
+  });
+  const range = ranges[sortMode];
   const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [focusRow, setFocusRow] = useState<string | null>(null);
@@ -444,6 +452,7 @@ export default function OceanPage() {
           onSelectFish={handleSelectFish}
           onDeselectFish={handleDeselectFish}
           swimSeed={swimSeed}
+          range={range}
         />
       </main>
 
@@ -524,6 +533,13 @@ export default function OceanPage() {
         lastUpdated={lastUpdated}
         sortMode={sortMode}
         onSortMode={setSortMode}
+        range={range}
+        onRange={(nextRange) =>
+          setRanges((current) => ({
+            ...current,
+            [sortMode]: nextRange,
+          }))
+        }
         hovered={hovered}
         onHoverRow={handleHoverRow}
         focusRow={focusRow}
