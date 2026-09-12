@@ -256,8 +256,11 @@ export function sourceFromWeekly(
   for (const handle of Object.keys(snapshot.counts)) {
     const canonical = canonicalByHistoricalHandle.get(handle) ?? handle;
     const policy = configuredByHandle.get(canonical);
+    // A removed account can remain in immutable snapshots, but must never
+    // reappear in a historical ocean or leaderboard.
+    if (!policy) continue;
     if (
-      policy?.historyStartsOn &&
+      policy.historyStartsOn &&
       snapshot.weekStart.slice(0, 10) < policy.historyStartsOn
     ) {
       continue;

@@ -457,13 +457,58 @@ export async function readLatest(): Promise<LiveRoster | null> {
   return redisGetJSON<LiveRoster>(KEY_LATEST);
 }
 
+function configuredIdentityHandles(): Set<string> {
+  return new Set(
+    (raw.accounts as Array<{
+      handle: string;
+      historicalHandles?: string[];
+    }>).flatMap((account) => [
+      account.handle,
+      ...(account.historicalHandles ?? []),
+    ]),
+  );
+}
+
+function filterCountsForConfiguredAccounts(
+  counts: Record<string, number>,
+  allowed: Set<string>,
+): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(counts).filter(([handle]) => allowed.has(handle)),
+  );
+}
+
+function filterStatsForConfiguredAccounts(
+  stats: Record<string, Stats> | undefined,
+  allowed: Set<string>,
+): Record<string, Stats> | undefined {
+  if (!stats) return undefined;
+  return Object.fromEntries(
+    Object.entries(stats).filter(([handle]) => allowed.has(handle)),
+  );
+}
+
 export async function readWeeklyHistory(): Promise<WeeklyHistoryPayload> {
   const timezone = process.env.WEEK_START_TZ ?? "America/Chicago";
-  const stored = (await redisGetJSON<WeeklySnapshot[]>(KEY_WEEKLY)) ?? [];
-  const history =
-    (await redisGetJSON<CountSnapshot[]>(KEY_HISTORY)) ?? [];
+  const allowed = configuredIdentityHandles();
+  const stored = ((await redisGetJSON<WeeklySnapshot[]>(KEY_WEEKLY)) ?? []).map(
+    (snapshot) => ({
+      ...snapshot,
+      counts: filterCountsForConfiguredAccounts(snapshot.counts, allowed),
+      stats: filterStatsForConfiguredAccounts(snapshot.stats, allowed),
+    }),
+  );
+  const history = ((await redisGetJSON<CountSnapshot[]>(KEY_HISTORY)) ?? []).map(
+    (snapshot) => ({
+      ...snapshot,
+      counts: filterCountsForConfiguredAccounts(snapshot.counts, allowed),
+    }),
+  );
+  const storedOrigins = (await redisGetJSON<OriginRecords>(KEY_ORIGINS)) ?? {};
   const origins = buildOriginRecords(
-    (await redisGetJSON<OriginRecords>(KEY_ORIGINS)) ?? {},
+    Object.fromEntries(
+      Object.entries(storedOrigins).filter(([handle]) => allowed.has(handle)),
+    ),
     history,
   );
   const historicalHandlesByCanonical = Object.fromEntries(

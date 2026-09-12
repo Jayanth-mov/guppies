@@ -60,9 +60,15 @@ export async function GET(
     // Redis can be unavailable in local development; try bundled data below.
   }
 
-  const bundledUrl = (raw.accounts as BundledAccount[]).find(
+  const bundledAccount = (raw.accounts as BundledAccount[]).find(
     (account) => account.handle.toLowerCase() === handle,
-  )?.profilePictureUrl;
+  );
+  // Do not let a cached live roster keep serving an avatar after that account
+  // has been removed from the site configuration.
+  if (!bundledAccount) {
+    return errorResponse("Profile picture unavailable", 404);
+  }
+  const bundledUrl = bundledAccount.profilePictureUrl;
   const upstreamUrl = liveUrl ?? bundledUrl;
 
   if (!upstreamUrl || !isMetaImageUrl(upstreamUrl)) {

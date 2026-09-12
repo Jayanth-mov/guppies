@@ -87,6 +87,21 @@ describe("historical roster membership", () => {
     expect(roster.map((entry) => entry.handle)).toContain("acegotchuu");
   });
 
+  it("never revives an account removed from the roster in old snapshots", () => {
+    const removedHistory: WeeklyHistoryPayload = {
+      ...history,
+      weeks: [
+        {
+          ...history.weeks[2],
+          counts: { ...history.weeks[2].counts, "removed.creator": 999 },
+        },
+      ],
+    };
+
+    const roster = getRoster(sourceFromWeekly(removedHistory, 0, liveRoster()));
+    expect(roster.map((entry) => entry.handle)).not.toContain("removed.creator");
+  });
+
   it("shows an old handle's weekly history under its current handle", () => {
     const renamedHistory: WeeklyHistoryPayload = {
       timezone: "America/Chicago",
