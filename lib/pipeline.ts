@@ -396,9 +396,9 @@ export async function runSnapshot(): Promise<RunSummary> {
     }
   }
 
-  if (accounts.length === 0) {
+  if (accounts.length === 0 || accounts.length === failed.length) {
     throw new Error(
-      `Every account failed — first error: ${failed[0]?.reason ?? "unknown"}`,
+      `Every account failed — snapshot not stored; first error: ${failed[0]?.reason ?? "unknown"}`,
     );
   }
 
