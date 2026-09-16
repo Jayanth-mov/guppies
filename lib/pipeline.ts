@@ -163,12 +163,13 @@ async function redisSetJSON(key: string, value: unknown): Promise<void> {
 async function getWorkingToken(): Promise<string> {
   let stored = await redisGetJSON<StoredToken>(KEY_TOKEN);
   const seed = process.env.IG_ACCESS_TOKEN;
+  const seedChanged = Boolean(seed && (!stored || stored.seededFrom !== seed));
 
   // Adopt the env token whenever it changes — this is how an operator swaps in
-  // a fresh token (e.g. after the old one is revoked). A 30-day auto-refresh
-  // leaves seededFrom untouched, so it never triggers this path; only a genuine
-  // env change (seededFrom !== current seed) re-seeds.
-  if (seed && (!stored || stored.seededFrom !== seed)) {
+  // a fresh token (e.g. after the old one is revoked). Exchange a new seed
+  // immediately when app credentials are available, so an Explorer token is
+  // upgraded before its short initial lifetime expires.
+  if (seedChanged && seed) {
     stored = {
       token: seed,
       exchangedAt: new Date().toISOString(),
@@ -188,7 +189,7 @@ async function getWorkingToken(): Promise<string> {
   const appId = process.env.META_APP_ID;
   const appSecret = process.env.META_APP_SECRET;
 
-  if (ageDays > 30 && appId && appSecret) {
+  if ((seedChanged || ageDays > 30) && appId && appSecret) {
     const res = await fetch(
       `${GRAPH}/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${stored.token}`,
       { cache: "no-store" },
