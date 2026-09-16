@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { FishEntry } from "@/lib/roster";
-import { SPECIES } from "@/lib/species";
+import { formatCount, SPECIES } from "@/lib/species";
 import styles from "./EvolutionToast.module.css";
 
 // A depth-map redesign is not a follower-driven evolution. Version the memory
@@ -12,7 +12,10 @@ const STORAGE_KEY = "guppies.species.v2";
 
 interface Toast {
   id: string;
-  text: string;
+  handle: string;
+  from: string;
+  to: string;
+  followers: number;
   grew: boolean;
 }
 
@@ -45,10 +48,11 @@ export default function EvolutionToast({ roster }: { roster: FishEntry[] }) {
           const grew = oldIdx === -1 || e.speciesIndex > oldIdx;
           changed.push({
             id: e.handle,
+            handle: e.handle,
+            from: old,
+            to: e.species.name,
+            followers: e.followers,
             grew,
-            text: grew
-              ? `@${e.handle} is now ${article(e.species.name)} ${e.species.name}`
-              : `@${e.handle} shrank back to ${article(e.species.name)} ${e.species.name}`,
           });
         }
         if (changed.length) setToasts(changed);
@@ -65,7 +69,7 @@ export default function EvolutionToast({ roster }: { roster: FishEntry[] }) {
     const timers = toasts.map((t, i) =>
       window.setTimeout(
         () => setToasts((cur) => cur.filter((x) => x.id !== t.id)),
-        6000 + i * 500,
+        30_000 + i * 50,
       ),
     );
     return () => timers.forEach((t) => window.clearTimeout(t));
@@ -77,10 +81,19 @@ export default function EvolutionToast({ roster }: { roster: FishEntry[] }) {
     <div className={styles.stack} role="status" aria-live="polite">
       {toasts.map((t) => (
         <div key={t.id} className={styles.toast} data-grew={t.grew || undefined}>
-          <span className={styles.icon} aria-hidden="true">
-            {t.grew ? "▼" : "▲"}
-          </span>
-          {t.text}
+          <div className={styles.copy}>
+            <span className={styles.eyebrow}>
+              {t.grew ? "New depths unlocked" : "Tier change"}
+            </span>
+            <strong className={styles.title}>
+              @{t.handle} {t.grew ? "graduated" : "changed course"}
+            </strong>
+            <span className={styles.detail}>
+              {t.grew
+                ? `${article(t.to)} ${t.to} at ${formatCount(t.followers)} followers`
+                : `${article(t.to)} ${t.to} — previously ${article(t.from)} ${t.from}`}
+            </span>
+          </div>
           <button
             type="button"
             className={styles.dismiss}
@@ -91,6 +104,7 @@ export default function EvolutionToast({ roster }: { roster: FishEntry[] }) {
           >
             ×
           </button>
+          <span className={styles.progress} aria-hidden="true" />
         </div>
       ))}
     </div>

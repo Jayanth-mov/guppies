@@ -1,13 +1,12 @@
 .stack {
   position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 18px;
+  left: 18px;
   z-index: 70;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  align-items: center;
+  gap: 10px;
+  align-items: flex-start;
   pointer-events: none;
 }
 
@@ -15,7 +14,6 @@
   .stack {
     left: 12px;
     right: 12px;
-    transform: none;
     align-items: flex-start;
   }
 
@@ -24,41 +22,132 @@
   }
 }
 
-@keyframes sink {
+@keyframes arrive {
   from {
     opacity: 0;
-    transform: translateY(-14px);
+    transform: translateY(-10px) scale(0.97);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* A short, understated ripple gives a promotion a little ceremony without
+   particle canvases, filters, or an animation that keeps running. */
+@keyframes ripple {
+  0% {
+    opacity: 0;
+    transform: scale(0.38);
+  }
+  26% {
+    opacity: 0.32;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
   }
 }
 
 .toast {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 12px 9px 14px;
-  border-radius: 999px;
-  background: rgba(4, 22, 38, 0.88);
-  border: 1px solid rgba(108, 245, 226, 0.4);
+  min-width: min(360px, calc(100vw - 36px));
+  max-width: 360px;
+  min-height: 116px;
+  align-items: flex-start;
+  gap: 12px;
+  overflow: hidden;
+  padding: 19px 16px 16px 19px;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(19, 70, 100, 0.96), rgba(4, 22, 38, 0.97)),
+    rgba(4, 22, 38, 0.96);
+  border: 1px solid rgba(108, 245, 226, 0.54);
   color: var(--ink-pale);
-  font-size: 14.5px;
-  letter-spacing: 0.03em;
-  box-shadow: 0 6px 24px rgba(2, 10, 20, 0.5);
+  box-shadow: 0 14px 34px rgba(2, 10, 20, 0.42);
   pointer-events: auto;
-  animation: sink 0.35s ease-out;
+  animation: arrive 0.38s cubic-bezier(0.2, 0.85, 0.25, 1) both;
 }
 
-/* growing means diving deeper */
-.icon {
-  font-size: 11px;
+.toast::before,
+.toast::after {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 28px;
+  width: 72px;
+  height: 72px;
+  content: "";
+  border: 1px solid rgba(143, 242, 230, 0.65);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: ripple 0.9s ease-out 0.12s both;
+}
+
+.toast::after {
+  width: 108px;
+  height: 108px;
+  margin: -18px 0 0 -18px;
+  border-color: rgba(143, 242, 230, 0.32);
+  animation-delay: 0.22s;
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  color: #f1fbff;
+  font-size: 20px;
+  line-height: 1.12;
+  letter-spacing: 0.01em;
+}
+
+.detail {
+  color: rgba(214, 239, 249, 0.76);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  transform-origin: left;
+  background: var(--accent);
+  animation: drain 30s linear forwards;
+}
+
+.toast:not([data-grew]) .eyebrow {
   color: var(--accent);
 }
 
-.toast:not([data-grew]) .icon {
-  color: var(--fall);
+.toast:not([data-grew]) .progress {
+  background: var(--fall);
 }
 
 .toast:not([data-grew]) {
@@ -66,9 +155,12 @@
 }
 
 .dismiss {
+  position: relative;
+  z-index: 1;
   font-size: 18px;
   line-height: 1;
-  opacity: 0.6;
+  flex: 0 0 auto;
+  opacity: 0.65;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -79,7 +171,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .toast {
+  .toast,
+  .progress,
+  .toast::before,
+  .toast::after {
     animation: none;
   }
 }
