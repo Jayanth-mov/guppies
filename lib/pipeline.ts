@@ -60,6 +60,7 @@ export interface RunSummary {
   readBack: number; // history length re-read right after writing
   weeklySnapshots: number; // permanent Sunday archive length
   origins: number; // immutable first-seen baselines retained for all-time stats
+  refreshedHandle?: string; // set when only one account was refreshed
 }
 
 /**
@@ -274,6 +275,118 @@ async function fetchAccount(
 }
 
 // ---- the snapshot run ----
+
+/**
+ * Refreshes one existing fish without adding a partial roster point to history.
+ * A partial point would incorrectly make every other account look unchanged in
+ * weekly archives, so the normal four-hour job remains the sole history writer.
+ */
+export async function runSingleAccountRefresh(
+  requestedHandle: string,
+): Promise<RunSummary> {
+  const handle = requestedHandle.trim().toLowerCase();
+  if (!/^[a-z0-9._]+$/.test(handle)) {
+    throw new Error("Invalid Instagram handle.");
+  }
+
+  const configuredAccounts = raw.accounts as Array<{
+    handle: string;
+    name?: string;
+    profilePictureUrl?: string;
+    historicalHandles?: string[];
+  }>;
+  const configured = configuredAccounts.find((account) => account.handle === handle);
+  if (!configured) {
+    throw new Error(`Account ${handle} is not in the active roster.`);
+  }
+
+  const previousLatest = await redisGetJSON<LiveRoster>(KEY_LATEST);
+  const identityHandles = [handle, ...(configured.historicalHandles ?? [])];
+  const previous = previousLatest?.accounts.find((account) =>
+    identityHandles.includes(account.handle),
+  );
+  if (!previousLatest || !previous) {
+    throw new Error("No prior live record for this account; run a full refresh first.");
+  }
+
+  const igUserId = process.env.IG_USER_ID;
+  if (!igUserId) throw new Error("IG_USER_ID env var missing.");
+  const token = await getWorkingToken();
+  const history = (await redisGetJSON<CountSnapshot[]>(KEY_HISTORY)) ?? [];
+  const storedOrigins =
+    (await redisGetJSON<OriginRecords>(KEY_ORIGINS)) ?? {};
+  const origins = buildOriginRecords(storedOrigins, history);
+  const now = new Date().toISOString();
+  const nowMs = new Date(now).getTime();
+
+  if (!origins[handle]) {
+    const previousOrigin = identityHandles
+      .map((identityHandle) => origins[identityHandle])
+      .filter((record) => record !== undefined)
+      .sort((a, b) => a.t.localeCompare(b.t))[0];
+    if (previousOrigin) origins[handle] = previousOrigin;
+  }
+
+  const got = await fetchAccount(igUserId, token, handle, handle === raw.hostAccount);
+  if (!origins[handle]) {
+    origins[handle] = { t: now, count: got.followers };
+  }
+
+  const stats = emptyStats();
+  for (const key of RANGE_KEYS) {
+    const base = baselineCountForRange(
+      history,
+      origins,
+      handle,
+      key,
+      nowMs,
+      configured.historicalHandles ?? [],
+    );
+    if (base !== undefined && base > 0) {
+      stats[key] = {
+        change: got.followers - base,
+        pct: ((got.followers - base) / base) * 100,
+      };
+    }
+  }
+
+  const refreshed: LiveAccount = {
+    handle,
+    name: configured.name ?? previous.name,
+    followers: got.followers,
+    avatarUrl:
+      got.avatarUrl ?? previous.avatarUrl ?? configured.profilePictureUrl ?? null,
+    stats,
+  };
+  const latest: LiveRoster = {
+    ...previousLatest,
+    lastUpdated: now,
+    accounts: previousLatest.accounts.map((account) =>
+      identityHandles.includes(account.handle) ? refreshed : account,
+    ),
+    failed: (previousLatest.failed ?? []).filter(
+      (failure) => !identityHandles.includes(failure.handle),
+    ),
+  };
+  const weeklySnapshots =
+    (await redisGetJSON<WeeklySnapshot[]>(KEY_WEEKLY))?.length ?? 0;
+
+  await redisSetJSON(KEY_ORIGINS, origins);
+  await redisSetJSON(KEY_LATEST, latest);
+
+  return {
+    ok: true,
+    fetched: 1,
+    failed: [],
+    lastUpdated: now,
+    snapshots: history.length,
+    historyReadIn: history.length,
+    readBack: history.length,
+    weeklySnapshots,
+    origins: Object.keys(origins).length,
+    refreshedHandle: handle,
+  };
+}
 
 export async function runSnapshot(): Promise<RunSummary> {
   const igUserId = process.env.IG_USER_ID;

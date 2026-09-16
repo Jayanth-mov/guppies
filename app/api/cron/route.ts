@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { runSnapshot } from "@/lib/pipeline";
+import { runSingleAccountRefresh, runSnapshot } from "@/lib/pipeline";
 
 // Triggered every four hours by the GitHub Actions workflow (see
 // .github/workflows/refresh.yml). Requires the CRON_SECRET bearer token so
 // strangers can't burn the rate limit.
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60; // ~25 sequential Graph calls
+export const maxDuration = 60; // enough for a full roster or one targeted call
 
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
@@ -15,7 +15,10 @@ export async function GET(req: Request) {
   }
 
   try {
-    const summary = await runSnapshot();
+    const handle = new URL(req.url).searchParams.get("handle");
+    const summary = handle
+      ? await runSingleAccountRefresh(handle)
+      : await runSnapshot();
     return NextResponse.json(summary);
   } catch (err) {
     return NextResponse.json(

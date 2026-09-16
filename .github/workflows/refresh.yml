@@ -14,7 +14,12 @@ name: refresh follower counts
 on:
   schedule:
     - cron: "0 */4 * * *"
-  workflow_dispatch: # manual "Run workflow" button for testing
+  workflow_dispatch:
+    inputs:
+      handle:
+        description: "Optional single Instagram handle to refresh"
+        required: false
+        type: string
 
 jobs:
   ping:
@@ -22,6 +27,12 @@ jobs:
     steps:
       - name: hit the cron endpoint
         run: |
+          url="${{ secrets.CRON_URL }}"
+          handle="${{ inputs.handle }}"
+          if [ -n "$handle" ]; then
+            encoded_handle=$(jq -rn --arg value "$handle" '$value | @uri')
+            url="${url}?handle=${encoded_handle}"
+          fi
           curl -fsS --max-time 90 \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ secrets.CRON_URL }}"
+            "$url"
